@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 # TODO Set up stronghold
 INSTALLED_APPS = [
+    'jet',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
