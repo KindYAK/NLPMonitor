@@ -1,0 +1,11 @@
+.idea
+venv
+*.log
+*.pot
+*.pyc
+*.sqlite3
+__pycache__
+.env
+media/
+static/
+.python-version
