@@ -1,4 +1,5 @@
 from django.db import models
+from topicmodelling.models import Topic, DocumentTopic
 
 
 class Corpus(models.Model):
@@ -33,6 +34,8 @@ class Document(models.Model):
 
     tags = models.ManyToManyField('Tag')
     categories = models.ManyToManyField('Category')
+
+    topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic')
 
 
 class Tag(models.Model):
