@@ -6,7 +6,7 @@ class TopicCorpus(models.Model):
     class Meta:
         verbose_name = "Корпус топиков"
         verbose_name_plural = "Корпусы топиков"
-        # unique_together = (('corpus', 'name'))
+        unique_together = (('corpus', 'name'))
 
     corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
