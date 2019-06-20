@@ -23,7 +23,7 @@ class ProcessedDocument(models.Model):
         verbose_name_plural = "Обработанные документы"
         unique_together = (('processed_corpus', 'original_document'))
         indexes = [
-            models.Index(fields=['processed_corpus']),git a
+            models.Index(fields=['processed_corpus']),
             models.Index(fields=['original_document']),
         ]
 
