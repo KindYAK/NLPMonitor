@@ -7,7 +7,10 @@ class ProcessedCorpus(models.Model):
     class Meta:
         verbose_name = "Обработанный корпус"
         verbose_name_plural = "Обработанные корпусы"
-        # unique_together = (('corpus', 'name'))
+        unique_together = (('corpus', 'name'))
+        indexes = [
+            models.Index(fields=['corpus']),
+        ]
 
     corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
@@ -18,7 +21,11 @@ class ProcessedDocument(models.Model):
     class Meta:
         verbose_name = "Обработанный документ"
         verbose_name_plural = "Обработанные документы"
-        # unique_together = (('processed_corpus', 'original_document'))
+        unique_together = (('processed_corpus', 'original_document'))
+        indexes = [
+            models.Index(fields=['processed_corpus']),git a
+            models.Index(fields=['original_document']),
+        ]
 
     processed_corpus = models.ForeignKey('ProcessedCorpus', on_delete=models.CASCADE)
     original_document = models.ForeignKey('mainapp.Document', on_delete=models.CASCADE)
@@ -28,7 +35,10 @@ class AnalysisUnit(models.Model):
     class Meta:
         verbose_name = "Базовая единица анализа"
         verbose_name_plural = "Базовые единицы анализа"
-        # unique_together = (('processed_document', 'index', 'value'))
+        unique_together = (('processed_document', 'index', 'value'))
+        indexes = [
+            models.Index(fields=['processed_document']),
+        ]
 
     UNIT_TYPES = (
         (0, "subword"),

@@ -27,7 +27,7 @@ class TopicUnit(models.Model):
     class Meta:
         verbose_name = "Единица-описание топика"
         verbose_name_plural = "Единицы-описания топика"
-        # unique_together = (('topic', 'text'))
+        unique_together = (('topic', 'text'))
 
     topic = models.ForeignKey('Topic', on_delete=models.CASCADE)
     weight = models.FloatField(null=True, blank=True)
@@ -38,7 +38,7 @@ class DocumentTopic(models.Model):
     class Meta:
         verbose_name = "Связь документа и топика"
         verbose_name_plural = "Связи документов и топиков"
-        # unique_together = (('topic', 'document'))
+        unique_together = (('topic', 'document'))
 
     topic = models.ForeignKey('Topic', on_delete=models.CASCADE)
     document = models.ForeignKey('mainapp.Document', on_delete=models.CASCADE)
