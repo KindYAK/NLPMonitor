@@ -3,31 +3,45 @@ from mainapp.models import *
 
 
 class CorpusAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', )
+    list_filter = ()
+    search_fields = ('name', )
 
 
 class SourceAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'url', 'corpus', )
+    list_filter = ('corpus', )
+    search_fields = ('name', 'url', )
 
 
 class AuthorAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'corpus', )
+    list_filter = ('corpus', )
+    search_fields = ('name', 'corpus__name', )
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'datetime', 'source', 'url', )
+    list_filter = ('source', )
+    search_fields = ('title', 'author__name', 'source__name', 'url', )
 
 
 class TagAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'corpus', )
+    list_filter = ('corpus', )
+    search_fields = ('name', 'corpus__name', )
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'corpus', )
+    list_filter = ('corpus', )
+    search_fields = ('name', 'corpus__name', )
 
 
 class CommentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('document', 'datetime', 'text', )
+    list_filter = ()
+    search_fields = ('text', 'document__title', )
 
 
 admin.site.register(Corpus, CorpusAdmin)
