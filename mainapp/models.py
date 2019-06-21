@@ -54,6 +54,7 @@ class Document(models.Model):
     title = models.CharField(max_length=2500, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
+    links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
     url = models.CharField(max_length=1000, null=True, blank=True, verbose_name="URL")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
