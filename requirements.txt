@@ -12,6 +12,7 @@ django-stronghold==0.3.0
 django-widget-tweaks==1.4.5
 djangorestframework==3.9.4
 djangorestframework-jwt==1.11.0
+elasticsearch-dsl==7.0.0
 gunicorn==19.9.0
 mysqlclient==1.4.2.post1
 redis==3.2.1
