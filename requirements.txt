@@ -15,6 +15,7 @@ djangorestframework-jwt==1.11.0
 elasticsearch-dsl==7.0.0
 gunicorn==19.9.0
 mysqlclient==1.4.2.post1
+pandas==0.24.2
 redis==3.2.1
 requests==2.22.0
 xlrd==1.2.0
