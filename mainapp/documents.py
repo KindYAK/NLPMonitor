@@ -34,11 +34,15 @@ class Document(es.Document):
         self.id = model_obj.id
         self.corpus = model_obj.source.corpus.name
         self.source = model_obj.source.name
-        self.author = model_obj.author.name
+        if model_obj.author:
+            self.author = model_obj.author.name
+        else:
+            self.author = None
         self.title = model_obj.title
         self.text = model_obj.text
         self.html = model_obj.html
-        self.links = json.loads(model_obj.links)
+        if model_obj.links:
+            self.links = json.loads(model_obj.links)
         self.url = model_obj.url
 
         self.datetime = model_obj.datetime
