@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'mainapp',
     'preprocessing',
     'topicmodelling',
+    'evaluation',
 ]
 
 MIDDLEWARE = [
