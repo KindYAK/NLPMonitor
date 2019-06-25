@@ -72,16 +72,16 @@ class Command(BaseCommand):
                         continue
                 if row['tags'] and type(row['tags']) == str:
                     for tag_name in json.loads(row['tags']):
-                        tag = get_object_or_None(Tag, name=tag_name, corpus=corpus)
+                        tag = get_object_or_None(Tag, name=tag_name[:Tag._meta.get_field('name').max_length], corpus=corpus)
                         if not tag:
-                            tag = Tag.objects.create(name=tag_name, corpus=corpus)
+                            tag = Tag.objects.create(name=tag_name[:Tag._meta.get_field('name').max_length], corpus=corpus)
                         document.tags.add(tag)
 
                 topic_name = row['topic']
                 if topic_name and type(topic_name) == str:
-                    topic = get_object_or_None(Category, name=topic_name, corpus=corpus)
+                    topic = get_object_or_None(Category, name=topic_name[:Category._meta.get_field('name').max_length], corpus=corpus)
                     if not topic:
-                        topic = Category.objects.create(name=topic_name, corpus=corpus)
+                        topic = Category.objects.create(name=topic_name[:Category._meta.get_field('name').max_length], corpus=corpus)
                     document.categories.add(topic)
             print(i * chunksize)
         Document.objects.bulk_create(documents, ignore_conflicts=True)

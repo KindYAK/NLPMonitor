@@ -84,7 +84,7 @@ class Tag(models.Model):
         ]
 
     corpus = models.ForeignKey('Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
-    name = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=100, verbose_name="Название")
 
     def __str__(self):
         return self.name
@@ -100,7 +100,7 @@ class Category(models.Model):
         ]
 
     corpus = models.ForeignKey('Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
-    name = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=100, verbose_name="Название")
 
     def __str__(self):
         return self.name
