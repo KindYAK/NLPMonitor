@@ -1,6 +1,7 @@
 import json
 
 import elasticsearch_dsl as es
+from nlpmonitor.settings import ES_INDEX, ES_CLIENT
 from mainapp.models import Document as ModelDocument
 from django.utils import timezone
 
@@ -52,3 +53,7 @@ class Document(es.Document):
 
         self.tags = [tag.name for tag in model_obj.tags.all()]
         self.categories = [category.name for category in model_obj.categories.all()]
+
+    class Index:
+        name = ES_INDEX
+        using = ES_CLIENT

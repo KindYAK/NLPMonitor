@@ -11,7 +11,7 @@ from nlpmonitor.settings import MEDIA_ROOT
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        # Document.objects.all().delete() # TODO Remove
+        Document.objects.all().delete() # TODO Remove
         self.parse_csv()
 
     def parse_csv(self):
@@ -19,7 +19,9 @@ class Command(BaseCommand):
         if not corpus:
             corpus = Corpus.objects.create(name="main")
         chunksize = 50000
+        db_chunksize = 10000
         dfs = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), chunksize=chunksize)
+        documents = []
         for i, df in enumerate(dfs, start=1):
             for index, row in df.iterrows():
                 media_name = row['mass_media_name']
@@ -44,18 +46,25 @@ class Command(BaseCommand):
 
                 if Document.objects.filter(source=source, datetime=date, title=row['title']).exists() or not row['text'] or type(row['text']) != str:
                     continue
+                document = Document(source=source,
+                                    author=author,
+                                    datetime=date,
+                                    text=row['text'] if type(row['text']) == str else None,
+                                    html=row['html'] if type(row['html']) == str else None,
+                                    title=row['title'] if type(row['title']) == str else None,
+                                    url=row['url'] if type(row['url']) == str else None,
+                                    links=row['links'] if type(row['links']) == str else None,
+                                    num_comments=int(row['num_coms']) if row['num_coms'] and not math.isnan(row['num_coms']) else None,
+                                    num_views=int(row['views']) if row['views'] and not math.isnan(row['views']) else None,
+                                    )
+                if not (row['tags'] and type(row['tags']) == str) and not(row['topic'] and type(row['topic']) == str):
+                    documents.append(document)
+                    if len(documents) % db_chunksize == 0:
+                        Document.objects.bulk_create(documents, ignore_conflicts=True)
+                        documents = []
+                    continue
                 try:
-                    document = Document.objects.create(source=source,
-                                                       author=author,
-                                                       datetime=date,
-                                                       text=row['text'] if type(row['text']) == str else None,
-                                                       html=row['html'] if type(row['html']) == str else None,
-                                                       title=row['title'] if type(row['title']) == str else None,
-                                                       url=row['url'] if type(row['url']) == str else None,
-                                                       links=row['links'] if type(row['links']) == str else None,
-                                                       num_comments=int(row['num_coms']) if row['num_coms'] and not math.isnan(row['num_coms']) else None,
-                                                       num_views=int(row['views']) if row['views'] and not math.isnan(row['views']) else None,
-                                                       )
+                    document.save()
                 except IntegrityError as e:
                     if not "Duplicate" in str(e):
                         raise e
@@ -75,3 +84,4 @@ class Command(BaseCommand):
                         topic = Category.objects.create(name=topic_name, corpus=corpus)
                     document.categories.add(topic)
             print(i * chunksize)
+        Document.objects.bulk_create(documents, ignore_conflicts=True)
