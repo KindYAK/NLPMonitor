@@ -11,7 +11,7 @@ from nlpmonitor.settings import MEDIA_ROOT
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        Document.objects.all().delete() # TODO Remove
+        # Document.objects.all().delete() # TODO Remove
         self.parse_csv()
 
     def parse_csv(self):
