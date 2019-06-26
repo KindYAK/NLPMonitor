@@ -115,7 +115,7 @@ class Comment(models.Model):
             models.Index(fields=['document']),
         ]
 
-    text = models.TextField(verbose_name="Текст")
+    text = models.TextField(verbose_name="Текст", max_length=50000)
     document = models.ForeignKey('Document', on_delete=models.CASCADE, verbose_name="Документ")
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
