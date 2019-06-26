@@ -12,10 +12,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='analysisunit',
-            unique_together={('processed_document', 'index', 'value')},
-        ),
-        migrations.AlterUniqueTogether(
             name='processedcorpus',
             unique_together={('corpus', 'name')},
         ),

@@ -41,10 +41,6 @@ class AnalysisUnit(models.Model):
     class Meta:
         verbose_name = "Базовая единица анализа"
         verbose_name_plural = "Базовые единицы анализа"
-        unique_together = (('processed_document', 'index', 'value'), )
-        indexes = [
-            models.Index(fields=['processed_document']),
-        ]
 
     UNIT_TYPES = (
         (0, "subword"),
