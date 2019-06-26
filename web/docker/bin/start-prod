@@ -3,4 +3,4 @@ python manage.py makemigrations
 python manage.py migrate
 
 python manage.py collectstatic --noinput
-gunicorn busman.wsgi -b 0.0.0.0:8000 --timeout=600 --workers=4
+gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=600 --workers=4
