@@ -7,9 +7,6 @@ RUN chmod +x /app/bin/*
 COPY ./requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 
-COPY ./git_requirements.txt /tmp/git_requirements.txt
-RUN pip3 install -r /tmp/git_requirements.txt
-
 RUN apt-get update && apt-get install -y gettext
 
 COPY . /opt/app
