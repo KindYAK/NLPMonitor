@@ -21,7 +21,6 @@ services:
       - web
   db:
     image: "mariadb/columnstore:1.2.3"
-    command: ["postgres"]
     expose:
       - 3306
     volumes:
