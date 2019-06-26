@@ -1,1 +1,47 @@
-STUB
+version: '3'
+
+services:
+  web:
+    env_file:
+      - ../.env
+    expose:
+      - 8000
+    depends_on:
+      - db
+      - redis
+      - elastic
+  nginx:
+    image: "nginx:1.17.0"
+    ports:
+      - "80:80"
+    volumes:
+      - static_root:/static_root
+      - media_root:/media_root
+    depends_on:
+      - web
+  db:
+    image: "mariadb/columnstore:1.2.3"
+    command: ["postgres"]
+    expose:
+      - 3306
+    volumes:
+      - maria_data:/var/lib/mysql
+    environment:
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+  elastic:
+    image: "elasticsearch:7.1.1"
+  redis:
+    image: "redis:5.0.5"
+
+volumes:
+  maria_data:
+    driver: local
+  redis:
+    driver: local
+  media_root:
+    driver: local
+  static_root:
+    driver: local

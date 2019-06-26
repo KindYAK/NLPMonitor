@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: ../web
+      dockerfile: docker/Dockerfile
+    command: ["start-dev"]
+    volumes:
+      - ../web:/opt/app
+      - media_root:/opt/app/media_root
+    ports:
+      - "8000:8000"
+    tty: true
+    stdin_open: true
+  db:
+    ports:
+      - "3306:3306"
+  nginx:
+    volumes:
+      - ./nginx-app-dev.conf:/etc/nginx/conf.d/app.conf

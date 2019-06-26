@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  web:
+    image: ${WEB_IMAGE}
+    command: ["start-prod"]
+    volumes:
+      - static_root:/opt/app/static_root
+      - media_root:/opt/app/media_root
+  nginx:
+    volumes:
+      - ./nginx-app-prod.conf:/etc/nginx/conf.d/app.conf
