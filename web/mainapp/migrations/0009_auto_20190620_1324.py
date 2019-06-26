@@ -15,10 +15,6 @@ class Migration(migrations.Migration):
             unique_together={('corpus', 'name')},
         ),
         migrations.AlterUniqueTogether(
-            name='comment',
-            unique_together={('document', 'datetime', 'text')},
-        ),
-        migrations.AlterUniqueTogether(
             name='tag',
             unique_together={('corpus', 'name')},
         ),

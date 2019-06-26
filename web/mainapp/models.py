@@ -110,10 +110,6 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
-        unique_together = (('document', 'datetime', 'text'), )
-        indexes = [
-            models.Index(fields=['document']),
-        ]
 
     text = models.TextField(verbose_name="Текст", max_length=50000)
     document = models.ForeignKey('Document', on_delete=models.CASCADE, verbose_name="Документ")
