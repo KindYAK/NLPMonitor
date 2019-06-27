@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
             name='Document',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=1500, verbose_name='Заголовок')),
+                ('title', models.CharField(max_length=750, verbose_name='Заголовок')),
                 ('text', models.TextField(verbose_name='Текст')),
                 ('html', models.TextField(blank=True, null=True, verbose_name='HTML')),
                 ('links', models.TextField(blank=True, null=True, verbose_name='Перечень ссылок')),

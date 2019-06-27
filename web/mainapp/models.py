@@ -52,7 +52,7 @@ class Document(models.Model):
 
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор")
-    title = models.CharField(max_length=1500, verbose_name="Заголовок")
+    title = models.CharField(max_length=750, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
