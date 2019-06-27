@@ -1,11 +1,11 @@
 .idea
-venv
+web/venv
 *.log
 *.pot
 *.pyc
 *.sqlite3
 __pycache__
 .env
-media/
-static/
+web/media/
+web/static/
 .python-version

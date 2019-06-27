@@ -1,5 +1,6 @@
 from django.db import models
 from topicmodelling.models import Topic, DocumentTopic
+import hashlib
 
 
 class Corpus(models.Model):
@@ -111,11 +112,20 @@ class Comment(models.Model):
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
 
-    text = models.TextField(verbose_name="Текст", max_length=50000)
+    text = models.TextField(verbose_name="Текст")
     document = models.ForeignKey('Document', on_delete=models.CASCADE, verbose_name="Документ")
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
     reply_to = models.ForeignKey('Comment', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Ответ на...")
+    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность document, datetime, text")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        hash = hashlib.md5()
+        hash.update(str(self.document.id).encode())
+        hash.update(str(self.datetime).encode())
+        hash.update(self.text.encode())
+        self.unique_hash = hash.hexdigest()
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         max_length_to_show = 50

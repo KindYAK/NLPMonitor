@@ -37,6 +37,14 @@ class TopicUnit(models.Model):
     topic = models.ForeignKey('Topic', on_delete=models.CASCADE, verbose_name="Топик")
     weight = models.FloatField(null=True, blank=True, verbose_name="Вес")
     text = models.CharField(max_length=100, verbose_name="Текст")
+    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность topic, text")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        hash = hashlib.md5()
+        hash.update(str(self.topic.id).encode())
+        hash.update(self.text.encode())
+        self.unique_hash = hash.hexdigest()
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.text

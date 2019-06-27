@@ -56,6 +56,15 @@ class AnalysisUnit(models.Model):
     value = models.TextField(verbose_name="Значение")
     index = models.IntegerField(default=0, verbose_name="Индекс/позиция")
     embedding = PickledObjectField(null=True, blank=True, verbose_name="Embedding/векторизация")
+    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность processed_document, index, value")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        hash = hashlib.md5()
+        hash.update(str(self.processed_document.id).encode())
+        hash.update(str(self.index).encode())
+        hash.update(self.value.encode())
+        self.unique_hash = hash.hexdigest()
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return f"{self.value} из {self.processed_document}"
