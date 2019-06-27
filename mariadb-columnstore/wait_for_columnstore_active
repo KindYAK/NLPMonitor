@@ -1,0 +1,96 @@
+#!/bin/bash
+MCSDIR=/usr/local/mariadb/columnstore
+MAX_TRIES=36 # 3 minutes
+if [ ! -z "$CS_WAIT_ATTEMPTS" ]; then
+    MAX_TRIES=$CS_WAIT_ATTEMPTS
+fi
+
+while getopts ":hvp:t:" opt; do
+  case ${opt} in
+    v ) MARIADB_CS_DEBUG=1
+      ;;
+    t ) MAX_TRIES="$OPTARG"
+      ;;
+    p ) ROOT_PASSWORD="$OPTARG"
+        ;;
+    h )
+        echo "Usage:"
+        echo "    wait_for_columnstore_active -v -t <TRIES> -p <ROOT_PASSWORD>"
+        echo "    -v                  enable verbose output"
+        echo "    -t <N>              test attempts before timeout, default 36"
+        echo "    -p <ROOT_PASSWORD>  optional root password to use for db test"
+        exit 0
+        ;;
+    \? )
+      echo "Invalid option: $OPTARG" 1>&2
+      ;;
+    : )
+      echo "Invalid option: $OPTARG requires an argument" 1>&2
+      ;;
+  esac
+done
+
+ATTEMPT=1
+# wait for mcsadmin getSystemStatus to show active
+STATUS=$($MCSDIR/bin/mcsadmin getSystemStatus | tail -n +9 | grep System | grep -v "System and Module statuses")
+if [ ! -z $MARIADB_CS_DEBUG ]; then
+    echo "wait_for_columnstore_active($ATTEMPT/$MAX_TRIES): getSystemStatus: $STATUS"
+fi
+echo "$STATUS" | grep -q 'System.*ACTIVE'
+while [ 0 -ne $? ] && [ $ATTEMPT -le $MAX_TRIES ]; do
+    sleep 5
+    ATTEMPT=$(($ATTEMPT+1))
+    STATUS=$($MCSDIR/bin/mcsadmin getSystemStatus | tail -n +9 | grep System | grep -v "System and Module statuses")
+    if [ ! -z $MARIADB_CS_DEBUG ]; then
+        echo "wait_for_columnstore_active($ATTEMPT/$MAX_TRIES): getSystemStatus: $STATUS"
+    fi
+    echo "$STATUS" | grep -q 'System.*ACTIVE'
+done
+
+if [ $ATTEMPT -ge $MAX_TRIES ]; then
+    echo "ERROR: ColumnStore did not start after $MAX_TRIES attempts"
+    exit 1
+fi
+
+# during install the system status can be active but the cs system catalog
+# is still being created, so wait for this to complete. This will first
+# check that mysqld is running and this is a UM. If this is run from UM2
+# or greater it will succeed if the standard error preventing DDL from
+# running is reported.
+MYSQLDS_RUNNING=$(ps -ef | grep -v grep | grep mysqld | wc -l)
+if [ $MYSQLDS_RUNNING -gt 0 ]; then
+    echo "Waiting for system catalog to be fully created"
+    ATTEMPT=1
+    TEST_TABLE="columnstore_info.mcs_wait_test_$RANDOM"
+    mysql=( $MCSDIR/mysql/bin/mysql --defaults-extra-file=$MCSDIR/mysql/my.cnf -uroot )
+    if [ ! -z "$ROOT_PASSWORD" ]; then
+      mysql+=( -p"${ROOT_PASSWORD}" )
+      #export MYSQL_PWD=${ROOT_PASSWORD}
+    fi
+
+    STATUS=$("${mysql[@]}" -e "create table $TEST_TABLE(i tinyint) engine=columnstore;" 2>&1)
+    while [ 0 -ne $? ] && [ $ATTEMPT -le $MAX_TRIES ]; do
+        if [ ! -z $MARIADB_CS_DEBUG ]; then
+            echo "wait_for_columnstore_active($ATTEMPT/$MAX_TRIES): create table test error: $STATUS"
+        fi
+        echo "$STATUS" | grep -q "DML and DDL statements for Columnstore tables can only be run from the replication master."
+        if [ 0 -eq $? ]; then
+            echo "Assuming system ready due to expected non UM1 DDL error: $STATUS"
+            exit 0
+        fi
+        sleep 2
+        ATTEMPT=$(($ATTEMPT+1))
+        STATUS=$("${mysql[@]}" -e "create table $TEST_TABLE(i tinyint) engine=columnstore;" 2>&1)
+    done
+    "${mysql[@]}" -e "drop table if exists $TEST_TABLE;"
+    if [ $ATTEMPT -ge $MAX_TRIES ]; then
+        echo "ERROR: ColumnStore not ready for use after $MAX_TRIES attempts, last status: $STATUS"
+        exit 1
+    else
+        echo "System ready"
+    fi
+else
+  echo "System ready, non UM node"
+fi
+unset MYSQL_PWD
+exit 0

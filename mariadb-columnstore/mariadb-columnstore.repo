@@ -1,0 +1,5 @@
+[mariadb-columnstore]
+name=MariaDB ColumnStore
+baseurl=https://downloads.mariadb.com/MariaDB/mariadb-columnstore/1.2.3/yum/centos/7/x86_64/
+gpgkey=https://downloads.mariadb.com/MariaDB/mariadb-columnstore/RPM-GPG-KEY-MariaDB-ColumnStore
+gpgcheck=1

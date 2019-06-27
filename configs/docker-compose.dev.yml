@@ -14,6 +14,9 @@ services:
     tty: true
     stdin_open: true
   db:
+    build:
+      context: ../mariadb-columnstore
+      dockerfile: Dockerfile
     ports:
       - "3306:3306"
   nginx:

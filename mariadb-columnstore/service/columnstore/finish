@@ -1,0 +1,3 @@
+#!/bin/sh
+rm -f /var/lock/subsys/columnstore
+rm -f /var/lock/subsys/mysql-Columnstore

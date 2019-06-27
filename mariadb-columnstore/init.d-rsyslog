@@ -1,0 +1,3 @@
+#!/bin/bash
+# hack to make postConfigure restart rsyslogd via runit
+sv $@ rsyslogd

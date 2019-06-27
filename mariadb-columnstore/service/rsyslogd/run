@@ -1,0 +1,3 @@
+#!/bin/sh
+rm -f /var/run/syslogd.pid
+exec /sbin/rsyslogd -n 2>&1
