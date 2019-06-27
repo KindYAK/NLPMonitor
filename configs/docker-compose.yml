@@ -24,7 +24,10 @@ services:
     expose:
       - 3306
     volumes:
-      - maria_data:/var/lib/mysql
+      - maria_data_etc:/usr/local/mariadb/columnstore/etc
+      - maria_data_data1:/usr/local/mariadb/columnstore/data1
+      - maria_data_local:/usr/local/mariadb/columnstore/local
+      - maria_data_mysql_db:/usr/local/mariadb/columnstore/mysql/db
     environment:
       - MARIADB_DATABASE=${DB_NAME}
       - MARIADB_USER=${DB_USER}
@@ -36,7 +39,13 @@ services:
     image: "redis:5.0.5"
 
 volumes:
-  maria_data:
+  maria_data_etc:
+    driver: local
+  maria_data_data1:
+    driver: local
+  maria_data_local:
+    driver: local
+  maria_data_mysql_db:
     driver: local
   redis:
     driver: local
