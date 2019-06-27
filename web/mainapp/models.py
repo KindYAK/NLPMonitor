@@ -45,14 +45,11 @@ class Document(models.Model):
     class Meta:
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
-        indexes = [
-            models.Index(fields=['source']),
-        ]
-        unique_together = (('source', 'title', 'datetime'), )
+        # unique_together = (('source', 'title', 'datetime'), )
 
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор")
-    title = models.CharField(max_length=750, verbose_name="Заголовок")
+    title = models.CharField(max_length=2500, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
@@ -70,6 +67,16 @@ class Document(models.Model):
     categories = models.ManyToManyField('Category', verbose_name="Категории", blank=True)
 
     topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic', verbose_name="Топики", blank=True)
+
+    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность document, datetime, text")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        hash = hashlib.md5()
+        hash.update(str(self.source.id).encode())
+        hash.update(str(self.datetime).encode())
+        hash.update(self.title.encode())
+        self.unique_hash = hash.hexdigest()
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.title

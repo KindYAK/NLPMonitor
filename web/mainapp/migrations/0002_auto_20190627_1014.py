@@ -52,14 +52,6 @@ class Migration(migrations.Migration):
             unique_together={('corpus', 'name')},
         ),
         migrations.AddIndex(
-            model_name='document',
-            index=models.Index(fields=['source'], name='mainapp_doc_source__b4a2c7_idx'),
-        ),
-        migrations.AlterUniqueTogether(
-            name='document',
-            unique_together={('source', 'title', 'datetime')},
-        ),
-        migrations.AddIndex(
             model_name='category',
             index=models.Index(fields=['corpus'], name='mainapp_cat_corpus__e53ff8_idx'),
         ),
