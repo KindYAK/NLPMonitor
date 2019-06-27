@@ -33,6 +33,8 @@ services:
       - MARIADB_USER=${DB_USER}
       - MARIADB_PASSWORD=${DB_PASSWORD}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
+      - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
   elastic:
     image: "elasticsearch:7.1.1"
   redis:
