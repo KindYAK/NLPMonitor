@@ -1,6 +1,4 @@
 #!/bin/bash
-python manage.py makemigrations
 python manage.py migrate
-
 python manage.py collectstatic --noinput
 gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=600 --workers=4
