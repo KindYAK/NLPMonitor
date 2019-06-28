@@ -47,5 +47,7 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/docker-entrypoint.sh && \
     ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
+# Custom configuration
+COPY my.cnf /usr/local/mariadb/columnstore/mysql/
 
 CMD ["/usr/sbin/runit_bootstrap"]
