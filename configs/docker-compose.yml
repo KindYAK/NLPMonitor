@@ -48,6 +48,8 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=elastic
+    depends_on:
+      - elastic
   redis:
     image: "redis:5.0.5"
 
