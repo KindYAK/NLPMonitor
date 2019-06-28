@@ -6,6 +6,6 @@ web/venv
 *.sqlite3
 __pycache__
 .env
-web/media/
-web/static/
+web/media_root/
+web/static_root/
 .python-version
