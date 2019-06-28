@@ -35,19 +35,27 @@ services:
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
       - MARIADB_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
       - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
+      - ES_JAVA_OPTS: "-Xmx16000m -Xms4000m"
   elastic:
     image: "elasticsearch:7.1.1"
     expose:
       - 9200
       - 9300
     environment:
+      - cluster.name="elk-nlpmonitor-cluster"
+      - network.host=0.0.0.0
       - discovery.type=single-node
+      - discovery.zen.minimum_master_nodes=1
     networks:
       - elk
   kibana:
     image: "kibana:7.1.1"
     ports:
       - "5601:5601"
+    environment:
+      - server.name="kibana"
+      - server.host="0"
+      - elasticsearch.url=http://elasticsearch:9200
     depends_on:
       - elastic
     networks:
