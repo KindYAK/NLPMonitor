@@ -10,7 +10,7 @@ from nlpmonitor.settings import ES_INDEX, ES_CLIENT
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        self.batch_size = 1000
+        self.batch_size = 50000
         ESDocument.init()
         self.parse_csv()
 
