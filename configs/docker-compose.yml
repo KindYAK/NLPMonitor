@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
       - redis
-      - elastic
+      - elasticsearch
   nginx:
     image: "nginx:1.17.0"
     ports:
@@ -35,8 +35,7 @@ services:
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
       - MARIADB_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
       - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
-      - ES_JAVA_OPTS="-Xmx16000m -Xms4000m"
-  elastic:
+  elasticsearch:
     image: "elasticsearch:7.1.1"
     expose:
       - 9200
@@ -46,6 +45,7 @@ services:
       - network.host=0.0.0.0
       - discovery.type=single-node
       - discovery.zen.minimum_master_nodes=1
+      - ES_JAVA_OPTS="-Xmx16000m -Xms4000m"
     networks:
       - elk
   kibana:
@@ -57,7 +57,7 @@ services:
       - server.host="0"
       - elasticsearch.url=http://elasticsearch:9200
     depends_on:
-      - elastic
+      - elasticsearch
     networks:
       - elk
   redis:
