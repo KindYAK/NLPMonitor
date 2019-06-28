@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
 cd web
-docker build . -f docker/Dockerfile -t 109.233.109.111:5000/nlpmonitor:prod
-docker login 109.233.109.111:5000
-docker push 109.233.109.111:5000/nlpmonitor:prod
+docker build . -f docker/Dockerfile -t vm-registry.ipic.kz/nlpmonitor:prod
+docker login vm-registry.ipic.kz
+docker push vm-registry.ipic.kz/nlpmonitor:prod
 
 cd ..
 cd mariadb-columnstore
-docker build . -f Dockerfile -t 109.233.109.111:5000/mariadb-columnstore:prod
-docker login 109.233.109.111:5000
-docker push 109.233.109.111:5000/mariadb-columnstore:prod
+docker build . -f Dockerfile -t vm-registry.ipic.kz/mariadb-columnstore:prod
+docker login vm-registry.ipic.kz
+docker push vm-registry.ipic.kz/mariadb-columnstore:prod
