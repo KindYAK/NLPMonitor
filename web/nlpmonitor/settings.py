@@ -148,3 +148,12 @@ ES_CLIENT = Elasticsearch(
     max_retries=25,
     retry_on_timeout=True
 )
+
+if not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn="https://d4791b886248439ea023085e5a9a6349@sentry.io/1492328",
+        integrations=[DjangoIntegration()]
+    )
