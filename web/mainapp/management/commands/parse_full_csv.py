@@ -43,6 +43,12 @@ class Command(BaseCommand):
                         date = datetime.datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
                 date = date.replace(tzinfo=pytz.timezone('Asia/Almaty'))
 
+                if not row['title'] or type(row['title']) != str:
+                    continue
+
+                if not row['text'] or type(row['text']) != str:
+                    continue
+
                 if Document.objects.filter(source=source, datetime=date, title=row['title']).exists() or not row['text'] or type(row['text']) != str:
                     continue
                 document = Document(source=source,

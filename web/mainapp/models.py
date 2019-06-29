@@ -45,7 +45,6 @@ class Document(models.Model):
     class Meta:
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
-        # unique_together = (('source', 'title', 'datetime'), )
 
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор")
