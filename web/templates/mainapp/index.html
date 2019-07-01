@@ -19,8 +19,9 @@
                             <p class="card-text">
                                 Проект финансируется ПЦФ BR05236839 МОН РК
                             </p>
-
-                            <a href="{% url 'admin:login' %}" class="card-link">Администрирование системы</a>
+                            {% if request.user.is_staff %}
+                                <a href="{% url 'admin:login' %}" class="card-link">Администрирование системы</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
