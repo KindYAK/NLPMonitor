@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+{% block heading %}Главная{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Главная</li>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Главная</h5>
+
+                            <p class="card-text">
+                                Проект финансируется ПЦФ BR05236839 МОН РК
+                            </p>
+
+                            <a href="{% url 'admin:login' %}" class="card-link">Администрирование системы</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+{% endblock %}
