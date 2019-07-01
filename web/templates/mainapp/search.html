@@ -1,7 +1,13 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
 
 {% block title %}Поиск{% endblock %}
 {% block heading %}Поиск{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}s">
+{% endblock %}
 
 {% block bc %}
     <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
@@ -9,5 +15,52 @@
 {% endblock %}
 
 {% block content %}
+    <div id="search-form">
+        <table>
+            {{ form.as_table }}
+        </table>
+    </div>
 
+    <div id="search-results">
+        <table id="search-results-table" class="table table-bordered table-hover">
+            <thead>
+            <tr role="row">
+                <th>ID</th>
+                <th>Дата публикации</th>
+                <th>Заголовок</th>
+                <th>Источник</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for document in documents %}
+                <tr>
+                    <td>{{ document.ID }}</td>
+                    <td>{{ document.datetime }}</td>
+                    <td>{{ document.title }}</td>
+                    <td>{{ document.source }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block foot %}
+    <!-- DataTables -->
+    <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
+    <!-- FastClick -->
+    <script src="{% static 'adminlte/plugins/fastclick/fastclick.js' %}"></script>
+    <script>
+        $(function () {
+            $('#search-results-table').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+            });
+        });
+    </script>
 {% endblock %}
