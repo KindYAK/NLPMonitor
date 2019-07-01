@@ -28,7 +28,7 @@
                 <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="index3.html" class="nav-link">Главная</a>
+                <a href="/" class="nav-link">Главная</a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="#" class="nav-link">О нас</a>
@@ -69,10 +69,8 @@
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Brand Logo -->
-        <a href="index3.html" class="brand-link">
-            <img src="{% static 'adminlte/dist/img/AdminLTELogo.png' %}" alt="AdminLTE Logo"
-                 class="brand-image img-circle elevation-3"
-                 style="opacity: .8">
+        <a href="/" class="brand-link">
+            <span class="fas fa-file-medical-alt"></span>
             <span class="brand-text font-weight-light">NLPMonitor</span>
         </a>
 
@@ -83,7 +81,7 @@
                 <div class="info">
                     <a href="#" class="d-block">
                         {% if request.user.is_authenticated %}
-                            {{ request.user.username }}
+                            <i class="fas fa-user"></i> {{ request.user.username }}
                         {% else %}
                             Вы не авторизованы
                             <a href="{% url 'mainapp:login' %}">
@@ -96,29 +94,20 @@
 
             <!-- Sidebar Menu -->
             <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-th"></i>
+                        <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line"></i>
                             <p>
-                                Ссылка 1
+                                Dashboard
                             </p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-th"></i>
+                        <a href="{% url 'mainapp:search' %}" class="nav-link">
+                            <i class="nav-icon fas fa-search-plus"></i>
                             <p>
-                                Ссылка 2
-                            </p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-th"></i>
-                            <p>
-                                Ссылка 3
+                                Поиск и фильтрация
                             </p>
                         </a>
                     </li>
