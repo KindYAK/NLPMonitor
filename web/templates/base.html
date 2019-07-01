@@ -38,24 +38,26 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
             <!-- Notifications Dropdown Menu -->
-            <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <i class="far fa-bell"></i>
-                    <span class="badge badge-warning navbar-badge">0</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                    <span class="dropdown-header">0 уведомлений</span>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item dropdown-footer">Все уведомления</a>
-                </div>
-            </li>
+            {% if request.user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-warning navbar-badge">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-header">0 уведомлений</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-footer">Все уведомления</a>
+                    </div>
+                </li>
+            {% endif %}
             <li class="nav-item">
                 {% if request.user.is_authenticated %}
-                    <a class="nav-link" data-toggle="dropdown" href="#">
+                    <a href="{% url 'mainapp:logout' %}">
                         <button class="btn btn-block btn-info btn-sm">Выйти ({{ request.user.username }})</button>
                     </a>
                 {% else %}
-                    <a class="nav-link" data-toggle="dropdown" href="#">
+                    <a href="{% url 'mainapp:login' %}">
                         <button class="btn btn-block btn-info btn-sm">Войти</button>
                     </a>
                 {% endif %}
@@ -84,7 +86,9 @@
                             {{ request.user.username }}
                         {% else %}
                             Вы не авторизованы
-                            <button class="btn btn-block btn-info btn-sm">Войти</button>
+                            <a href="{% url 'mainapp:login' %}">
+                                <button class="btn btn-block btn-info btn-sm">Войти</button>
+                            </a>
                         {% endif %}
                     </a>
                 </div>

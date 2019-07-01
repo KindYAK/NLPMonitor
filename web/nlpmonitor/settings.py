@@ -77,6 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'nlpmonitor.wsgi.application'
 
 
+LOGIN_REDIRECT_URL = "/"
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
