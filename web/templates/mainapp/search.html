@@ -6,7 +6,22 @@
 {% block heading %}Поиск{% endblock %}
 
 {% block head %}
+    <!-- data tables -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- Tempusdominus Bbootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <style>
+        .form-group .row {
+            margin-bottom: 15px;
+        }
+        .form-group-intervals .row {
+            margin-bottom: 0;
+        }
+    </style>
 {% endblock %}
 
 {% block bc %}
@@ -15,33 +30,167 @@
 {% endblock %}
 
 {% block content %}
-    <div id="search-form">
-        <table>
-            {{ form.as_table }}
-        </table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Поиск и фильтры</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-form">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.id.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.id placeholder="ID" class="form-control" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.corpuses.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.corpuses data-placeholder="Выберите корпусы"  class="form-control select2" multiple="multiple" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.sources.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.sources data-placeholder="Выберите источники"  class="form-control select2" multiple="multiple" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.authors.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.authors data-placeholder="Выберите авторов"  class="form-control select2" multiple="multiple" %}</div>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <div class="row" style="width: 100%;">
+                                                <div class="col-md-5">
+                                                    <button type="button" class="btn btn-default float-right"
+                                                            id="daterange-btn">
+                                                        <i class="far fa-calendar-alt"></i>Даты<i class="fas fa-caret-down"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <span id="daterange-selected">Даты не выбраны</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group form-group-intervals">
+                                            <div class="row">
+                                                <div style="width: 100%; text-align: center;">
+                                                    <label>Количество просмотров</label>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-1"><label>От</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_views_from class="form-control" type="number" %}</div>
+                                                    <div class="col-md-1"><label>До</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_views_to class="form-control" type="number" %}</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div style="width: 100%; text-align: center;">
+                                                    <label>Количество репостов</label>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-1"><label>От</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_shares_from class="form-control" type="number" %}</div>
+                                                    <div class="col-md-1"><label>До</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_shares_to class="form-control" type="number" %}</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div style="width: 100%; text-align: center;">
+                                                    <label>Количество комментариев</label>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-1"><label>От</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_comments_from class="form-control" type="number" %}</div>
+                                                    <div class="col-md-1"><label>До</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_comments_to class="form-control" type="number" %}</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div style="width: 100%; text-align: center;">
+                                                    <label>Количество лайков</label>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-1"><label>От</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_likes_from class="form-control" type="number" %}</div>
+                                                    <div class="col-md-1"><label>До</label></div>
+                                                    <div class="col-md-5">{% render_field form.num_likes_to class="form-control" type="number" %}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.title.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.title placeholder="Заголовок" class="form-control" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.text.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.text placeholder="Текст" class="form-control" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.tags.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2" multiple="multiple" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.categories.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.categories data-placeholder="Выберите категории" class="form-control select2" multiple="multiple" %}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="search-results">
-        <table id="search-results-table" class="table table-bordered table-hover">
-            <thead>
-            <tr role="row">
-                <th>ID</th>
-                <th>Дата публикации</th>
-                <th>Заголовок</th>
-                <th>Источник</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for document in documents %}
-                <tr>
-                    <td>{{ document.ID }}</td>
-                    <td>{{ document.datetime }}</td>
-                    <td>{{ document.title }}</td>
-                    <td>{{ document.source }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Результаты поиска</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        <table id="search-results-table" class="table table-bordered table-hover">
+                            <thead>
+                            <tr role="row">
+                                <th>ID</th>
+                                <th>Дата публикации</th>
+                                <th>Заголовок</th>
+                                <th>Источник</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for document in documents %}
+                                <tr>
+                                    <td>{{ document.ID }}</td>
+                                    <td>{{ document.datetime }}</td>
+                                    <td>{{ document.title }}</td>
+                                    <td>{{ document.source }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -49,18 +198,41 @@
     <!-- DataTables -->
     <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
-    <!-- FastClick -->
-    <script src="{% static 'adminlte/plugins/fastclick/fastclick.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'adminlte/plugins/select2/js/select2.full.min.js' %}"></script>
+    <!-- InputMask -->
+    <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
+    <!-- date-range-picker -->
+    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
     <script>
         $(function () {
             $('#search-results-table').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": false,
                 "ordering": true,
                 "info": true,
-                "autoWidth": false,
+                "autoWidth": true,
             });
         });
+        $('.select2').select2();
+        $('#daterange-btn').daterangepicker(
+            {
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment()
+            },
+            function (start, end) {
+                $('#daterange-selected').html(start.format('D-M-YYYY') + ' - ' + end.format('D-M-YYYY'))
+            }
+        );
     </script>
 {% endblock %}
