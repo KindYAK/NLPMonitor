@@ -1,25 +1,30 @@
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormMixin
 from .forms import DocumentSearchForm
-from elasticsearch_dsl import Search
-from nlpmonitor.settings import ES_CLIENT
+from .services_es import execute_search
 
 
-class SearchView(FormMixin, TemplateView):
+class SearchView(TemplateView):
     template_name = "mainapp/search.html"
     form_class = DocumentSearchForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        s = Search(using=ES_CLIENT)
-        result = s[:1000].execute().to_dict()['hits']['hits']
+        form = self.form_class(data=self.request.GET)
+        search_request = {}
+        if form.is_valid():
+            search_request = form.cleaned_data
+        results = execute_search(search_request)
         context['documents'] = [{
-            "ID": document['_source']['id'],
-            "datetime": document['_source']['datetime'],
-            "title": document['_source']['title'],
-            "source": document['_source']['source'],
-        } for document in result]
+            "ID": document['source']['id'],
+            "datetime": document['source']['datetime'],
+            "title": document['source']['title'],
+            "source": document['source']['source'],
+            "score": str(document['score']).replace(",", "."),
+        } for document in results['hits']]
+        context['form'] = form
         return context
+
 
 class DashboardView(TemplateView):
     template_name = "mainapp/dashboard.html"
