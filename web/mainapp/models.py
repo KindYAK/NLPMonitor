@@ -67,7 +67,7 @@ class Document(models.Model):
 
     topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic', verbose_name="Топики", blank=True)
 
-    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность document, datetime, text")
+    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность source, datetime, title")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()
