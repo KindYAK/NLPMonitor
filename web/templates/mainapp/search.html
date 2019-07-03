@@ -238,8 +238,8 @@
                     'This Month': [moment().startOf('month'), moment().endOf('month')],
                     'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 },
-                startDate: '{{ request.GET.datetime_from }}',
-                endDate: '{{ request.GET.datetime_to }}'
+                startDate: {% if request.GET.datetime_from %}'{{ request.GET.datetime_from }}'{% else %}moment().subtract(29, 'days'){% endif %},
+                endDate: {% if request.GET.datetime_to %}'{{ request.GET.datetime_to }}'{% else %}moment(){% endif %}
             },
             function (start, end) {
                 $('#daterange-selected').html(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
@@ -253,6 +253,8 @@
         {% if request.GET.datetime_to %}
             $('#datetime_to').val('{{ request.GET.datetime_to }}');
         {% endif %}
-        $('#daterange-selected').html('{{ request.GET.datetime_from }}' + ' - ' + '{{ request.GET.datetime_to }}');
+        {% if request.GET.datetime_from or request.GET.datetime_to %}
+            $('#daterange-selected').html('{{ request.GET.datetime_from }}' + ' - ' + '{{ request.GET.datetime_to }}');
+        {% endif %}
     </script>
 {% endblock %}
