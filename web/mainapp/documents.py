@@ -89,11 +89,6 @@ class Dashboard(es.Document):
     def add_value(self, value, datetime):
         self.values.append(DashboardValue(value=value, datetime=datetime))
 
-    def save(self, using=None, index=None, validate=True, skip_empty=True, **kwargs):
-        if not self.datetime_started:
-            self.datetime_started = timezone.now()
-        return super().save(using, index, validate, skip_empty, **kwargs)
-
     class Index:
         name = ES_INDEX_DASHOBARD
         using = ES_CLIENT
