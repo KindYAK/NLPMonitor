@@ -24,3 +24,10 @@ class DocumentSearchForm(forms.Form):
 
     tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(), label="Теги", required=False)
     categories = forms.ModelMultipleChoiceField(queryset=Category.objects.all(), label="Категории", required=False)
+
+
+class DashboardFilterForm(forms.Form):
+    tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(), label="Теги", required=False)
+
+    datetime_from = forms.DateField(label="Дата - Начало периода", input_formats=['%d-%m-%Y'], required=False)
+    datetime_to = forms.DateField(label="Дата - Конец периода", input_formats=['%d-%m-%Y'], required=False)
