@@ -40,7 +40,10 @@ class Command(BaseCommand):
                     try:
                         date = datetime.datetime.strptime(row['date'], "%Y-%m-%d")
                     except:
-                        date = datetime.datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
+                        try:
+                            date = datetime.datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
+                        except:
+                            date = datetime.datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S.%f")
                     date = date.replace(tzinfo=pytz.timezone('Asia/Almaty'))
 
                 if not row['title'] or type(row['title']) != str:
