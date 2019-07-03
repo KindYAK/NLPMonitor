@@ -1,5 +1,5 @@
 from elasticsearch_dsl import Search, Q
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENTS
 
 
 FILTER_FIELDS = (('corpuses', 'corpus'),
@@ -24,7 +24,7 @@ def es_filter(search, key, value):
 
 
 def execute_search(val_data):
-    s = Search(using=ES_CLIENT, index=ES_INDEX)
+    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENTS)
     s = s.source(include=SOURCE_FIELDS)
 
     for key, value in val_data.items():

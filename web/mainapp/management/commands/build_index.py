@@ -5,13 +5,13 @@ from mainapp.models import *
 from mainapp.documents import Document as ESDocument
 from mainapp.services import batch_qs
 import elasticsearch_dsl as es
-from nlpmonitor.settings import ES_INDEX, ES_CLIENT
+from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_CLIENT
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.batch_size = 50000
-        index = es.Index(ES_INDEX, using=ES_CLIENT)
+        index = es.Index(ES_INDEX_DOCUMENTS, using=ES_CLIENT)
         index.delete(ignore=404)
         ESDocument.init()
         self.parse_csv()
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         success = 0
         failed = 0
         qs = Document.objects.all()
-        for ok, result in streaming_bulk(ES_CLIENT, self.document_generator(qs), index=ES_INDEX, chunk_size=self.batch_size, raise_on_error=False):
+        for ok, result in streaming_bulk(ES_CLIENT, self.document_generator(qs), index=ES_INDEX_DOCUMENTS, chunk_size=self.batch_size, raise_on_error=False):
             if ok:
                 success += 1
             else:

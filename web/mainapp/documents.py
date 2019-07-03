@@ -1,7 +1,7 @@
 import json
 
 import elasticsearch_dsl as es
-from nlpmonitor.settings import ES_INDEX, ES_CLIENT
+from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_INDEX_DASHOBARD, ES_CLIENT
 from mainapp.models import Document as ModelDocument
 from django.utils import timezone
 
@@ -59,5 +59,38 @@ class Document(es.Document):
         self.categories = [category.name for category in model_obj.categories.all()]
 
     class Index:
-        name = ES_INDEX
+        name = ES_INDEX_DOCUMENTS
         using = ES_CLIENT
+
+
+DASHBOARD_TYPE_NUM_PUBLICATIONS_BY_TAG = "NUM_PUBLICATIONS_BY_TAG"
+DASHBOARD_TYPE_NUM_PUBLICATIONS_OVERALL = "NUM_PUBLICATIONS_OVERALL"
+DASHBOARD_TYPE_NUM_VIEWS_BY_TAG = "NUM_VIEWS_BY_TAG"
+DASHBOARD_TYPE_NUM_VIEWS_OVERALL = "NUM_VIEWS_OVERALL"
+
+
+class Dashboard(es.Document):
+    corpus = es.Keyword()
+    type = es.Keyword()
+    granularity = es.Keyword() # 1d / 1h
+    datetime_started = es.Date()
+    datetime_generated = es.Date()
+    is_ready = es.Boolean()
+
+    tag = es.Keyword()
+
+    values = es.Nested('DashboardValue')
+
+    def save(self, using=None, index=None, validate=True, skip_empty=True, **kwargs):
+        if not self.datetime_started:
+            self.datetime_started = timezone.now()
+        return super().save(using, index, validate, skip_empty, **kwargs)
+
+    class Index:
+        name = ES_INDEX_DASHOBARD
+        using = ES_CLIENT
+
+
+class DashboardValue(es.InnerDoc):
+    value = es.Integer()
+    datetime = es.Date()

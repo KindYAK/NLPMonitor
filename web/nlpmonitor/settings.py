@@ -136,7 +136,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
 
-ES_INDEX = 'main'
+ES_INDEX_DOCUMENTS = 'main'
+ES_INDEX_DASHOBARD = 'dashboard'
 ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
