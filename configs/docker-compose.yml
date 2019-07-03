@@ -40,6 +40,8 @@ services:
     expose:
       - 9200
       - 9300
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
     environment:
       - cluster.name="elk-nlpmonitor-cluster"
       - network.host=0.0.0.0
@@ -71,6 +73,8 @@ volumes:
   maria_data_local:
     driver: local
   maria_data_mysql_db:
+    driver: local
+  elasticsearch_data:
     driver: local
   redis:
     driver: local
