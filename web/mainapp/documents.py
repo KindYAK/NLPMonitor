@@ -69,6 +69,11 @@ DASHBOARD_TYPE_NUM_VIEWS_BY_TAG = "NUM_VIEWS_BY_TAG"
 DASHBOARD_TYPE_NUM_VIEWS_OVERALL = "NUM_VIEWS_OVERALL"
 
 
+class DashboardValue(es.InnerDoc):
+    value = es.Integer()
+    datetime = es.Date()
+
+
 class Dashboard(es.Document):
     corpus = es.Keyword()
     type = es.Keyword()
@@ -79,7 +84,10 @@ class Dashboard(es.Document):
 
     tag = es.Keyword()
 
-    values = es.Nested('DashboardValue')
+    values = es.Nested(DashboardValue)
+
+    def add_value(self, value, datetime):
+        self.values.append(DashboardValue(value=value, datetime=datetime))
 
     def save(self, using=None, index=None, validate=True, skip_empty=True, **kwargs):
         if not self.datetime_started:
@@ -90,7 +98,3 @@ class Dashboard(es.Document):
         name = ES_INDEX_DASHOBARD
         using = ES_CLIENT
 
-
-class DashboardValue(es.InnerDoc):
-    value = es.Integer()
-    datetime = es.Date()
