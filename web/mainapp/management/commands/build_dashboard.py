@@ -2,46 +2,19 @@ from django.core.management.base import BaseCommand
 from django.db.models import Sum
 from elasticsearch_dsl import Search
 
-from mainapp.models import Document as ModelDocument, Corpus, Tag
+from mainapp.dashboard_types import *
 from mainapp.documents import *
+from mainapp.models import Document as ModelDocument, Corpus, Tag
 from mainapp.services import batch_qs, date_generator
-
-
-VALUE_TYPE_COUNT = "VALUE_TYPE_COUNT"
-VALUE_TYPE_SUM = "VALUE_TYPE_SUM"
-
-BY_TAG_TYPES = [
-    {
-        "type": DASHBOARD_TYPE_NUM_PUBLICATIONS_BY_TAG,
-        "value": VALUE_TYPE_COUNT,
-    },
-    {
-        "type": DASHBOARD_TYPE_NUM_VIEWS_BY_TAG,
-        "value": VALUE_TYPE_SUM,
-        "field": "num_views",
-    },
-]
-
-OVERALL_TYPES = [
-    {
-        "type": DASHBOARD_TYPE_NUM_PUBLICATIONS_OVERALL,
-        "value": VALUE_TYPE_COUNT,
-    },
-    {
-        "type": DASHBOARD_TYPE_NUM_VIEWS_OVERALL,
-        "value": VALUE_TYPE_SUM,
-        "field": "num_views",
-    },
-]
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.tag_batch_size = 10000
         Dashboard.init()
-        for dashboard_type in BY_TAG_TYPES:
+        for dashboard_type in list(filter(lambda x: x['filtering'] == FILTERING_TYPE_BY_TAG, DASHBOARD_TYPES)):
             self.build_dashboard_by_tag(dashboard_type)
-        for dashboard_type in OVERALL_TYPES:
+        for dashboard_type in list(filter(lambda x: x['filtering'] == FILTERING_TYPE_OVERALL, DASHBOARD_TYPES)):
             self.build_dashboard_overall(dashboard_type)
 
     def delete_ready_dashboards(self, dashboard_type, tag=None):

@@ -71,12 +71,9 @@
                     <h3>Результаты</h3>
                 </div>
                 <div class="card-body">
-                    {% if publications_by_tag %}
-                        <div id="publications_by_tag_graph"></div>
-                    {% endif %}
-                    {% if publications_overall %}
-                        <div id="publications_overall_graph"></div>
-                    {% endif %}
+                    {% for plot in plots %}
+                        <div id="{{ plot.id }}"></div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -152,9 +149,9 @@
             }],
         };
 
-        {% if publications_by_tag %}
-            var data_pub_by_tag = [
-                {% for line in publications_by_tag %}
+        {% for plot in plots %}
+            var data_{{ plot.id }} = [
+                {% for line in plot.data %}
                 {
                     mode: 'lines',
                     x: [{% for date in line.x %}new Date('{{ date }}'), {% endfor %}],
@@ -163,8 +160,8 @@
                 },
                 {% endfor %}
             ];
-            var layout_pub_by_tag = {
-                title: 'График количества публикаций по тегам',
+            var layout_{{ plot.id }} = {
+                title: '{{ plot.name }}',
                 xaxis: {
                     rangeselector: selectorOptions,
                     rangeslider: {}
@@ -173,31 +170,7 @@
                     fixedrange: true
                 }
             };
-            Plotly.plot('publications_by_tag_graph', data_pub_by_tag, layout_pub_by_tag);
-        {% endif %}
-
-        {% if publications_overall %}
-            var data_pub_overall = [
-                {% for line in publications_overall %}
-                {
-                    mode: 'lines',
-                    x: [{% for date in line.x %}new Date('{{ date }}'), {% endfor %}],
-                    y: {{ line.y }},
-                    name: '{{ line.tag }}'
-                },
-                {% endfor %}
-            ];
-            var layout_pub_overall = {
-                title: 'График общего количества публикаций',
-                xaxis: {
-                    rangeselector: selectorOptions,
-                    rangeslider: {}
-                },
-                yaxis: {
-                    fixedrange: true
-                }
-            };
-            Plotly.plot('publications_overall_graph', data_pub_overall, layout_pub_overall);
-        {% endif %}
+            Plotly.plot('{{ plot.id }}', data_{{ plot.id }}, layout_{{ plot.id }});
+        {% endfor %}
     </script>
 {% endblock %}

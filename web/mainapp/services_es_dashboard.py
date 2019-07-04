@@ -1,15 +1,16 @@
-from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl import Search
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DASHOBARD
+from .dashboard_types import *
 from .documents import *
 
 
 SOURCE_FIELDS = ('values', 'datetime_generated', 'tag', )
 
 
-def get_publications_dashboard(search_request):
+def get_dashboard(search_request):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DASHOBARD)
     s = s.source(include=SOURCE_FIELDS)
-    s = s.filter("term", **{"type": DASHBOARD_TYPE_NUM_PUBLICATIONS_BY_TAG if 'tags' in search_request else DASHBOARD_TYPE_NUM_PUBLICATIONS_OVERALL})
+    s = s.filter("term", **{"type": search_request['type']})
     s = s.filter("term", **{"is_ready": True})
     for key, value in search_request.items():
         if not value:
