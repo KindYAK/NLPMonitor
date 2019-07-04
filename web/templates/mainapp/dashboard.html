@@ -74,6 +74,9 @@
                     {% if publications_by_tag %}
                         <div id="publications_by_tag_graph"></div>
                     {% endif %}
+                    {% if publications_overall %}
+                        <div id="publications_overall_graph"></div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -150,7 +153,7 @@
         };
 
         {% if publications_by_tag %}
-            var data = [
+            var data_pub_by_tag = [
                 {% for line in publications_by_tag %}
                 {
                     mode: 'lines',
@@ -160,7 +163,7 @@
                 },
                 {% endfor %}
             ];
-            var layout = {
+            var layout_pub_by_tag = {
                 title: 'График количества публикаций по тегам',
                 xaxis: {
                     rangeselector: selectorOptions,
@@ -170,7 +173,31 @@
                     fixedrange: true
                 }
             };
-            Plotly.plot('publications_by_tag_graph', data, layout);
+            Plotly.plot('publications_by_tag_graph', data_pub_by_tag, layout_pub_by_tag);
+        {% endif %}
+
+        {% if publications_overall %}
+            var data_pub_overall = [
+                {% for line in publications_overall %}
+                {
+                    mode: 'lines',
+                    x: [{% for date in line.x %}new Date('{{ date }}'), {% endfor %}],
+                    y: {{ line.y }},
+                    name: '{{ line.tag }}'
+                },
+                {% endfor %}
+            ];
+            var layout_pub_overall = {
+                title: 'График общего количества публикаций',
+                xaxis: {
+                    rangeselector: selectorOptions,
+                    rangeslider: {}
+                },
+                yaxis: {
+                    fixedrange: true
+                }
+            };
+            Plotly.plot('publications_overall_graph', data_pub_overall, layout_pub_overall);
         {% endif %}
     </script>
 {% endblock %}

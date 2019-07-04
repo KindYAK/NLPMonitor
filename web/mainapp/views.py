@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 from .forms import DocumentSearchForm, DashboardFilterForm
 from .services_es_documents import execute_search
-from .services_es_dashboard import get_publications_by_tag
+from .services_es_dashboard import get_publications_dashboard
 
 
 class SearchView(TemplateView):
@@ -30,6 +30,15 @@ class DashboardView(TemplateView):
     template_name = "mainapp/dashboard.html"
     form_class = DashboardFilterForm
 
+    def parse_es_response(self, response):
+        return [
+            {
+                "x": [tick['datetime'] for tick in source['source']['values']],
+                "y": [tick['value'] for tick in source['source']['values']],
+                "tag": source['source']['tag'] if 'tag' in source['source'] else None
+            } for source in response['hits']
+        ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = self.form_class(data=self.request.GET)
@@ -37,13 +46,7 @@ class DashboardView(TemplateView):
         if form.is_valid():
             search_request = form.cleaned_data
         if form.cleaned_data['tags']:
-            publications_by_tag = [
-                {
-                    "x": [tick['datetime'] for tick in source['source']['values']],
-                    "y": [tick['value'] for tick in source['source']['values']],
-                    "tag": source['source']['tag']
-                } for source in get_publications_by_tag(search_request)['hits']
-            ]
-            context['publications_by_tag'] = publications_by_tag
+            context['publications_by_tag'] = self.parse_es_response(get_publications_dashboard(search_request))
+        context['publications_overall'] = self.parse_es_response(get_publications_dashboard({}))
         context['form'] = form
         return context
