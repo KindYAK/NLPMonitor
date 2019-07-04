@@ -1,18 +1,21 @@
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DASHOBARD
+from .documents import *
 
 
 SOURCE_FIELDS = ('values', 'datetime_generated', 'tag', )
 
 
-def get_publication_by_tag(tag_names, date_from=None, date_to=None):
+def get_publications_by_tag(search_request):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DASHOBARD)
     s = s.source(include=SOURCE_FIELDS)
-    s = s.filter("terms", **{"tag": tag_names})
-    if date_from:
-        s = s.filter('range', **{"values.datetime": {'gte': date_from}})
-    if date_to:
-        s = s.filter('range', **{"values.datetime": {'lte': date_to}})
+    s = s.filter("term", **{"type": DASHBOARD_TYPE_NUM_PUBLICATIONS_BY_TAG})
+    s = s.filter("term", **{"is_ready": True})
+    for key, value in search_request.items():
+        if not value:
+            continue
+        if key == "tags":
+            s = s.filter("terms", **{"tag": [v.name for v in value]})
 
     s = s[:None]
     esresult = s.execute().to_dict()

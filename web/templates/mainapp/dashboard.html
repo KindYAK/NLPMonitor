@@ -1,7 +1,20 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+{% load widget_tweaks %}
 
 {% block title %}Dashboard{% endblock %}
 {% block heading %}Dashboard{% endblock %}
+
+{% block head %}
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- Tempusdominus Bbootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <!-- Plotyly.js -->
+    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+{% endblock %}
 
 {% block bc %}
     <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
@@ -9,5 +22,155 @@
 {% endblock %}
 
 {% block content %}
-    {{ publications_by_tag }}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <form action="" method="GET">
+                <div class="card-header">
+                    <h3>Поиск и фильтры</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 offset-md-3">
+                            <div class="form-group row">
+                                <div class="col-md-2">{{ form.tags.label_tag }}</div>
+                                <div class="col-md-10">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2" multiple="multiple" %}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                        <div class="input-group">
+                            <div class="row" style="width: 100%;">
+                                <div class="col-md-5">
+                                    <button type="button" class="btn btn-default float-right"
+                                            id="daterange-btn">
+                                        <i class="far fa-calendar-alt"></i>Даты<i class="fas fa-caret-down"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-7">
+                                    <span id="daterange-selected">Даты не выбраны</span>
+                                    <input type="hidden" id="datetime_from" name="datetime_from">
+                                    <input type="hidden" id="datetime_to" name="datetime_to">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-block btn-info" type="submit">Поиск</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Результаты</h3>
+                </div>
+                <div class="card-body">
+                    {% if publications_by_tag %}
+                        <div id="publications_by_tag_graph"></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block foot %}
+    <!-- Select2 -->
+    <script src="{% static 'adminlte/plugins/select2/js/select2.full.min.js' %}"></script>
+    <!-- InputMask -->
+    <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
+    <!-- date-range-picker -->
+    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
+    <script>
+        $('.select2').select2();
+        $('#daterange-btn').daterangepicker(
+            {
+                locale: {
+                    format: 'DD-MM-YYYY',
+                },
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: {% if request.GET.datetime_from %}'{{ request.GET.datetime_from }}'{% else %}moment().subtract(29, 'days'){% endif %},
+                endDate: {% if request.GET.datetime_to %}'{{ request.GET.datetime_to }}'{% else %}moment(){% endif %}
+            },
+            function (start, end) {
+                $('#daterange-selected').html(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
+                $('#datetime_from').val(start.format('DD-MM-YYYY'));
+                $('#datetime_to').val(end.format('DD-MM-YYYY'));
+            }
+        );
+        {% if request.GET.datetime_from %}
+            $('#datetime_from').val('{{ request.GET.datetime_from }}');
+        {% endif %}
+        {% if request.GET.datetime_to %}
+            $('#datetime_to').val('{{ request.GET.datetime_to }}');
+        {% endif %}
+        {% if request.GET.datetime_from or request.GET.datetime_to %}
+            $('#daterange-selected').html('{{ request.GET.datetime_from }}' + ' - ' + '{{ request.GET.datetime_to }}');
+        {% endif %}
+
+        var selectorOptions = {
+            buttons: [{
+                step: 'month',
+                stepmode: 'backward',
+                count: 1,
+                label: '1m'
+            }, {
+                step: 'month',
+                stepmode: 'backward',
+                count: 6,
+                label: '6m'
+            }, {
+                step: 'year',
+                stepmode: 'todate',
+                count: 1,
+                label: 'YTD'
+            }, {
+                step: 'year',
+                stepmode: 'backward',
+                count: 1,
+                label: '1y'
+            }, {
+                step: 'all',
+            }],
+        };
+
+        {% if publications_by_tag %}
+            var data = [
+                {% for line in publications_by_tag %}
+                {
+                    mode: 'lines',
+                    x: [{% for date in line.x %}new Date('{{ date }}'), {% endfor %}],
+                    y: {{ line.y }},
+                    name: '{{ line.tag }}'
+                },
+                {% endfor %}
+            ];
+            var layout = {
+                title: 'График количества публикаций по тегам',
+                xaxis: {
+                    rangeselector: selectorOptions,
+                    rangeslider: {}
+                },
+                yaxis: {
+                    fixedrange: true
+                }
+            };
+            Plotly.plot('publications_by_tag_graph', data, layout);
+        {% endif %}
+    </script>
 {% endblock %}

@@ -92,4 +92,3 @@ class Dashboard(es.Document):
     class Index:
         name = ES_INDEX_DASHOBARD
         using = ES_CLIENT
-

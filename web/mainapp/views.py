@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 from .forms import DocumentSearchForm, DashboardFilterForm
 from .services_es_documents import execute_search
-from .services_es_dashboard import get_publication_by_tag
+from .services_es_dashboard import get_publications_by_tag
 
 
 class SearchView(TemplateView):
@@ -36,6 +36,14 @@ class DashboardView(TemplateView):
         search_request = {}
         if form.is_valid():
             search_request = form.cleaned_data
-        context['publications_by_tag'] = get_publication_by_tag(["t1", "Test"])
+        if form.cleaned_data['tags']:
+            publications_by_tag = [
+                {
+                    "x": [tick['datetime'] for tick in source['source']['values']],
+                    "y": [tick['value'] for tick in source['source']['values']],
+                    "tag": source['source']['tag']
+                } for source in get_publications_by_tag(search_request)['hits']
+            ]
+            context['publications_by_tag'] = publications_by_tag
         context['form'] = form
         return context

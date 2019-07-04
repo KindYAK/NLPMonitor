@@ -23,11 +23,11 @@ def es_filter(search, key, value):
     return search.filter(query, **{key: value})
 
 
-def execute_search(val_data):
+def execute_search(search_request):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENTS)
     s = s.source(include=SOURCE_FIELDS)
 
-    for key, value in val_data.items():
+    for key, value in search_request.items():
         if not value:
             continue
         if key in TERMS_FIELDS_DICT:
