@@ -17,6 +17,8 @@ def get_dashboard(search_request):
             continue
         if key == "tags":
             s = s.filter("terms", **{"tag": [v.name for v in value]})
+        elif key in ["corpus"]:
+            s = s.filter("term", **{key: value.name})
 
     s = s[:None]
     esresult = s.execute().to_dict()

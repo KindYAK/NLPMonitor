@@ -21,13 +21,13 @@ DASHBOARD_TYPES = [
         "filtering": FILTERING_TYPE_BY_TAG,
         "value": VALUE_TYPE_SUM,
         "field": "num_views",
-        "name": "Количество публикаций",
+        "name": "Количество просмотров по тегам",
     },
     {
         "type": DASHBOARD_TYPE_NUM_PUBLICATIONS_OVERALL,
         "filtering": FILTERING_TYPE_OVERALL,
         "value": VALUE_TYPE_COUNT,
-        "name": "Количество просмотров по тегам",
+        "name": "Количество публикаций",
     },
     {
         "type": DASHBOARD_TYPE_NUM_VIEWS_OVERALL,

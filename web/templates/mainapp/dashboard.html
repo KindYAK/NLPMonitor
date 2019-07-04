@@ -31,7 +31,13 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-3 offset-md-3">
+                        <div class="col-md-3">
+                            <div class="form-group row">
+                                <div class="col-md-2">{{ form.corpus.label_tag }}</div>
+                                <div class="col-md-10">{% render_field form.corpus data-placeholder="Выберите корпус" class="form-control select2" %}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="form-group row">
                                 <div class="col-md-2">{{ form.tags.label_tag }}</div>
                                 <div class="col-md-10">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2" multiple="multiple" %}</div>
@@ -156,7 +162,7 @@
                     mode: 'lines',
                     x: [{% for date in line.x %}new Date('{{ date }}'), {% endfor %}],
                     y: {{ line.y }},
-                    name: '{{ line.tag }}'
+                    {% if line.tag %}name: '{{ line.tag }}',{% endif %}
                 },
                 {% endfor %}
             ];

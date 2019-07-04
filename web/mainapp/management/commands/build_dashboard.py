@@ -11,6 +11,8 @@ from mainapp.services import batch_qs, date_generator
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.tag_batch_size = 10000
+        # index = es.Index(ES_INDEX_DOCUMENTS, using=ES_CLIENT)
+        # index.delete(ignore=404)
         Dashboard.init()
         for dashboard_type in list(filter(lambda x: x['filtering'] == FILTERING_TYPE_BY_TAG, DASHBOARD_TYPES)):
             self.build_dashboard_by_tag(dashboard_type)

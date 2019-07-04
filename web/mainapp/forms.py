@@ -27,6 +27,7 @@ class DocumentSearchForm(forms.Form):
 
 
 class DashboardFilterForm(forms.Form):
+    corpus = forms.ModelChoiceField(queryset=Corpus.objects.all(), label="Корпус", required=True, initial=Corpus.objects.first())
     tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(), label="Теги", required=False)
 
     datetime_from = forms.DateField(label="Дата - Начало периода", input_formats=['%d-%m-%Y'], required=False)
