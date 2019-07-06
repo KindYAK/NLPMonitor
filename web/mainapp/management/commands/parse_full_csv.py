@@ -19,7 +19,7 @@ class Command(BaseCommand):
             corpus = Corpus.objects.create(name="main")
         chunksize = 50000
         db_chunksize = 10000
-        dfs = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), chunksize=chunksize)
+        dfs = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), index_col=0, chunksize=chunksize, index_col=0, skiprows=1500000)
         documents = []
         for i, df in enumerate(dfs, start=1):
             for index, row in df.iterrows():
