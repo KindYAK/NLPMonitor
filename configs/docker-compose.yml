@@ -10,6 +10,8 @@ services:
       - db
       - redis
       - elasticsearch
+    networks:
+      - elk
   nginx:
     image: "nginx:1.17.0"
     ports:
