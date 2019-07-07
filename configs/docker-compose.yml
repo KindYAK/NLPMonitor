@@ -10,8 +10,6 @@ services:
       - db
       - redis
       - elasticsearch
-    networks:
-      - elk
   nginx:
     image: "nginx:1.17.0"
     ports:
@@ -39,9 +37,9 @@ services:
       - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
   elasticsearch:
     image: "elasticsearch:7.1.1"
-    expose:
-      - 9200
-      - 9300
+    ports:
+      - "9200:9200"
+      - "9300:9300"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     environment:
