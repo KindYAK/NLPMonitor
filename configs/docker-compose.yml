@@ -10,6 +10,8 @@ services:
       - db
       - redis
       - elasticsearch
+    networks:
+      - network
   nginx:
     image: "nginx:1.17.0"
     ports:
@@ -35,6 +37,8 @@ services:
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
       - MARIADB_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
       - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
+    networks:
+      - network
   elasticsearch:
     image: "elasticsearch:7.1.1"
     ports:
@@ -49,7 +53,7 @@ services:
       - discovery.zen.minimum_master_nodes=1
       - ${ELASTIC_JAVA_OPTIONS}
     networks:
-      - elk
+      - network
   kibana:
     image: "kibana:7.1.1"
     ports:
@@ -61,9 +65,11 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - elk
+      - network
   redis:
     image: "redis:5.0.5"
+    networks:
+      - network
 
 volumes:
   maria_data_etc:
@@ -84,5 +90,5 @@ volumes:
     driver: local
 
 networks:
-  elk:
+  network:
     driver: bridge
