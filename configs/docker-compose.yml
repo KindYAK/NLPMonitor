@@ -21,6 +21,8 @@ services:
       - media_root:/media_root
     depends_on:
       - web
+    networks:
+      - network
   db:
     image: "mariadb/columnstore:1.2.3"
     expose:
