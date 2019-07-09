@@ -18,6 +18,7 @@ class Command(BaseCommand):
         corpus = get_object_or_None(Corpus, name="main")
         df = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), index_col=0)
         df = df[pd.notnull(df['tags'])]
+        passed = 0
         for index, row in df.iterrows():
             media_name = row['mass_media_name']
             source = get_object_or_None(Source, name=media_name, corpus=corpus)
@@ -48,10 +49,15 @@ class Command(BaseCommand):
             if not row['text'] or type(row['text']) != str or not row['text'] or type(row['text']) != str:
                 continue
 
-            document = get_object_or_None(Document, source=source, datetime=date, title=row['title'])
+            try:
+                document = get_object_or_None(Document, source=source, datetime=date, title=row['title'])
+            except:
+                passed += 1
+                continue
             if document and row['tags'] and type(row['tags']) == str:
                 for tag_name in json.loads(row['tags']):
                     tag = get_object_or_None(Tag, name=tag_name[:Tag._meta.get_field('name').max_length], corpus=corpus)
                     if not tag:
                         tag = Tag.objects.create(name=tag_name[:Tag._meta.get_field('name').max_length], corpus=corpus)
                     document.tags.add(tag)
+        print("Passed:", passed)
