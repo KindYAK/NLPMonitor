@@ -149,8 +149,8 @@ ES_CLIENT = Elasticsearch(
     ],
     connection_class=Urllib3HttpConnection,
     timeout=5,
-    max_retries=25,
-    retry_on_timeout=False
+    max_retries=10,
+    retry_on_timeout=True
 )
 
 if not DEBUG:
