@@ -10,10 +10,12 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_CLIENT
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        self.batch_size = 50000
+        self.batch_size = 10
         self.client = ES_CLIENT
+        print("Deleting index")
         index = es.Index(ES_INDEX_DOCUMENTS, using=self.client)
         index.delete(ignore=404)
+        print("Creating index")
         ESDocument.init()
         self.parse_csv()
 
@@ -22,12 +24,14 @@ class Command(BaseCommand):
             for document in batch:
                 obj = ESDocument()
                 obj.init_from_model(document)
+                print("Yield obj")
                 yield obj.to_dict()
 
     def parse_csv(self):
         success = 0
         failed = 0
         qs = Document.objects.all()
+        print("Start build")
         for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENTS, chunk_size=self.batch_size, raise_on_error=False):
             if ok:
                 success += 1
