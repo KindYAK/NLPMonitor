@@ -148,8 +148,8 @@ ES_CLIENT = Elasticsearch(
         {'port': ES_PORT}
     ],
     connection_class=Urllib3HttpConnection,
-    timeout=5,
-    max_retries=10,
+    timeout=15,
+    max_retries=3,
     retry_on_timeout=True
 )
 

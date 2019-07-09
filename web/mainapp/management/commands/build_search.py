@@ -9,8 +9,11 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_CLIENT
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('batch_size', type=int)
+
     def handle(self, *args, **options):
-        self.batch_size = 10
+        self.batch_size = options['batch_size']
         self.client = ES_CLIENT
         print("Deleting index")
         index = es.Index(ES_INDEX_DOCUMENTS, using=self.client)
@@ -24,7 +27,6 @@ class Command(BaseCommand):
             for document in batch:
                 obj = ESDocument()
                 obj.init_from_model(document)
-                print("Yield obj")
                 yield obj.to_dict()
 
     def parse_csv(self):
