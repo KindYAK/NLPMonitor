@@ -22,5 +22,5 @@ class Command(BaseCommand):
             if not doc.unique_hash:
                 print("Not hash", doc.id)
             i += 1
-            if i % 10000:
+            if i % 10000 == 0:
                 print(i, "/", Document.objects.count())
