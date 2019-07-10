@@ -21,7 +21,7 @@ class Command(BaseCommand):
         passed = 0
         for index, row in df.iterrows():
             if index % 100 == 0:
-                print(index)
+                print(index, "/", len(df))
             media_name = row['mass_media_name']
             source = get_object_or_None(Source, name=media_name, corpus=corpus)
             if not source:
