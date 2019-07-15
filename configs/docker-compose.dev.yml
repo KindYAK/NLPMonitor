@@ -17,8 +17,6 @@ services:
     build:
       context: ../mariadb-columnstore
       dockerfile: Dockerfile
-    ports:
-      - "3306:3306"
   nginx:
     volumes:
       - ./nginx-app-dev.conf:/etc/nginx/conf.d/app.conf

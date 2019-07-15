@@ -24,7 +24,6 @@ services:
     networks:
       - network
   db:
-    image: "mariadb/columnstore:1.2.3"
     expose:
       - 3306
     volumes:

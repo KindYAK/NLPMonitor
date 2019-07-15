@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 python manage.py collectstatic --noinput
-gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=600 --workers=4
+gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=30 --workers=4
