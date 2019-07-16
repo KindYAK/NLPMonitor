@@ -1,4 +1,4 @@
 #!/bin/sh
 
-sleep 30
+sleep 120
 python manage.py runserver 0.0.0.0:8000

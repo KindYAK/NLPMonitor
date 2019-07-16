@@ -1,0 +1,96 @@
+version: '3'
+
+services:
+  airflow-postgresql:
+    image: 'bitnami/postgresql:11.4.0-r21'
+    environment:
+      - POSTGRESQL_DATABASE=${AIRFLOW_DB_NAME}
+      - POSTGRESQL_USERNAME=${AIRFLOW_DB_USER}
+      - POSTGRESQL_PASSWORD=${AIRFLOW_DB_PASSWORD}
+    volumes:
+      - airflow:/bitnami/postgresql
+    networks:
+      - network
+  airflow-redis:
+    image: 'bitnami/redis:5.0.5-r63'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - airflow:/bitnami
+    networks:
+      - network
+  airflow-worker:
+    image: "bitnami/airflow-worker:1.10.3-r72"
+    environment:
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
+      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - REDIS_HOST=airflow-redis
+    volumes:
+      - airflow:/bitnami
+    networks:
+      - network
+    depends_on:
+      - airflow-redis
+      - airflow-postgresql
+  airflow-scheduler:
+    image: "bitnami/airflow-scheduler:1.10.3-r73"
+    environment:
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
+      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - AIRFLOW_LOAD_EXAMPLES=yes
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - REDIS_HOST=airflow-redis
+    volumes:
+      - airflow:/bitnami
+    networks:
+      - network
+    depends_on:
+      - airflow-redis
+      - airflow-postgresql
+  airflow:
+    image: "bitnami/airflow:1.10.3-r63"
+    environment:
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
+      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - AIRFLOW_PASSWORD=${AIRFLOW_PASSWORD}
+      - AIRFLOW_USERNAME=${AIRFLOW_USER}
+      - AIRFLOW_EMAIL=${AIRFLOW_EMAIL}
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - REDIS_HOST=airflow-redis
+    ports:
+      - '8001:8001'
+    volumes:
+      - airflow:/bitnami
+    networks:
+      - network
+    depends_on:
+      - airflow-redis
+      - airflow-postgresql
+  airflow-flower:
+    image: "mher/flower:latest"
+    networks:
+      - network
+    depends_on:
+      - airflow-redis
+      - airflow-postgresql
+    ports:
+      - "8888:8888"
+    command: ["flower", "--broker=redis://airflow-redis:6379/0", "--port=8888"]
+
+
+volumes:
+  airflow:
+    driver: local
