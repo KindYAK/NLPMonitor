@@ -158,6 +158,6 @@ if not DEBUG:
     from sentry_sdk.integrations.django import DjangoIntegration
 
     sentry_sdk.init(
-        dsn="https://d4791b886248439ea023085e5a9a6349@sentry.io/1492328",
+        dsn="https://1bb6ad46936e48328ff25e3e37b7ea94@sentry.io/1505657",
         integrations=[DjangoIntegration()]
     )
