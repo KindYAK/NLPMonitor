@@ -79,16 +79,6 @@ services:
     depends_on:
       - airflow-redis
       - airflow-postgresql
-  airflow-flower:
-    image: "mher/flower:latest"
-    networks:
-      - network
-    depends_on:
-      - airflow-redis
-      - airflow-postgresql
-    ports:
-      - "8888:8888"
-    command: ["flower", "--broker=redis://airflow-redis:6379/0", "--broker_api=redis://localhost:6379/0", "--port=8888"]
 
 
 volumes:
