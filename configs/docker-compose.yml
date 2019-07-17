@@ -31,6 +31,7 @@ services:
       - maria_data_data1:/usr/local/mariadb/columnstore/data1
       - maria_data_local:/usr/local/mariadb/columnstore/local
       - maria_data_mysql_db:/usr/local/mariadb/columnstore/mysql/db
+      - ../db_backup:/backup
     environment:
       - MARIADB_DATABASE=${DB_NAME}
       - MARIADB_USER=${DB_USER}
