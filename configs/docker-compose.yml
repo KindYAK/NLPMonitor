@@ -24,7 +24,6 @@ services:
     networks:
       - network
   db:
-    image: "mariadb/columnstore:1.2.3"
     expose:
       - 3306
     volumes:
@@ -32,13 +31,14 @@ services:
       - maria_data_data1:/usr/local/mariadb/columnstore/data1
       - maria_data_local:/usr/local/mariadb/columnstore/local
       - maria_data_mysql_db:/usr/local/mariadb/columnstore/mysql/db
+      - ../db_backup:/backup
     environment:
       - MARIADB_DATABASE=${DB_NAME}
       - MARIADB_USER=${DB_USER}
       - MARIADB_PASSWORD=${DB_PASSWORD}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
-      - MARIADB_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
-      - MARIADB_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
+      - MARIADB_CS_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
+      - MARIADB_CS_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
     networks:
       - network
   elasticsearch:

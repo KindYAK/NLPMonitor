@@ -8,4 +8,5 @@ __pycache__
 .env
 web/media_root/
 web/static_root/
+db_backup
 .python-version

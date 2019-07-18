@@ -1,5 +1,5 @@
 #!/bin/sh
 exec 2>&1
-(mkdir -p /var/lock/subsys && touch /var/lock/subsys/columnstore) 
+(mkdir -p /var/lock/subsys && touch /var/lock/subsys/columnstore)
 rm -f /var/lock/subsys/mysql-Columnstore
 exec /usr/local/mariadb/columnstore/bin/ProcMon > /dev/null
