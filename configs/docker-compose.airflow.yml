@@ -70,6 +70,10 @@ services:
       - AIRFLOW_EMAIL=${AIRFLOW_EMAIL}
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
+      - AIRFLOW__SMTP__SMTP_HOST=${AIRFLOW_SMTP_HOST}
+      - AIRFLOW__SMTP__SMTP_PORT=${AIRFLOW_SMTP_PORT}
+      - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW_SMTP_USER}
+      - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
     ports:
       - '8001:8001'
     volumes:
