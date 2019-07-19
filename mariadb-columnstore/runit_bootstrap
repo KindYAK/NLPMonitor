@@ -1,4 +1,0 @@
-#!/bin/bash
-export > /etc/envvars
-/usr/sbin/dbinit &
-exec /usr/sbin/runsvdir-start

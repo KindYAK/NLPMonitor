@@ -85,12 +85,12 @@ LOGIN_REDIRECT_URL = "/"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv('DB_NAME', 'nlpmonitor'),
         'USER': os.getenv('DB_USER', 'nlpmonitor'),
         'PASSWORD': os.getenv('DB_PASSWORD', '32193219'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', 3306),
+        'PORT': os.getenv('DB_PORT', 5432),
     }
 }
 

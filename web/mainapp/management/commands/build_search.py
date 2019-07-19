@@ -34,7 +34,7 @@ class Command(BaseCommand):
         failed = 0
         qs = Document.objects.all()
         print("Start build")
-        for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENTS, chunk_size=self.batch_size, raise_on_error=False):
+        for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENTS, chunk_size=self.batch_size, raise_on_error=True, max_retries=10):
             if ok:
                 success += 1
             else:

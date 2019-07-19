@@ -24,21 +24,16 @@ services:
     networks:
       - network
   db:
+    image: "postgres:11.4"
     expose:
-      - 3306
+      - 5432
     volumes:
-      - maria_data_etc:/usr/local/mariadb/columnstore/etc
-      - maria_data_data1:/usr/local/mariadb/columnstore/data1
-      - maria_data_local:/usr/local/mariadb/columnstore/local
-      - maria_data_mysql_db:/usr/local/mariadb/columnstore/mysql/db
+      - pgdata:/var/lib/postgresql/data
       - ../db_backup:/backup
     environment:
-      - MARIADB_DATABASE=${DB_NAME}
-      - MARIADB_USER=${DB_USER}
-      - MARIADB_PASSWORD=${DB_PASSWORD}
-      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
-      - MARIADB_CS_NUM_BLOCKS_PCT=${MARIADB_NUM_BLOCKS_PCT}
-      - MARIADB_CS_TOTAL_UM_MEMORY=${MARIADB_TOTAL_UM_MEMORY}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
       - network
   elasticsearch:
@@ -74,13 +69,7 @@ services:
       - network
 
 volumes:
-  maria_data_etc:
-    driver: local
-  maria_data_data1:
-    driver: local
-  maria_data_local:
-    driver: local
-  maria_data_mysql_db:
+  pgdata:
     driver: local
   elasticsearch_data:
     driver: local

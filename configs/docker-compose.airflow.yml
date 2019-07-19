@@ -74,12 +74,12 @@ services:
       - '8001:8001'
     volumes:
       - airflow:/bitnami
+      - ../dags:/opt/bitnami/airflow/dags
     networks:
       - network
     depends_on:
       - airflow-redis
       - airflow-postgresql
-
 
 volumes:
   airflow:

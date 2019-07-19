@@ -42,7 +42,10 @@ class Document(es.Document):
         self.text = model_obj.text
         self.html = model_obj.html
         if model_obj.links:
-            self.links = json.loads(model_obj.links)
+            try:
+                self.links = json.loads(model_obj.links)
+            except json.JSONDecodeError:
+                self.links = model_obj.links
         self.url = model_obj.url
 
         self.datetime = model_obj.datetime
