@@ -19,7 +19,7 @@ class Command(BaseCommand):
             corpus = Corpus.objects.create(name="main")
         chunksize = 50000
         db_chunksize = 10000
-        dfs = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), index_col=0, chunksize=chunksize)
+        dfs = pd.read_csv(os.path.join(MEDIA_ROOT, '1.csv'), index_col=0, chunksize=chunksize, skiprows=range(1, 1500000))
         documents = []
         for i, df in enumerate(dfs, start=1):
             for index, row in df.iterrows():
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                                     datetime=date,
                                     text=row['text'] if type(row['text']) == str else None,
                                     html=row['html'] if type(row['html']) == str else None,
-                                    title=row['title'] if type(row['title']) == str else None,
+                                    title=row['title'][:Document._meta.get_field('title').max_length] if type(row['title']) == str else None,
                                     url=row['url'] if type(row['url']) == str else None,
                                     links=row['links'] if type(row['links']) == str else None,
                                     num_comments=int(row['num_coms']) if row['num_coms'] and not math.isnan(row['num_coms']) else None,

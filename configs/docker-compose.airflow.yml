@@ -2,7 +2,7 @@ version: '3'
 
 services:
   airflow-postgresql:
-    image: 'bitnami/postgresql:11.4.0-r21'
+    image: 'bitnami/postgresql:11.4.0'
     environment:
       - POSTGRESQL_DATABASE=${AIRFLOW_DB_NAME}
       - POSTGRESQL_USERNAME=${AIRFLOW_DB_USER}
@@ -12,7 +12,7 @@ services:
     networks:
       - network
   airflow-redis:
-    image: 'bitnami/redis:5.0.5-r63'
+    image: 'bitnami/redis:5.0.5'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     volumes:
@@ -20,7 +20,7 @@ services:
     networks:
       - network
   airflow-worker:
-    image: "bitnami/airflow-worker:1.10.3-r72"
+    image: "bitnami/airflow-worker:1.10.3"
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -32,13 +32,14 @@ services:
       - REDIS_HOST=airflow-redis
     volumes:
       - airflow:/bitnami
+      - ../dags:/opt/bitnami/airflow/dags
     networks:
       - network
     depends_on:
       - airflow-redis
       - airflow-postgresql
   airflow-scheduler:
-    image: "bitnami/airflow-scheduler:1.10.3-r73"
+    image: "bitnami/airflow-scheduler:1.10.3"
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -51,13 +52,14 @@ services:
       - REDIS_HOST=airflow-redis
     volumes:
       - airflow:/bitnami
+      - ../dags:/opt/bitnami/airflow/dags
     networks:
       - network
     depends_on:
       - airflow-redis
       - airflow-postgresql
   airflow:
-    image: "bitnami/airflow:1.10.3-r63"
+    image: "bitnami/airflow:1.10.3"
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -70,6 +72,10 @@ services:
       - AIRFLOW_EMAIL=${AIRFLOW_EMAIL}
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
+      - AIRFLOW__SMTP__SMTP_HOST=${AIRFLOW_SMTP_HOST}
+      - AIRFLOW__SMTP__SMTP_PORT=${AIRFLOW_SMTP_PORT}
+      - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW_SMTP_USER}
+      - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
     ports:
       - '8001:8001'
     volumes:
