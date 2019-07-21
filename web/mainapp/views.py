@@ -18,7 +18,7 @@ class SearchView(TemplateView):
         results = execute_search(search_request)
         context['documents'] = [{
             "ID": document['source']['id'],
-            "datetime": document['source']['datetime'],
+            "datetime": document['source']['datetime'] if 'datetime' in document['source'] else "",
             "title": document['source']['title'],
             "source": document['source']['source'],
             "score": str(document['score']).replace(",", "."),

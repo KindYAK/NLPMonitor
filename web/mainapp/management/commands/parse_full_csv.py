@@ -59,7 +59,7 @@ class Command(BaseCommand):
                                     datetime=date,
                                     text=row['text'] if type(row['text']) == str else None,
                                     html=row['html'] if type(row['html']) == str else None,
-                                    title=row['title'] if type(row['title']) == str else None,
+                                    title=row['title'][:Document._meta.get_field('title').max_length] if type(row['title']) == str else None,
                                     url=row['url'] if type(row['url']) == str else None,
                                     links=row['links'] if type(row['links']) == str else None,
                                     num_comments=int(row['num_coms']) if row['num_coms'] and not math.isnan(row['num_coms']) else None,

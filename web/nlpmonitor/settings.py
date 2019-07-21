@@ -85,12 +85,12 @@ LOGIN_REDIRECT_URL = "/"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv('DB_NAME', 'nlpmonitor'),
         'USER': os.getenv('DB_USER', 'nlpmonitor'),
         'PASSWORD': os.getenv('DB_PASSWORD', '32193219'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', 3306),
+        'PORT': os.getenv('DB_PORT', 5432),
     }
 }
 
@@ -141,17 +141,8 @@ ES_INDEX_DASHOBARD = 'dashboard'
 ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
-from elasticsearch import Elasticsearch, Urllib3HttpConnection
-ES_CLIENT = Elasticsearch(
-    hosts=[
-        {'host': ES_HOST},
-        {'port': ES_PORT}
-    ],
-    connection_class=Urllib3HttpConnection,
-    timeout=60,
-    max_retries=100,
-    retry_on_timeout=True
-)
+from elasticsearch import Elasticsearch
+ES_CLIENT = Elasticsearch([ES_HOST])
 
 if not DEBUG:
     import sentry_sdk

@@ -1,3 +1,0 @@
-#!/bin/sh
-rm -rf /run/log/journal/*
-/usr/lib/systemd/systemd-journald 2>&1

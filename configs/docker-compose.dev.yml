@@ -13,10 +13,6 @@ services:
       - "8000:8000"
     tty: true
     stdin_open: true
-  db:
-    build:
-      context: ../mariadb-columnstore
-      dockerfile: Dockerfile
   nginx:
     volumes:
       - ./nginx-app-dev.conf:/etc/nginx/conf.d/app.conf

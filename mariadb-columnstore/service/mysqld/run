@@ -1,3 +1,0 @@
-#!/bin/sh
-sleep 30
-exec /usr/local/mariadb/columnstore/mysql/bin/mysqld --user=root

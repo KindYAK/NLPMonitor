@@ -1,3 +1,0 @@
-#!/bin/sh
-MCS_DIR=/usr/local/mariadb/columnstore
-$MCS_DIR/mysql/bin/mysql --defaults-extra-file=$MCS_DIR/mysql/my.cnf "$@"
