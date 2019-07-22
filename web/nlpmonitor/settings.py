@@ -141,17 +141,8 @@ ES_INDEX_DASHOBARD = 'dashboard'
 ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
-from elasticsearch import Elasticsearch, Urllib3HttpConnection
-ES_CLIENT = Elasticsearch(
-    hosts=[
-        {'host': ES_HOST},
-        {'port': ES_PORT}
-    ],
-    connection_class=Urllib3HttpConnection,
-    timeout=60,
-    max_retries=100,
-    retry_on_timeout=True
-)
+from elasticsearch import Elasticsearch
+ES_CLIENT = Elasticsearch([ES_HOST])
 
 if not DEBUG:
     import sentry_sdk
