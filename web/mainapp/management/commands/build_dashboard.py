@@ -11,8 +11,6 @@ from mainapp.services import batch_qs, date_generator
 class Command(BaseCommand):
     def handle(self, *args, **options):
         self.tag_batch_size = 10000
-        # index = es.Index(ES_INDEX_DOCUMENTS, using=ES_CLIENT)
-        # index.delete(ignore=404)
         Dashboard.init()
         for dashboard_type in list(filter(lambda x: x['filtering'] == FILTERING_TYPE_BY_TAG, DASHBOARD_TYPES)):
             self.build_dashboard_by_tag(dashboard_type)
@@ -54,10 +52,10 @@ class Command(BaseCommand):
         for corpus in Corpus.objects.all():
             for tags in batch_qs(Tag.objects.filter(corpus=corpus), batch_size=self.tag_batch_size):
                 for tag in tags:
-                    ds = ModelDocument.objects.filter(tags=tag)
+                    ds = ModelDocument.objects.filter(tags=tag).exclude(datetime=None)
                     self.create_dashboard(ds, dashboard_type, corpus, tag)
 
     def build_dashboard_overall(self, dashboard_type):
         for corpus in Corpus.objects.all():
-            ds = ModelDocument.objects.filter(source__corpus=corpus)
+            ds = ModelDocument.objects.filter(source__corpus=corpus).exclude(datetime=None)
             self.create_dashboard(ds, dashboard_type, corpus)

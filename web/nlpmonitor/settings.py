@@ -142,7 +142,15 @@ ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
 from elasticsearch import Elasticsearch
-ES_CLIENT = Elasticsearch([ES_HOST])
+ES_CLIENT = Elasticsearch(
+    hosts=[
+        {'host': ES_HOST},
+        {'port': ES_PORT}
+    ],
+    timeout=60,
+    max_retries=100,
+    retry_on_timeout=True
+)
 
 if not DEBUG:
     import sentry_sdk
