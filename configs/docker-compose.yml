@@ -12,6 +12,7 @@ services:
       - elasticsearch
     networks:
       - network
+    restart: always
   nginx:
     image: "nginx:1.17.0"
     ports:
@@ -23,6 +24,7 @@ services:
       - web
     networks:
       - network
+    restart: always
   db:
     image: "postgres:11.4"
     expose:
@@ -38,6 +40,7 @@ services:
       - PGPASSWORD=${DB_PASSWORD}
     networks:
       - network
+    restart: always
   elasticsearch:
     image: "elasticsearch:7.1.1"
     ports:
@@ -53,6 +56,7 @@ services:
       - ${ELASTIC_JAVA_OPTIONS}
     networks:
       - network
+    restart: always
   kibana:
     image: "kibana:7.1.1"
     ports:
@@ -65,10 +69,12 @@ services:
       - elasticsearch
     networks:
       - network
+    restart: always
   redis:
     image: "redis:5.0.5"
     networks:
       - network
+    restart: always
 
 volumes:
   pgdata:

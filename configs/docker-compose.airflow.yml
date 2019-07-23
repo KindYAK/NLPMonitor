@@ -11,6 +11,7 @@ services:
       - airflow:/bitnami/postgresql
     networks:
       - network
+    restart: always
   airflow-redis:
     image: 'bitnami/redis:5.0.5'
     environment:
@@ -19,6 +20,7 @@ services:
       - airflow:/bitnami
     networks:
       - network
+    restart: always
   airflow-worker:
     image: "bitnami/airflow-worker:1.10.3"
     environment:
@@ -38,6 +40,7 @@ services:
     depends_on:
       - airflow-redis
       - airflow-postgresql
+    restart: always
   airflow-scheduler:
     image: "bitnami/airflow-scheduler:1.10.3"
     environment:
@@ -58,6 +61,7 @@ services:
     depends_on:
       - airflow-redis
       - airflow-postgresql
+    restart: always
   airflow:
     image: "bitnami/airflow:1.10.3"
     environment:
@@ -86,6 +90,7 @@ services:
     depends_on:
       - airflow-redis
       - airflow-postgresql
+    restart: always
 
 volumes:
   airflow:
