@@ -38,14 +38,21 @@ class Command(BaseCommand):
                                        is_ready=False,
                                        tag=tag.name if tag else None
                                        )
-        for date in date_generator(qs.earliest('datetime').datetime.date(), qs.latest('datetime').datetime.date()):
+        not_null_value_exists = False
+        for date in date_generator(max(qs.earliest('datetime').datetime.date(2002, 6, 1)), qs.latest('datetime').datetime.date()):
             if dashboard_type['value'] == VALUE_TYPE_COUNT:
                 value = qs.filter(datetime__contains=date).count()
             elif dashboard_type['value'] == VALUE_TYPE_SUM:
                 value = qs.filter(datetime__contains=date).aggregate(Sum(dashboard_type['field']))[f"{dashboard_type['field']}__sum"]
             else:
                 raise Exception("Value type not implemented")
+            if not value:
+                value = 0
+            else:
+                not_null_value_exists = True
             dashboard_document.add_value(value, date)
+        if not not_null_value_exists:
+            return
         dashboard_document.datetime_generated = timezone.now()
         dashboard_document.is_ready = True
         self.delete_ready_dashboards(dashboard_type, tag.name if tag else None)
