@@ -1,6 +1,8 @@
 import json
 
 import elasticsearch_dsl as es
+from elasticsearch_dsl import Index
+
 from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_INDEX_DASHOBARD, ES_CLIENT
 from mainapp.models import Document as ModelDocument
 from django.utils import timezone
@@ -71,6 +73,13 @@ class DashboardValue(es.InnerDoc):
     datetime = es.Date()
 
 
+dashboard_index = Index(ES_INDEX_DASHOBARD, ES_CLIENT)
+dashboard_index.settings(
+    **{"index.mapping.nested_objects.limit": 50000}
+)
+
+
+@dashboard_index.document
 class Dashboard(es.Document):
     corpus = es.Keyword()
     type = es.Keyword()
@@ -85,7 +94,3 @@ class Dashboard(es.Document):
 
     def add_value(self, value, datetime):
         self.values.append(DashboardValue(value=value, datetime=datetime))
-
-    class Index:
-        name = ES_INDEX_DASHOBARD
-        using = ES_CLIENT

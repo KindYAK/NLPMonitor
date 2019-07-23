@@ -159,3 +159,7 @@ if not DEBUG:
         dsn="https://1bb6ad46936e48328ff25e3e37b7ea94@sentry.io/1505657",
         integrations=[DjangoIntegration()]
     )
+
+
+MIN_DOCS_PER_TAG = 1000
+MIN_DOCS_PER_AUTHOR = 100
