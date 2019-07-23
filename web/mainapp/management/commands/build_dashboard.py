@@ -41,7 +41,7 @@ class Command(BaseCommand):
                                        tag=tag.name if tag else None
                                        )
         not_null_value_exists = False
-        for date in date_generator(max(qs.earliest('datetime').datetime.date, datetime.date(2002, 6, 1)), qs.latest('datetime').datetime.date()):
+        for date in date_generator(max(qs.earliest('datetime').datetime.date(), datetime.date(2002, 6, 1)), qs.latest('datetime').datetime.date()):
             if dashboard_type['value'] == VALUE_TYPE_COUNT:
                 value = qs.filter(datetime__contains=date).count()
             elif dashboard_type['value'] == VALUE_TYPE_SUM:
