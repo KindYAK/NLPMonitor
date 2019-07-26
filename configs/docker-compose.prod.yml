@@ -7,6 +7,7 @@ services:
     volumes:
       - static_root:/opt/app/static_root
       - media_root:/opt/app/media_root
+      - django_root:/opt/app
   nginx:
     volumes:
       - ./nginx-app-prod.conf:/etc/nginx/conf.d/app.conf

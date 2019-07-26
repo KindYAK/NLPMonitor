@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  airflow-worker:
+    build:
+      context: ../airflow-worker
+      dockerfile: Dockerfile
+    volumes:
+      - airflow:/bitnami
+      - ../dags:/opt/bitnami/airflow/dags
+      - ./airflow_plugins:/opt/bitnami/airflow/plugins
+      - ../web:/django

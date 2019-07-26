@@ -22,7 +22,8 @@ services:
       - network
     restart: always
   airflow-worker:
-    image: "bitnami/airflow-worker:1.10.3"
+    env_file:
+      - ../.env
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -32,9 +33,6 @@ services:
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
-    volumes:
-      - airflow:/bitnami
-      - ../dags:/opt/bitnami/airflow/dags
     networks:
       - network
     depends_on:
@@ -56,6 +54,7 @@ services:
     volumes:
       - airflow:/bitnami
       - ../dags:/opt/bitnami/airflow/dags
+      - ./airflow_plugins:/opt/bitnami/airflow/plugins
     networks:
       - network
     depends_on:
@@ -85,6 +84,7 @@ services:
     volumes:
       - airflow:/bitnami
       - ../dags:/opt/bitnami/airflow/dags
+      - ./airflow_plugins:/opt/bitnami/airflow/plugins
     networks:
       - network
     depends_on:
