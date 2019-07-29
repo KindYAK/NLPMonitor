@@ -77,6 +77,8 @@ services:
     restart: always
 
 volumes:
+  django_root:
+    driver: local
   pgdata:
     driver: local
   elasticsearch_data:
