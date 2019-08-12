@@ -22,6 +22,11 @@ services:
       - network
     restart: always
   airflow-worker:
+    volumes:
+      - airflow:/bitnami
+      - ../dags:/opt/bitnami/airflow/dags
+      - ./airflow_plugins:/opt/bitnami/airflow/plugins
+      - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
     env_file:
       - ../.env
     environment:
