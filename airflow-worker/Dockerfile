@@ -41,8 +41,8 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
     REDIS_PORT_NUMBER="6379" \
     REDIS_USER=""
 
-COPY requirements_base.txt /requirements_base.txt
-RUN pip install -r /requirements_base.txt
+COPY requirements-base.txt /requirements-base.txt
+RUN pip install -r /requirements-base.txt
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
