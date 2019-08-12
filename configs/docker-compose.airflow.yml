@@ -33,6 +33,7 @@ services:
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
+      - SENTRY_DSN=${SENTRY_DSN}
     networks:
       - network
     depends_on:
