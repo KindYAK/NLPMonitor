@@ -156,7 +156,7 @@ if not DEBUG:
     from sentry_sdk.integrations.django import DjangoIntegration
 
     sentry_sdk.init(
-        dsn=os.getenv('SENTRY_DSN'),
+        dsn=os.getenv('SENTRY_DSN_DJANGO'),
         integrations=[DjangoIntegration()]
     )
 

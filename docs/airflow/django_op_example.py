@@ -24,6 +24,7 @@ default_args = {
 
 dag = DAG('django_op_example', default_args=default_args, schedule_interval=timedelta(days=1))
 
+
 def test():
     from mainapp.models import Corpus
     import random
