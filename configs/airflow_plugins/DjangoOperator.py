@@ -19,7 +19,7 @@ class DjangoOperator(PythonOperator):
         setup_django_for_airflow()
 
 
-class AirflowTestPlugin(AirflowPlugin):
+class DjangoPlugin(AirflowPlugin):
     name = "django"
     operators = [DjangoOperator]
     # A list of class(es) derived from BaseHook
