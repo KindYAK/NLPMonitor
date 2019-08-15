@@ -44,6 +44,9 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
 COPY requirements-base.txt /requirements-base.txt
 RUN pip install -r /requirements-base.txt
 
+COPY requirements-base.txt /requirements-tf.txt
+RUN pip install -r /requirements-tf.txt
+
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
