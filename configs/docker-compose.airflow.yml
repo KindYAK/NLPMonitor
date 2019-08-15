@@ -24,7 +24,7 @@ services:
   airflow-worker:
     volumes:
       - airflow:/bitnami
-      - ../dags:/opt/bitnami/airflow/dags
+      - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
       - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
     env_file:
@@ -59,7 +59,7 @@ services:
       - REDIS_HOST=airflow-redis
     volumes:
       - airflow:/bitnami
-      - ../dags:/opt/bitnami/airflow/dags
+      - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
     networks:
       - network
@@ -89,7 +89,7 @@ services:
       - '8001:8001'
     volumes:
       - airflow:/bitnami
-      - ../dags:/opt/bitnami/airflow/dags
+      - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
     networks:
       - network
