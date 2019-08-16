@@ -30,4 +30,3 @@ if [ $EUID -eq 0 ]; then
 else
     exec bash -c "${START_COMMAND}"
 fi
-
