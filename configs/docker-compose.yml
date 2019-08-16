@@ -40,6 +40,7 @@ services:
       - PGPASSWORD=${DB_PASSWORD}
     networks:
       - network
+    command: postgres -c 'max_connections=9s00'
     restart: always
   elasticsearch:
     image: "elasticsearch:7.1.1"
