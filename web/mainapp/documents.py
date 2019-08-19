@@ -3,7 +3,8 @@ import json
 import elasticsearch_dsl as es
 from elasticsearch_dsl import Index
 
-from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_INDEX_DASHOBARD, ES_CLIENT
+from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, ES_INDEX_TOPIC_MODELLING, \
+                                ES_CLIENT
 from mainapp.models import Document as ModelDocument
 from django.utils import timezone
 
@@ -64,7 +65,7 @@ class Document(es.Document):
         self.categories = [category.name for category in model_obj.categories.all()]
 
     class Index:
-        name = ES_INDEX_DOCUMENTS
+        name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
 
 
@@ -83,7 +84,7 @@ dashboard_index.settings(
 class Dashboard(es.Document):
     corpus = es.Keyword()
     type = es.Keyword()
-    granularity = es.Keyword() # 1d / 1h
+    granularity = es.Keyword()  # 1d / 1h
     datetime_started = es.Date()
     datetime_generated = es.Date()
     is_ready = es.Boolean()
@@ -106,10 +107,14 @@ class EmbeddingIndex(es.Document):
     datetime_created = es.Date()
     datetime_finished = es.Date()
 
-    by_unit = es.Keyword() # Token/Word/Sentence/Text
+    by_unit = es.Keyword()  # Token/Word/Sentence/Text
     algorithm = es.Keyword()
     pooling = es.Keyword()
     meta_parameters = es.Object()
+
+    class Index:
+        name = ES_INDEX_EMBEDDING
+        using = ES_CLIENT
 
 
 # List of all TMs in the storage
@@ -127,6 +132,10 @@ class TopicModellingIndex(es.Document):
     hierarchical = es.Boolean()
     meta_parameters = es.Object()
 
+    class Index:
+        name = ES_INDEX_TOPIC_MODELLING
+        using = ES_CLIENT
+
 
 # List of all TMs in the storage
 class ClassifierIndex(es.Document):
@@ -140,5 +149,9 @@ class ClassifierIndex(es.Document):
 
     algorithm = es.Keyword()
     target = es.Keyword()
-    quality = es.Object() # Different quality metrics - F1, ROC, etc.
+    quality = es.Object()  # Different quality metrics - F1, ROC, etc.
     meta_parameters = es.Object()
+
+    class Index:
+        name = ES_INDEX_CLASSIFIER
+        using = ES_CLIENT

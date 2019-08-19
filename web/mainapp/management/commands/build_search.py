@@ -5,7 +5,7 @@ from mainapp.models import *
 from mainapp.documents import Document as ESDocument
 from mainapp.services import batch_qs
 import elasticsearch_dsl as es
-from nlpmonitor.settings import ES_INDEX_DOCUMENTS, ES_CLIENT
+from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_CLIENT
 
 
 class Command(BaseCommand):
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         self.batch_size = options['batch_size']
         self.client = ES_CLIENT
         print("Deleting index")
-        index = es.Index(ES_INDEX_DOCUMENTS, using=self.client)
+        index = es.Index(ES_INDEX_DOCUMENT, using=self.client)
         index.delete(ignore=404)
         print("Creating index")
         ESDocument.init()
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         failed = 0
         qs = Document.objects.all()
         print("Start build")
-        for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENTS, chunk_size=self.batch_size, raise_on_error=False, max_retries=10):
+        for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT, chunk_size=self.batch_size, raise_on_error=False, max_retries=10):
             if ok:
                 success += 1
             else:
