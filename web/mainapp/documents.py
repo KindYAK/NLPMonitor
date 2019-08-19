@@ -94,3 +94,43 @@ class Dashboard(es.Document):
 
     def add_value(self, value, datetime):
         self.values.append(DashboardValue(value=value, datetime=datetime))
+
+
+# List of all Embeddings in the storage
+class EmbeddingIndex(es.Document):
+    corpus = es.Keyword()
+    name = es.Keyword()
+    description = es.Text()
+    datetime_created = es.Date()
+    datetime_finished = es.Date()
+
+    by_unit = es.Keyword() # Token/Word/Sentence/Text
+    algorithm = es.Keyword()
+    pooling = es.Keyword()
+    meta_parameters = es.Object()
+
+
+# List of all TMs in the storage
+class TopicModellingIndex(es.Document):
+    name = es.Keyword()
+    description = es.Text()
+    datetime_created = es.Date()
+    datetime_finished = es.Date()
+
+    algorithm = es.Keyword()
+    number_of_topics = es.Integer()
+    hierarchical = es.Boolean()
+    meta_parameters = es.Object()
+
+
+# List of all TMs in the storage
+class ClassifierIndex(es.Document):
+    name = es.Keyword()
+    description = es.Text()
+    datetime_created = es.Date()
+    datetime_finished = es.Date()
+
+    algorithm = es.Keyword()
+    target = es.Keyword()
+    quality = es.Object() # Different quality metrics - F1, ROC, etc.
+    meta_parameters = es.Object()
