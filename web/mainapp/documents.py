@@ -99,6 +99,7 @@ class Dashboard(es.Document):
 # List of all Embeddings in the storage
 class EmbeddingIndex(es.Document):
     corpus = es.Keyword()
+    is_ready = es.Boolean()
     name = es.Keyword()
     description = es.Text()
     datetime_created = es.Date()
@@ -112,6 +113,8 @@ class EmbeddingIndex(es.Document):
 
 # List of all TMs in the storage
 class TopicModellingIndex(es.Document):
+    corpus = es.Keyword()
+    is_ready = es.Boolean()
     name = es.Keyword()
     description = es.Text()
     datetime_created = es.Date()
@@ -125,6 +128,8 @@ class TopicModellingIndex(es.Document):
 
 # List of all TMs in the storage
 class ClassifierIndex(es.Document):
+    corpus = es.Keyword()
+    is_ready = es.Boolean()
     name = es.Keyword()
     description = es.Text()
     datetime_created = es.Date()
