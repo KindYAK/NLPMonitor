@@ -44,7 +44,8 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
 COPY requirements-base.txt /requirements-base.txt
 RUN pip install -r /requirements-base.txt
 
-RUN pip install tensorflow>=1.11.0
+RUN pip install --upgrade --ignore-installed setuptools
+RUN pip install --ignore-installed tensorflow>=1.11.0
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
