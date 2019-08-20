@@ -41,10 +41,12 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
     REDIS_PORT_NUMBER="6379" \
     REDIS_USER=""
 
+RUN pip install --upgrade pip
+RUN pip install --upgrade --ignore-installed setuptools
+
 COPY requirements-base.txt /requirements-base.txt
 RUN pip install -r /requirements-base.txt
 
-RUN pip install --upgrade --ignore-installed setuptools
 RUN pip install --ignore-installed tensorflow>=1.11.0
 
 COPY requirements.txt /requirements.txt
