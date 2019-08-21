@@ -7,3 +7,4 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../web:/django
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
