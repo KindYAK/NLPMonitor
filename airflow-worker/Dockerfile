@@ -48,6 +48,7 @@ COPY requirements-base.txt /requirements-base.txt
 RUN pip install -r /requirements-base.txt
 
 RUN pip install --ignore-installed tensorflow>=1.11.0
+RUN python -m textblob.download_corpora
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
