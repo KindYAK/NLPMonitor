@@ -24,6 +24,8 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'datetime', 'source', 'url', )
     list_filter = ('source', )
     search_fields = ('title', 'author__name', 'source__name', 'url', )
+    fields = ('title', 'text', 'tags', 'categories', )
+    raw_id_fields = ('tags', 'categories', )
 
 
 class TagAdmin(admin.ModelAdmin):
