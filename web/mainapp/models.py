@@ -69,6 +69,24 @@ class Document(models.Model):
 
     unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность source, datetime, title")
 
+    def corpus_name(self):
+        return getattr(self.source.corpus, 'name', '')
+
+    def source_name(self):
+        return getattr(self.source, 'name', '')
+
+    def author_name(self):
+        return getattr(self.author, 'name', '')
+
+    def tags_name(self):
+        return self.tags.all().values_list(('name'), flat=True)
+
+    def categories_name(self):
+        return self.categories.all().values_list(('name'), flat=True)
+
+    def topics_name(self):
+        return self.topics.all().values_list(('name'), flat=True)
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()
         hash.update(str(self.source.id).encode())

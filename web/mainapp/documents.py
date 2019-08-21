@@ -1,12 +1,15 @@
 import json
 
 import elasticsearch_dsl as es
+import django_elasticsearch_dsl as ded
 from elasticsearch_dsl import Index
 
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, ES_INDEX_TOPIC_MODELLING, \
                                 ES_CLIENT
-from mainapp.models import Document as ModelDocument
+from mainapp.models import (
+    Document as ModelDocument, Source, Author, Tag, Category, Topic)
 from django.utils import timezone
+from django_elasticsearch_dsl.registries import registry
 
 
 class Document(es.Document):
@@ -155,3 +158,45 @@ class ClassifierIndex(es.Document):
     class Index:
         name = ES_INDEX_CLASSIFIER
         using = ES_CLIENT
+
+
+# Alternative to Document
+@registry.register_document
+class DocumentInElastic(ded.Document):
+    corpus = ded.fields.TextField(attr='corpus_name')
+    source = ded.fields.TextField(attr='source_name')
+    author = ded.fields.TextField(attr='author_name')
+    tags = ded.fields.ListField(
+        ded.fields.TextField(attr='tags_name')
+    )
+    categories = ded.fields.ListField(
+        ded.fields.TextField(attr='categories_name')
+    )
+    topics = ded.fields.ListField(
+        ded.fields.TextField(attr='topics_name')
+    )
+
+    class Index:
+        name = 'mainapp_document'
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0}
+
+    class Django:
+        model = ModelDocument
+        fields = [
+            'title',
+            'text',
+            'html',
+            'links',
+            'url',
+            'datetime',
+            'datetime_created',
+            'num_views',
+            'num_shares',
+            'num_comments',
+            'num_likes',
+            'unique_hash',
+        ]
+        related_models = [Source, Author, Tag, Category, Topic]
+
+        queryset_pagination = 1000

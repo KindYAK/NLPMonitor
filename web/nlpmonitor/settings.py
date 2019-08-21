@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'preprocessing',
     'topicmodelling',
     'evaluation',
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -154,6 +155,13 @@ ES_CLIENT = Elasticsearch(
     max_retries=100,
     retry_on_timeout=True
 )
+
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}
+
 
 if not DEBUG:
     import sentry_sdk
