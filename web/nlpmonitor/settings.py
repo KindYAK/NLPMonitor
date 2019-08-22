@@ -149,7 +149,7 @@ from elasticsearch import Elasticsearch
 ES_CLIENT = Elasticsearch(
     hosts=[
         {'host': ES_HOST}
-    ],
+    ],л
     timeout=60,
     max_retries=100,
     retry_on_timeout=True
