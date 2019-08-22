@@ -5,3 +5,4 @@ services:
     image: ${AIRFLOW_WORKER_IMAGE}
     volumes:
       - django_root:/django
+      - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg

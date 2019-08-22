@@ -1,0 +1,1 @@
+If index.max_result_window error occurs (maximum number of documents in one request), change index.max_result_windows in your index settings through Kibana (5601)
