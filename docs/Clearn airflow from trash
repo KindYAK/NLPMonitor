@@ -1,3 +1,0 @@
-1) Delete /opt/bitnami/airflow/venv/lib/python3.6/site-packages/airflow/example_dags/ (everything except __init__.py)
-2) airflow resetdb (y)
-3) airflow create_user -r Admin -u login -p password -l admin -f admin -e yakunin.k@mail.ru
