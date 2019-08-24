@@ -75,9 +75,9 @@ default_gpus=0
 default_hive_mapred_queue=
 
 [webserver]
-base_url=http://localhost:8080
+base_url=http://localhost:8001
 web_server_host=0.0.0.0
-web_server_port=8080
+web_server_port=8001
 web_server_ssl_cert=
 web_server_ssl_key=
 web_server_master_timeout=120
@@ -99,7 +99,7 @@ demo_mode=False
 log_fetch_timeout_sec=5
 hide_paused_dags_by_default=False
 page_size=100
-rbac=False
+rbac=True
 navbar_color=
 default_dag_run_display_number=25
 enable_proxy_fix=False

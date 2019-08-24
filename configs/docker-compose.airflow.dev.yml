@@ -16,3 +16,9 @@ services:
         reservations:
           cpus: '0.1'
           memory: 128M
+  airflow:
+    volumes:
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
+  airflow-scheduler:
+    volumes:
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
