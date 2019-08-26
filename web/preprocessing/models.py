@@ -13,7 +13,7 @@ class ProcessedCorpus(models.Model):
         ]
 
     corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
-    name = models.CharField(max_length=50, verbose_name="Название")
+    name = models.CharField(max_length=250, verbose_name="Название")
     description = models.TextField(verbose_name="Описание")
 
     def __str__(self):
