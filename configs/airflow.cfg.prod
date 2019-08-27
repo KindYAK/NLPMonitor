@@ -29,7 +29,7 @@ sql_alchemy_schema=
 parallelism=24
 dag_concurrency=8
 dags_are_paused_at_creation=True
-max_active_runs_per_dag=2
+max_active_runs_per_dag=4
 load_examples=False
 plugins_folder=/opt/bitnami/airflow/plugins
 fernet_key=LD2nT24yYyLD2okKJgbIJmiv-IsxkSkj0Rt7BO92mj4=
