@@ -43,7 +43,7 @@ services:
     command: postgres -c 'max_connections=9000'
     restart: always
   elasticsearch:
-    image: "elasticsearch:7.1.1"
+    image: "elasticsearch:7.3.1"
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -59,7 +59,7 @@ services:
       - network
     restart: always
   kibana:
-    image: "kibana:7.1.1"
+    image: "kibana:7.3.1"
     ports:
       - "5601:5601"
     environment:
