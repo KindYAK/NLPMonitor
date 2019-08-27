@@ -1,13 +1,30 @@
 import json
 
 import elasticsearch_dsl as es
-from elasticsearch_dsl import Index
+from elasticsearch_dsl import Index, MetaField
 
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, ES_INDEX_TOPIC_MODELLING, \
                                 ES_CLIENT
 from mainapp.models import Document as ModelDocument
 from django.utils import timezone
 
+
+DYNAMIC_TEMPLATES = [{
+    "not_indexed_long": {
+        "match_mapping_type": "long",
+        "mapping": {
+            "type": "long",
+            "index": False
+        }
+    }
+},{
+    "not_indexed_double": {
+    "match_mapping_type": "double",
+    "mapping": {
+        "type": "float",
+        "index": False
+    }
+}}]
 
 class Document(es.Document):
     id = es.Keyword()
@@ -67,6 +84,9 @@ class Document(es.Document):
     class Index:
         name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
+    
+    class Meta:
+        dynamic_templates = MetaField(DYNAMIC_TEMPLATES)
 
 
 class DashboardValue(es.InnerDoc):
