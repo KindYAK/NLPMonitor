@@ -1,1 +1,19 @@
 If index.max_result_window error occurs (maximum number of documents in one request), change index.max_result_window in your index settings through Kibana (5601)
+
+Q: I want to turn off index on certain fields
+A:
+1) You must specify this on mapping, as the default behavior of the elastic is to index as much as he can
+2) You must specify this it in `dynamic mapping`. When dynamic mapping is on creation time, you can easily modify it.
+Via type, field_name, path_name.
+Example:
+{
+    "not_indexed_long": {
+        "match_mapping_type": "long",
+        "mapping": {
+            "type": "long",
+            "index": False
+        }
+    }
+}  -> all long values would not index in elastic
+
+more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
