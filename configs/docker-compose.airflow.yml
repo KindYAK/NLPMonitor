@@ -2,15 +2,19 @@ version: '3'
 
 services:
   airflow-postgresql:
-    image: 'bitnami/postgresql:11.4.0'
-    environment:
-      - POSTGRESQL_DATABASE=${AIRFLOW_DB_NAME}
-      - POSTGRESQL_USERNAME=${AIRFLOW_DB_USER}
-      - POSTGRESQL_PASSWORD=${AIRFLOW_DB_PASSWORD}
+    image: "postgres:11.4"
+    expose:
+      - 5432
     volumes:
-      - airflow:/bitnami/postgresql
+      - airflow:/var/lib/postgresql
+    environment:
+      - POSTGRES_DB=${AIRFLOW_DB_NAME}
+      - POSTGRES_USER=${AIRFLOW_DB_USER}
+      - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - PGPASSWORD=${AIRFLOW_DB_PASSWORD}
     networks:
       - network
+    command: postgres -c 'max_connections=9000'
     restart: always
   airflow-redis:
     image: 'bitnami/redis:5.0.5'
