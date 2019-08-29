@@ -75,7 +75,7 @@ default_gpus=0
 default_hive_mapred_queue=
 
 [webserver]
-base_url=http://localhost:8001
+base_url=http://{hostname}:8001
 web_server_host=0.0.0.0
 web_server_port=8001
 web_server_ssl_cert=
