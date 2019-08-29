@@ -7,6 +7,8 @@ services:
       - 5432
     volumes:
       - airflow:/var/lib/postgresql
+      - ../db_airflow_backup:/backup
+      - ./db_backup.sh:/bin/db_backup.sh
     environment:
       - POSTGRES_DB=${AIRFLOW_DB_NAME}
       - POSTGRES_USER=${AIRFLOW_DB_USER}
