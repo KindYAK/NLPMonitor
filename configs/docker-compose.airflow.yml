@@ -6,7 +6,7 @@ services:
     expose:
       - 5432
     volumes:
-      - airflow-postgresql:/var/lib/postgresql
+      - airflow-postgresql:/bitnami/postgresql
       - ../db_airflow_backup:/backup
       - ./db_backup.sh:/bin/db_backup.sh
     environment:
