@@ -4,7 +4,7 @@ services:
   airflow-worker:
     image: ${AIRFLOW_WORKER_IMAGE}
     volumes:
-      - django_root:/django
+      - ../web:/django:ro
       - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg
     deploy:
       resources:
