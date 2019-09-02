@@ -34,8 +34,11 @@ services:
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
       - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
+      - ../logs/:/opt/bitnami/airflow/logs:rw
     env_file:
       - ../.env
+    expose:
+      - 8793
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -72,6 +75,7 @@ services:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
+      - ../logs/:/opt/bitnami/airflow/logs:rw
     networks:
       - network
     depends_on:
@@ -104,6 +108,7 @@ services:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
+      - ../logs/:/opt/bitnami/airflow/logs
     networks:
       - network
     depends_on:
