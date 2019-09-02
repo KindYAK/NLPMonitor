@@ -50,6 +50,9 @@ RUN pip install -r /requirements-base.txt
 RUN pip install --ignore-installed tensorflow>=1.11.0
 RUN python -m textblob.download_corpora
 
+COPY bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl /bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
+RUN pip install --ignore-installed /bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
+
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
