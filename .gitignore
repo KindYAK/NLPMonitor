@@ -15,3 +15,4 @@ web/static_root/
 db_backup
 stuff
 dags
+logs

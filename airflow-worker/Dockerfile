@@ -10,7 +10,7 @@ RUN install_packages libbsd0 libbz2-1.0 libc6 libcomerr2 libedit2 libffi6 libgcc
 RUN bitnami-pkg install python-3.6.9-0 --checksum a3303f1de534403d1c1286b3f16a8052d48a06dbb7bf1cf004c7bd9db1b57873
 RUN bitnami-pkg install postgresql-client-10.10.0-0 --checksum 1f7e0f81461e8ab2593f88f79a2eb618ee657647fcc971b4c150a7fd9c40433a
 RUN bitnami-pkg unpack airflow-worker-1.10.4-0 --checksum 47938018178d0f9d8e7247af951381150cf8c24abd69fb9943c7769ff2cfb3d9
-RUN install_packages python3-dev build-essential postgresql-server-dev-all libpq-dev gcc
+RUN install_packages python3-dev python3-setuptools build-essential postgresql-server-dev-all libpq-dev gcc libboost-all-dev wget git cmake
 
 COPY rootfs /
 ENV AIRFLOW_DATABASE_HOST="postgresql" \
@@ -40,7 +40,8 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
     REDIS_HOST="redis" \
     REDIS_PASSWORD="" \
     REDIS_PORT_NUMBER="6379" \
-    REDIS_USER=""
+    REDIS_USER="" \
+    ARTM_SHARED_LIBRARY=/bigartm/build/lib/libartm.so
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade --ignore-installed setuptools
@@ -51,8 +52,13 @@ RUN pip install -r /requirements-base.txt
 RUN pip install --ignore-installed tensorflow>=1.11.0
 RUN python -m textblob.download_corpora
 
-COPY bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl /bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
-RUN pip install --ignore-installed /bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
+RUN pip install --ignore-installed numpy scipy pandas protobuf==3.0.0 tqdm wheel
+RUN git clone --branch=stable https://github.com/bigartm/bigartm.git
+WORKDIR bigartm
+RUN mkdir build && cd build && cmake -DPYTHON=python3 .. && make && make install
+RUN pip install /bigartm/build/python/bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
+
+WORKDIR /
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
