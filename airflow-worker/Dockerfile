@@ -41,7 +41,7 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
     REDIS_PASSWORD="" \
     REDIS_PORT_NUMBER="6379" \
     REDIS_USER="" \
-    ARTM_SHARED_LIBRARY=/bigartm/build/lib/libartm.so
+    ARTM_SHARED_LIBRARY=/bigartm/libartm.so
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade --ignore-installed setuptools
@@ -52,13 +52,8 @@ RUN pip install -r /requirements-base.txt
 RUN pip install --ignore-installed tensorflow>=1.11.0
 RUN python -m textblob.download_corpora
 
-RUN pip install --ignore-installed numpy scipy pandas protobuf==3.0.0 tqdm wheel
-RUN git clone --branch=stable https://github.com/bigartm/bigartm.git
-WORKDIR bigartm
-RUN mkdir build && cd build && cmake -DPYTHON=python3 .. && make && make install
-RUN pip install /bigartm/build/python/bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
-
-WORKDIR /
+COPY bigartm /bigartm/
+RUN pip install /bigartm/bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
