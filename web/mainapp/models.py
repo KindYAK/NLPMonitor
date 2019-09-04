@@ -28,6 +28,30 @@ class Source(models.Model):
         return self.name
 
 
+class ScrapRules(models.Model):
+    class Meta:
+        verbose_name = "Правило скрапинга"
+        verbose_name_plural = "Правила скрапинга"
+        unique_together = (('source', 'type'), )
+
+    TYPES = (
+        (0, "title"),
+        (1, "text"),
+        (2, "author"),
+        (3, "date"),
+        (4, "tags"),
+        (5, "categories"),
+        (6, "num_views"),
+        (7, "num_likes"),
+        (8, "num_comments"),
+        (8, "num_shares"),
+    )
+
+    source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
+    type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип поля")
+    selector = models.CharField(max_length=500, verbose_name="CSS селектор")
+
+
 class Author(models.Model):
     class Meta:
         verbose_name = "Автор"

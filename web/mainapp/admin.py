@@ -44,6 +44,12 @@ class CommentAdmin(admin.ModelAdmin):
     search_fields = ('text', 'document__title', )
 
 
+class ScrapRulesAdmin(admin.ModelAdmin):
+    list_display = ('source', 'type', 'selector')
+    list_filter = ('source', 'type', )
+    search_fields = ('selector', )
+
+
 admin.site.register(Corpus, CorpusAdmin)
 admin.site.register(Source, SourceAdmin)
 admin.site.register(Author, AuthorAdmin)
@@ -51,3 +57,4 @@ admin.site.register(Document, DocumentAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(ScrapRules, ScrapRulesAdmin)
