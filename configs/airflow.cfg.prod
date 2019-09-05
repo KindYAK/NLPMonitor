@@ -119,7 +119,7 @@ smtp_mail_from=airflow@example.com
 
 [celery]
 celery_app_name=airflow.executors.celery_executor
-worker_concurrency=2
+worker_concurrency=1
 worker_log_server_port=8793
 broker_url=redis://:@airflow-redis:6379/1
 flower_host=0.0.0.0
