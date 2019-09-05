@@ -38,7 +38,7 @@ class ScrapRules(models.Model):
         (0, "title"),
         (1, "text"),
         (2, "author"),
-        (3, "date"),
+        (3, "datetime"),
         (4, "tags"),
         (5, "categories"),
         (6, "num_views"),

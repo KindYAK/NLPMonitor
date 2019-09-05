@@ -6,3 +6,4 @@ xlwt==1.3.0
 gensim==3.8.0
 scrapy==1.7.3
 bs4==0.0.1
+dateparser>=0.7.1
