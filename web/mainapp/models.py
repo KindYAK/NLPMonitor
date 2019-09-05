@@ -47,8 +47,6 @@ class ScrapRules(models.Model):
         (9, "num_shares"),
     )
 
-    TYPES
-
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип поля")
     selector = models.CharField(max_length=500, verbose_name="CSS селектор")
