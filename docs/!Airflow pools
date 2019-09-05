@@ -1,0 +1,5 @@
+In Airflow web GUI you have to cretate two pools
+long_tasks
+short_tasks
+
+There should be NO tasks assigned to other pools (including default_pool)
