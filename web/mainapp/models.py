@@ -44,8 +44,10 @@ class ScrapRules(models.Model):
         (6, "num_views"),
         (7, "num_likes"),
         (8, "num_comments"),
-        (8, "num_shares"),
+        (9, "num_shares"),
     )
+
+    TYPES
 
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип поля")
