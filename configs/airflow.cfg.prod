@@ -143,12 +143,12 @@ tls_cert=
 tls_key=
 
 [scheduler]
-job_heartbeat_sec=5
-scheduler_heartbeat_sec=5
+job_heartbeat_sec=15
+scheduler_heartbeat_sec=15
 run_duration=-1
 min_file_process_interval=0
 dag_dir_list_interval=300
-print_stats_interval=30
+print_stats_interval=60
 scheduler_health_check_threshold=30
 child_process_log_directory=/opt/bitnami/airflow/logs/scheduler
 scheduler_zombie_task_threshold=300
