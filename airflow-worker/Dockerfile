@@ -60,6 +60,7 @@ RUN pip install -r /requirements.txt
 
 EXPOSE 8793
 
+WORKDIR /opt/bitnami/airflow/dags/
 USER 1001
 ENTRYPOINT [ "/app-entrypoint.sh" ]
 CMD [ "/run.sh" ]
