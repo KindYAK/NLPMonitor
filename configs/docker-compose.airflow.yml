@@ -61,6 +61,9 @@ services:
     image: "scrapinghub/splash:3.3.1"
     expose:
       - 8050
+    networks:
+      - network
+    restart: always
   airflow-scheduler:
     image: "bitnami/airflow-scheduler:1.10.4"
     environment:
