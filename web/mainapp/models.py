@@ -70,6 +70,13 @@ class Document(models.Model):
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
 
+    TYPES = (
+        (0, "News"),
+        (1, "Interview"),
+        (2, "Article"),
+        (3, "Blogs/Opinions"),
+    )
+
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор")
     title = models.CharField(max_length=2500, verbose_name="Заголовок")
@@ -77,6 +84,7 @@ class Document(models.Model):
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
     url = models.CharField(max_length=1000, null=True, blank=True, verbose_name="URL")
+    type = models.SmallIntegerField(choices=TYPES, default=0, verbose_name="Тип публикации (в основном для Тенгри)")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
