@@ -14,11 +14,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.batch_size = options['batch_size']
-        self.start_from = 0
-        if "start_from" in options:
-            self.start_from = options['start_from']
+        self.from_id = 0
+        if "from_id" in options:
+            self.from_id = options['from_id']
+        self.to_id = None
+        if "to_id" in options:
+            self.to_id = options['to_id']
         self.client = ES_CLIENT
-        if not self.start_from:
+        if not self.from_id:
             print("Deleting index")
             index = es.Index(ES_INDEX_DOCUMENT, using=self.client)
             index.delete(ignore=404)
@@ -36,7 +39,9 @@ class Command(BaseCommand):
     def parse_csv(self):
         success = 0
         failed = 0
-        qs = Document.objects.filter(id__gte=self.start_from)
+        qs = Document.objects.filter(id__gt=self.from_id)
+        if self.to_id:
+            qs = qs.filter(id__lte=self.to_id)
         print("Start build")
         for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT, chunk_size=self.batch_size, raise_on_error=False, max_retries=10):
             if ok:
