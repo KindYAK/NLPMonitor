@@ -59,6 +59,7 @@ services:
     restart: always
   splash:
     image: "scrapinghub/splash:3.3.1"
+    command: --max-timeout 180 --slots 30 --maxrss 5000
     expose:
       - 8050
     networks:
