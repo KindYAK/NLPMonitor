@@ -1,6 +1,6 @@
 from mainapp.models import Document
 
-ds = Document.objects.filter(source__id=9)
+ds = Document.objects.filter(source__id=9).exclude(url=None)
 
 for d in ds:
     if "/conference/" in d.url:
