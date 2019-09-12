@@ -12,7 +12,7 @@ for d in ds:
         "type": dict(Document.TYPES)[d.type],
         "url": d.url,
         "datetime": d.datetime,
-        "number_of_img": d.html.dount("<img"),
+        "number_of_img": d.html.count("<img"),
         "number_of_paragraphs": d.html.count("<p")
     })
 
