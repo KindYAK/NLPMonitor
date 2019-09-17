@@ -5,6 +5,12 @@ from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG
 from mainapp.models import *
 
 
+class KibanaSearchForm(forms.Form):
+    def __init__(self, choices, *args, **kwargs):
+        super(KibanaSearchForm, self).__init__(*args, **kwargs)
+        self.fields["dashboard"] = forms.ChoiceField(choices=choices)
+
+
 class DocumentSearchForm(forms.Form):
     id = forms.CharField(label="ID", required=False)
     corpuses = forms.ModelMultipleChoiceField(queryset=Corpus.objects.all(), label="Корпусы", required=False)

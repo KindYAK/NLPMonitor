@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load widget_tweaks %}
+
+{% block title %}Kibana dashboard{% endblock %}
+{% block heading %}Kibana dashboard{% endblock %}
+
+{% block head %}
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- Tempusdominus Bbootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <!-- Plotyly.js -->
+    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Kibana dashboard</li>
+{% endblock %}
+
+{% block content %}
+
+{% if request.user.is_authenticated %}
+    <div id="dashboard" class="row">
+        <div class="col-12">
+            <div class="card">
+               <form action="" method="GET">
+                <div class="card-body">
+                    <div class="col-md-4">{{ form.dashboard.label_tag }}</div>
+                    <div class="col-md-8">{% render_field form.dashboard placeholder="ID" class="form-control" %}</div>        
+                </div>
+                <div class="card-footer">
+                    <button class="btn-block btn-info" type="submit">Выбрать</button>
+                </div>
+               </form>
+            </div>
+
+            <iframe src="{{host}}/app/kibana#/dashboard/{{ selected_dashboard }}?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-15M%2Cto%3Anow))"
+                    height="500"
+                    onload="resizeIframe(this);"
+                    scrolling="no"
+                    >
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        function resizeIframe(iframe){
+            iframe.style.width = document.getElementById("dashboard").clientWidth + 'px';
+            // TODO: Add custom logic on height if needed
+            // iframe.style.height = document.getElementById("dashboard").clientWidth + 'px';
+        }
+    </script>
+{% else %}
+<h1>Вы не авторизованы</h1>
+{% endif %}
+{% endblock %}

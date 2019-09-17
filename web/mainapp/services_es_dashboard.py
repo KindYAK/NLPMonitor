@@ -33,3 +33,27 @@ def get_dashboard(search_request):
     ]
     response['hits'] = esresult
     return response
+
+
+def get_kibana_dashboards():
+    s = Search(using=ES_CLIENT, index='.kibana')
+    s = s.filter("term", **{"type": "dashboard"})
+    s = s.execute()
+
+    esresult = s.to_dict()
+
+    response = dict()
+
+    response = [
+        {
+            'id': l['_id'].split(":")[1],
+            'title': l['_source']['dashboard']['title']
+        } for l in esresult['hits']['hits']
+    ]
+    # NOTE: Added first element as `null dashboard`
+    # This dashboard does not contain anything
+    form_response = [('', '-')] + [
+        (p['id'], p['title']) for p in response
+    ]
+
+    return form_response
