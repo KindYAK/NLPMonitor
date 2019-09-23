@@ -27,7 +27,7 @@ class Command(BaseCommand):
             index.delete(ignore=404)
             print("Creating index")
             ESDocument.init()
-            self.parse_csv()
+        self.send_elastic()
 
     def document_generator(self, qs):
         for batch in batch_qs(qs, batch_size=self.batch_size):
@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 obj.init_from_model(document)
                 yield obj.to_dict()
 
-    def parse_csv(self):
+    def send_elastic(self):
         success = 0
         failed = 0
         qs = Document.objects.filter(id__gt=self.from_id)
