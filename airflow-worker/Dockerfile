@@ -1,4 +1,4 @@
-FROM bitnami/minideb-extras:stretch-r467
+FROM bitnami/minideb-extras:stretch-r484
 LABEL maintainer "Bitnami <containers@bitnami.com>"
 
 ENV BITNAMI_PKG_CHMOD="-R g+rwX" \
@@ -6,11 +6,11 @@ ENV BITNAMI_PKG_CHMOD="-R g+rwX" \
     HOME="/"
 
 # Install required system packages and dependencies
-RUN install_packages libbsd0 libbz2-1.0 libc6 libcomerr2 libedit2 libffi6 libgcc1 libgssapi-krb5-2 libicu57 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 liblzma5 libmariadbclient18 libncurses5 libnss-wrapper libreadline7 libsasl2-2 libsqlite3-0 libssl1.1 libstdc++6 libtinfo5 libxml2 libxslt1.1 zlib1g
-RUN bitnami-pkg install python-3.6.9-0 --checksum a3303f1de534403d1c1286b3f16a8052d48a06dbb7bf1cf004c7bd9db1b57873
-RUN bitnami-pkg install postgresql-client-10.10.0-0 --checksum 1f7e0f81461e8ab2593f88f79a2eb618ee657647fcc971b4c150a7fd9c40433a
-RUN bitnami-pkg unpack airflow-worker-1.10.4-0 --checksum 47938018178d0f9d8e7247af951381150cf8c24abd69fb9943c7769ff2cfb3d9
-RUN install_packages python3-dev python3-setuptools build-essential postgresql-server-dev-all libpq-dev gcc libboost-all-dev wget git cmake
+RUN install_packages libbsd0 libbz2-1.0 libc6 libcomerr2 libedit2 libffi6 libgcc1 libgssapi-krb5-2 libicu57 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 liblzma5 libmariadbclient18 libncurses5 libnss-wrapper libreadline7 libsasl2-2 libsqlite3-0 libssl1.1 libstdc++6 libtinfo5 libuuid1 libxml2 libxslt1.1 zlib1g
+RUN bitnami-pkg install python-3.6.9-1 --checksum 16bf895318d5581937b3b5e73b55d7c7180a8ef42af8d0a8d4dd010bd0a0408d
+RUN bitnami-pkg install postgresql-client-10.10.0-1 --checksum 77f89198ede517c8355f466642643cc787989b16bd136c0efcfea0a2d21282cb
+RUN bitnami-pkg unpack airflow-worker-1.10.5-1 --checksum 078ee3a40c6e2d42bcef0c75eee66acb26902be3651aa2d05009452c82b3859a
+RUN install_packages python3-dev python3-setuptools build-essential postgresql-server-dev-all libpq-dev gcc libboost-all-dev
 
 COPY rootfs /
 ENV AIRFLOW_DATABASE_HOST="postgresql" \
@@ -28,7 +28,7 @@ ENV AIRFLOW_DATABASE_HOST="postgresql" \
     AIRFLOW_WEBSERVER_PORT_NUMBER="8080" \
     AIRFLOW_WORKER_PORT_NUMBER="8793" \
     BITNAMI_APP_NAME="airflow-worker" \
-    BITNAMI_IMAGE_VERSION="1.10.4-debian-9-r27" \
+    BITNAMI_IMAGE_VERSION="1.10.5-debian-9-r20" \
     C_FORCE_ROOT="True" \
     LD_LIBRARY_PATH="/opt/bitnami/python/lib/:/opt/bitnami/airflow/venv/lib/python3.6/site-packages/numpy/.libs/:$LD_LIBRARY_PATH" \
     LD_PRELOAD="/usr/lib/libnss_wrapper.so" \

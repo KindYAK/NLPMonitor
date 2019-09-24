@@ -66,7 +66,7 @@ services:
       - network
     restart: always
   airflow-scheduler:
-    image: "bitnami/airflow-scheduler:1.10.4"
+    image: "bitnami/airflow-scheduler:1.10.5"
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
@@ -91,7 +91,7 @@ services:
       - airflow-postgresql
     restart: always
   airflow:
-    image: "bitnami/airflow:1.10.4"
+    image: "bitnami/airflow:1.10.5"
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
