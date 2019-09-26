@@ -61,8 +61,8 @@ MIDDLEWARE = [
 STRONGHOLD_DEFAULTS = False
 
 STRONGHOLD_PUBLIC_URLS = (
-    r'^/$',
-    r'^/accounts/.*?',
+    r'/',
+    r'^/accounts/.+$',
 )
 
 ROOT_URLCONF = 'nlpmonitor.urls'
