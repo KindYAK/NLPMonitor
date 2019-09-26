@@ -10,14 +10,6 @@ from django.utils import timezone
 
 
 DYNAMIC_TEMPLATES = [{
-    "not_indexed_long": {
-        "match_mapping_type": "long",
-        "mapping": {
-            "type": "long",
-            "index": False
-        }
-    }
-},{
     "not_indexed_double": {
     "match_mapping_type": "double",
     "mapping": {
