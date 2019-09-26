@@ -99,22 +99,24 @@
             <!-- Sidebar Menu -->
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                    <li class="nav-item">
-                        <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>
-                                Dashboard
-                            </p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'mainapp:search' %}" class="nav-link">
-                            <i class="nav-icon fas fa-search-plus"></i>
-                            <p>
-                                Поиск и фильтрация
-                            </p>
-                        </a>
-                    </li>
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>
+                                    Dashboard
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'mainapp:search' %}" class="nav-link">
+                                <i class="nav-icon fas fa-search-plus"></i>
+                                <p>
+                                    Поиск и фильтрация
+                                </p>
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </nav>
             <!-- /.sidebar-menu -->

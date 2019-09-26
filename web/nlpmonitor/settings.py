@@ -30,7 +30,6 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-# TODO Set up stronghold
 INSTALLED_APPS = [
     'jet',
     'django.contrib.admin',
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'stronghold',
     'django_extensions',
     'widget_tweaks',
     'mainapp',
@@ -55,7 +55,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'stronghold.middleware.LoginRequiredMiddleware',
 ]
+
+STRONGHOLD_DEFAULTS = False
+
+STRONGHOLD_PUBLIC_URLS = (
+    r'^/$',
+)
 
 ROOT_URLCONF = 'nlpmonitor.urls'
 

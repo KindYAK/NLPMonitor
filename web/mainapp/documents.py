@@ -18,6 +18,7 @@ DYNAMIC_TEMPLATES = [{
     }
 }}]
 
+
 class Document(es.Document):
     id = es.Keyword()
     corpus = es.Keyword()
@@ -129,6 +130,15 @@ class EmbeddingIndex(es.Document):
         using = ES_CLIENT
 
 
+class TopicWord(es.InnerDoc):
+    word = es.Keyword()
+    weight = es.Float()
+
+
+class Topic(es.InnerDoc):
+    topic_words = es.Nested(TopicWord)
+
+
 # List of all TMs in the storage
 class TopicModellingIndex(es.Document):
     corpus = es.Keyword()
@@ -143,6 +153,8 @@ class TopicModellingIndex(es.Document):
     number_of_topics = es.Integer()
     hierarchical = es.Boolean()
     meta_parameters = es.Object()
+
+    topics = es.Nested(Topic)
 
     class Index:
         name = ES_INDEX_TOPIC_MODELLING
