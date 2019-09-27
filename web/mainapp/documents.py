@@ -136,6 +136,7 @@ class TopicWord(es.InnerDoc):
 
 
 class Topic(es.InnerDoc):
+    id = es.Keyword()
     topic_words = es.Nested(TopicWord)
 
 

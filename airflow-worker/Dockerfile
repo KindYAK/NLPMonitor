@@ -51,6 +51,7 @@ RUN pip install -r /requirements-base.txt
 
 RUN pip install --ignore-installed tensorflow>=1.11.0
 RUN python -m textblob.download_corpora
+RUN python -m nltk.downloader stopwords
 
 COPY bigartm /bigartm/
 RUN pip install /bigartm/bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
