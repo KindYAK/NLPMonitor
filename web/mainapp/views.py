@@ -1,8 +1,35 @@
 from django.views.generic import TemplateView
-from .forms import DocumentSearchForm, DashboardFilterForm
+from django.http import HttpResponse
+from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
 from .dashboard_types import *
 from .services_es_documents import execute_search
-from .services_es_dashboard import get_dashboard
+from .services_es_dashboard import get_dashboard, get_kibana_dashboards
+from rest_framework import serializers
+
+
+
+class KibanaDashboardView(TemplateView):
+    template_name = "mainapp/kibana_dashboard.html"
+    form_class = KibanaSearchForm
+    kibana_port = 5601
+
+    def host(self):
+        """localhost:8000 > http://localhost:5601"""
+        host = self.request.get_host()
+        host_name = host.split(":")[0]
+        return f"http://{host_name}:{self.kibana_port}"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        dashbords = get_kibana_dashboards()
+        form = self.form_class(dashbords, data=self.request.GET)
+        if form.is_valid():
+            selected = form.cleaned_data
+            context['selected_dashboard'] = selected['dashboard']
+
+        context['form'] = form
+        context['host'] = self.host()
+        return context
 
 
 class SearchView(TemplateView):
