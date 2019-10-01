@@ -13,4 +13,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page="/"), name='logout'),
     path('kibana_dashboard/', KibanaDashboardView.as_view(), name="kibana_dashboard"),
     path('topics_list/', TopicsListView.as_view(), name="topics_list"),
+    path('topic_documents_list/<topic_modelling>/<topic_name>/', TopicDocumentListView.as_view(), name="topic_document_list"),
 ]

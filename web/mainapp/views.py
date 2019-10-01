@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, TopicChooseForm
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
@@ -48,6 +48,20 @@ class TopicsListView(TemplateView):
                 .filter("term", **{"is_ready": True}).execute()[0]['topics']
         context['topics'] = topics
         context['form'] = form
+        return context
+
+
+class TopicDocumentListView(TemplateView):
+    template_name = "mainapp/topic_document_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        topic_name = kwargs['topic_name']
+        topic_modelling = kwargs['topic_modelling']
+        documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
+            .filter("term", **{f"topics_{topic_modelling}.topic": topic_name}) \
+            .source(['id', 'title', 'source', 'datetime'])[:100].execute()
+        context['documents'] = documents
         return context
 
 
