@@ -143,12 +143,17 @@ class Topic(es.InnerDoc):
 # List of all TMs in the storage
 class TopicModellingIndex(es.Document):
     corpus = es.Keyword()
+    source = es.Keyword()
     number_of_documents = es.Integer()
     is_ready = es.Boolean()
     name = es.Keyword()
     description = es.Text()
     datetime_created = es.Date()
     datetime_finished = es.Date()
+
+    datetime_from = es.Date()
+    datetime_to = es.Date()
+    datetime_delta = es.Keyword() # Day/Week/Month/Year
 
     algorithm = es.Keyword()
     number_of_topics = es.Integer()
