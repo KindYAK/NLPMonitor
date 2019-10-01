@@ -101,10 +101,18 @@
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     {% if request.user.is_authenticated %}
                         <li class="nav-item">
+                            <a href="{% url 'mainapp:topics_list' %}" class="nav-link">
+                                <i class="nav-icon fas fa-tags"></i>
+                                <p>
+                                    Тематическое моделирование
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
                                 <i class="nav-icon fas fa-chart-line"></i>
                                 <p>
-                                    Dashboard
+                                    Динамика тегов
                                 </p>
                             </a>
                         </li>
@@ -117,13 +125,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                        <a href="{% url 'mainapp:kibana_dashboard' %}" class="nav-link">
-                            <i class="nav-icon fab fa-dashcube"></i>
-                            <p>
-                                Kibana dashboard
-                            </p>
-                        </a>
-                    </li>
+                            <a href="{% url 'mainapp:kibana_dashboard' %}" class="nav-link">
+                                <i class="nav-icon fab fa-dashcube"></i>
+                                <p>
+                                    Kibana dashboard
+                                </p>
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </nav>

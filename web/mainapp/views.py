@@ -1,11 +1,11 @@
 from django.views.generic import TemplateView
-from django.http import HttpResponse
-from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
-from .dashboard_types import *
-from .services_es_documents import execute_search
-from .services_es_dashboard import get_dashboard, get_kibana_dashboards
-from rest_framework import serializers
+from elasticsearch_dsl import Search
 
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING
+from .dashboard_types import *
+from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, TopicChooseForm
+from .services_es_dashboard import get_dashboard, get_kibana_dashboards
+from .services_es_documents import execute_search
 
 
 class KibanaDashboardView(TemplateView):
@@ -29,6 +29,25 @@ class KibanaDashboardView(TemplateView):
 
         context['form'] = form
         context['host'] = self.host()
+        return context
+
+
+class TopicsListView(TemplateView):
+    template_name = "mainapp/topics_list.html"
+    form_class = TopicChooseForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = self.form_class(data=self.request.GET)
+        if form.is_valid():
+            context['topic_modelling'] = form.cleaned_data['topic_modelling']
+        else:
+            context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
+        topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
+                .filter("term", **{"name": context['topic_modelling']}) \
+                .filter("term", **{"is_ready": True}).execute()[0]['topics']
+        context['topics'] = topics
+        context['form'] = form
         return context
 
 

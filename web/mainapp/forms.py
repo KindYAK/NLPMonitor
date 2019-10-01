@@ -1,8 +1,23 @@
 import django.forms as forms
 from django.db.models import Count
+from django.forms.utils import ErrorList
 
-from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG
+from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
 from mainapp.models import *
+
+from elasticsearch_dsl import Search, Q
+
+
+class TopicChooseForm(forms.Form):
+    topic_modelling = forms.ChoiceField()
+
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
+                 label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
+                 renderer=None):
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
+                         use_required_attribute, renderer)
+        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).source(['name', 'algorithm', 'number_of_topics'])[:100]
+        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков") for tm in s.scan()]
 
 
 class KibanaSearchForm(forms.Form):
