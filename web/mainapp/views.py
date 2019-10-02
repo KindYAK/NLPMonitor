@@ -14,6 +14,7 @@ class KibanaDashboardView(TemplateView):
     kibana_port = 5601
 
     def host(self):
+        return "109.233.109.110" # TODO the method return "web" now - no good
         """localhost:8000 > http://localhost:5601"""
         host = self.request.get_host()
         host_name = host.split(":")[0]
