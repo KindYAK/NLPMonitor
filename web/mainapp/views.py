@@ -119,3 +119,13 @@ class DashboardView(TemplateView):
             })
         context['form'] = form
         return context
+
+
+class DocumentDetailView(TemplateView):
+    template_name = "mainapp/document_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['document'] = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
+                .filter("term", **{"id": kwargs['document_id']}).execute()[0]
+        return context
