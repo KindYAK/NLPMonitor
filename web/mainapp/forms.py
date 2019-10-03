@@ -16,7 +16,7 @@ class TopicChooseForm(forms.Form):
                  renderer=None):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
-        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).source(['name', 'algorithm', 'number_of_topics'])[:100]
+        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter('term', is_ready=True).source(['name', 'algorithm', 'number_of_topics'])[:100]
         self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков") for tm in s.scan()]
 
 
