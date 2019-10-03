@@ -153,7 +153,6 @@ class TopicModellingIndex(es.Document):
 
     datetime_from = es.Date()
     datetime_to = es.Date()
-    datetime_delta = es.Keyword() # Day/Week/Month/Year
 
     algorithm = es.Keyword()
     number_of_topics = es.Integer()
