@@ -159,6 +159,11 @@ class TopicModellingIndex(es.Document):
     hierarchical = es.Boolean()
     meta_parameters = es.Object()
 
+    perplexity = es.Float()
+    purity = es.Float()
+    contrast = es.Float()
+    coherence = es.Float()
+
     topics = es.Nested(Topic)
 
     class Index:

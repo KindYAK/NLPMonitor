@@ -16,8 +16,14 @@ class TopicChooseForm(forms.Form):
                  renderer=None):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
-        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter('term', is_ready=True).source(['name', 'algorithm', 'number_of_topics'])[:100]
-        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков") for tm in s.scan()]
+        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter('term', is_ready=True) \
+                  .source(['name', 'algorithm', 'number_of_topics', 'perplexity', 'purity', 'contrast', 'coherence'])[:100]
+        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков - "
+                                                            f"метрики "
+                                                            f"PX={tm.perplexity if hasattr(tm, 'perplexity') else 'None'} "
+                                                            f"CH={tm.coherence if hasattr(tm, 'coherence') else 'None'} "
+                                                            f"CT={tm.contrast if hasattr(tm, 'contrast') else 'None'} "
+                                                            f"PR={tm.purity if hasattr(tm, 'purity') else 'None'}") for tm in s.scan()]
 
 
 class KibanaSearchForm(forms.Form):
