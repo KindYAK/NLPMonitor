@@ -17,13 +17,17 @@ class TopicChooseForm(forms.Form):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter('term', is_ready=True) \
-                  .source(['name', 'algorithm', 'number_of_topics', 'perplexity', 'purity', 'contrast', 'coherence'])[:100]
+                  .source(['name', 'algorithm', 'number_of_topics',
+                           'perplexity', 'purity', 'contrast', 'coherence',
+                           'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
+                           'tau_decorrelator_phi', 'tau_coherence_phi',])[:100]
         self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков - "
-                                                            f"метрики "
-                                                            f"PX={tm.perplexity if hasattr(tm, 'perplexity') else 'None'} "
-                                                            f"CH={tm.coherence if hasattr(tm, 'coherence') else 'None'} "
-                                                            f"CT={tm.contrast if hasattr(tm, 'contrast') else 'None'} "
-                                                            f"PR={tm.purity if hasattr(tm, 'purity') else 'None'}") for tm in s.scan()]
+                                                            f"PRPLX={round(tm.perplexity, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                                                            f"SST={round(tm.tau_smooth_sparse_theta, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                                                            f"SSP={round(tm.tau_smooth_sparse_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                                                            f"DEC={round(tm.tau_decorrelator_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                                                            f"COH={round(tm.tau_coherence_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                                                   ) for tm in s.scan()]
 
 
 class KibanaSearchForm(forms.Form):

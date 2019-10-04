@@ -164,6 +164,11 @@ class TopicModellingIndex(es.Document):
     contrast = es.Float()
     coherence = es.Float()
 
+    tau_smooth_sparse_theta = es.Float()
+    tau_smooth_sparse_phi = es.Float()
+    tau_decorrelator_phi = es.Float()
+    tau_coherence_phi = es.Float()
+
     topics = es.Nested(Topic)
 
     class Index:
