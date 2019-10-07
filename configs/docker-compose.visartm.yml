@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  visartm:
+    build:
+      context: ../visartm
+      dockerfile: Dockerfile
+    env_file:
+      - ../.env
+    ports:
+      - "8002:8000"
+    networks:
+      - network
+    depends_on:
+      - db-visartm
+    restart: always
+    tty: true
+    stdin_open: true
+  db-visartm:
+    image: "postgres:11.5"
+    expose:
+      - 5432
+    volumes:
+      - pgdata_visartm:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=visartm
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - PGPASSWORD=${DB_PASSWORD}
+    networks:
+      - network
+    command: postgres -c 'max_connections=900'
+    restart: always
+
+volumes:
+  pgdata_visartm:
+    driver: local
+
+networks:
+  network:
+    driver: bridge
