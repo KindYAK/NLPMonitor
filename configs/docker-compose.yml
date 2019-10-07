@@ -66,6 +66,8 @@ services:
       - server.name="kibana"
       - server.host="0"
       - elasticsearch.url=http://elasticsearch:9200
+      - SERVER_BASEPATH=${KIBANA_PRIVATE_PATH}
+      - SERVER_REWRITEBASEPATH=true
     depends_on:
       - elasticsearch
     networks:

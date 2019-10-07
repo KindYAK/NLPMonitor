@@ -16,3 +16,4 @@ services:
   nginx:
     volumes:
       - ./nginx-app-dev.conf:/etc/nginx/conf.d/app.conf
+      - ./htpasswd:/etc/nginx/.htpasswd
