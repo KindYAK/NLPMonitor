@@ -202,8 +202,6 @@ dictionary_index.settings(
 
 
 class DictionaryWord(es.InnerDoc):
-    corpus = es.Keyword()
-
     word = es.Keyword()
     word_normal = es.Keyword()
 
@@ -221,6 +219,7 @@ class DictionaryWord(es.InnerDoc):
 
 @dictionary_index.document
 class Dictionary(es.Document):
+    corpus = es.Keyword()
     name = es.Keyword()
     description = es.Text()
     datetime = es.Date()
