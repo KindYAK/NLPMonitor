@@ -207,7 +207,11 @@ class DictionaryWord(es.InnerDoc):
 
     is_in_pymorphy2_dict = es.Boolean()
     is_multiple_normals_in_pymorphy2 = es.Boolean()
+    is_stop_word = es.Boolean()
+    is_latin = es.Boolean()
+    is_kazakh = es.Boolean()
     pos_tag = es.Keyword()
+    word_len = es.Integer()
 
     word_frequency = es.Integer()
     document_frequency = es.Integer()
