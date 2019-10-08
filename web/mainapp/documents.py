@@ -202,6 +202,8 @@ dictionary_index.settings(
 
 
 class DictionaryWord(es.InnerDoc):
+    corpus = es.Keyword()
+
     word = es.Keyword()
     word_normal = es.Keyword()
 
