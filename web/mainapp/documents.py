@@ -1,13 +1,12 @@
 import json
 
 import elasticsearch_dsl as es
+from django.utils import timezone
 from elasticsearch_dsl import Index, MetaField
 
-from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, ES_INDEX_TOPIC_MODELLING, \
-                                ES_CLIENT
 from mainapp.models import Document as ModelDocument
-from django.utils import timezone
-
+from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
+    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY, ES_CLIENT
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -194,3 +193,31 @@ class ClassifierIndex(es.Document):
     class Index:
         name = ES_INDEX_CLASSIFIER
         using = ES_CLIENT
+
+
+dictionary_index = Index(ES_INDEX_DICTIONARY, ES_CLIENT)
+dictionary_index.settings(
+    **{"index.mapping.nested_objects.limit": 1000000}
+)
+
+
+class DictionaryWord(es.InnerDoc):
+    word = es.Keyword()
+    word_normal = es.Keyword()
+
+    is_in_pymorphy2_dict = es.Boolean()
+    is_multiple_normals_in_pymorphy2 = es.Boolean()
+    pos_tag = es.Keyword()
+
+    word_frequency = es.Integer()
+    document_frequency = es.Integer()
+
+
+@dictionary_index.document
+class Dictionary(es.Document):
+    name = es.Keyword()
+    description = es.Text()
+    datetime = es.Date()
+    number_of_documents = es.Integer()
+
+    words = es.Nested(DictionaryWord)
