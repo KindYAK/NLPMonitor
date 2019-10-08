@@ -216,6 +216,7 @@ class DictionaryWord(es.InnerDoc):
     word_frequency = es.Integer()
     word_normal_frequency = es.Integer()
     document_frequency = es.Integer()
+    document_normal_frequency = es.Integer()
 
 
 @dictionary_index.document
