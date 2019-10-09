@@ -20,6 +20,7 @@ services:
     volumes:
       - static_root:/static_root
       - media_root:/media_root
+      - ./htpasswd:/etc/nginx/.htpasswd
     depends_on:
       - web
     networks:
@@ -60,8 +61,6 @@ services:
     restart: always
   kibana:
     image: "kibana:7.3.1"
-    ports:
-      - "5601:5601"
     environment:
       - server.name="kibana"
       - server.host="0"
