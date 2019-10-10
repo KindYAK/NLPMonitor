@@ -6,7 +6,7 @@ from elasticsearch_dsl import Index, MetaField
 
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
-    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY, ES_CLIENT
+    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -195,13 +195,8 @@ class ClassifierIndex(es.Document):
         using = ES_CLIENT
 
 
-dictionary_index = Index(ES_INDEX_DICTIONARY, ES_CLIENT)
-dictionary_index.settings(
-    **{"index.mapping.nested_objects.limit": 1000000}
-)
-
-
-class DictionaryWord(es.InnerDoc):
+class DictionaryWord(es.Document):
+    dictionary = es.Keyword()
     word = es.Keyword()
     word_normal = es.Keyword()
 
@@ -218,8 +213,11 @@ class DictionaryWord(es.InnerDoc):
     document_frequency = es.Integer()
     document_normal_frequency = es.Integer()
 
+    class Index:
+        name = ES_INDEX_DICTIONARY_WORD
+        using = ES_CLIENT
 
-@dictionary_index.document
+
 class Dictionary(es.Document):
     corpus = es.Keyword()
     name = es.Keyword()
@@ -227,4 +225,8 @@ class Dictionary(es.Document):
     datetime = es.Date()
     number_of_documents = es.Integer()
 
-    words = es.Nested(DictionaryWord)
+    is_ready = es.Boolean()
+
+    class Index:
+        name = ES_INDEX_DICTIONARY_INDEX
+        using = ES_CLIENT
