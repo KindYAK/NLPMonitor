@@ -212,6 +212,12 @@ class DictionaryWord(es.Document):
     word_normal_frequency = es.Integer()
     document_frequency = es.Integer()
     document_normal_frequency = es.Integer()
+
+    word_frequency_relative = es.Float()
+    word_normal_frequency_relative = es.Float()
+    document_frequency_relative = es.Float()
+    document_normal_frequency_relative = es.Float()
+
     word_first_capital_ratio = es.Float()
     word_normal_first_capital_ratio = es.Float()
 
