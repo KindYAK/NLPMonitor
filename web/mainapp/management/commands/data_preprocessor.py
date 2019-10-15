@@ -22,7 +22,7 @@ class Command(BaseCommand):
             for doc in batch:
                 doc.text = BeautifulSoup(doc.text, "html.parser").text.strip().replace('\n', '')
                 doc.title = BeautifulSoup(doc.title, "html.parser").text.strip().replace('\n', '')
-                Document.objects.bulk_update(batch, fields=['text', 'title'])
+            Document.objects.bulk_update(batch, fields=['text', 'title'])
         for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
             print(f"Deleting {i*batch_size}/{number_of_documents}")
             for doc in batch:
