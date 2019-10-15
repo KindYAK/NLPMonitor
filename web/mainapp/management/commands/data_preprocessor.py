@@ -19,9 +19,12 @@ class Command(BaseCommand):
         number_of_documents = qs.count()
         for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
             print(f"Processing {i*batch_size}/{number_of_documents}")
-            for doc in batch:
-                doc.text = BeautifulSoup(doc.text, "html.parser").text.strip().replace('\n', '')
-                doc.title = BeautifulSoup(doc.title, "html.parser").text.strip().replace('\n', '')
+            for j, doc in enumerate(batch):
+                if i == 0:
+                    print(f"{j}/{batch_size}")
+                if "<" in doc.text or ">" in doc.text or "<" in doc.title or ">" in doc.title:
+                    doc.text = BeautifulSoup(doc.text, "html.parser").text.strip().replace('\n', '')
+                    doc.title = BeautifulSoup(doc.title, "html.parser").text.strip().replace('\n', '')
             Document.objects.bulk_update(batch, fields=['text', 'title'])
         for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
             print(f"Deleting {i*batch_size}/{number_of_documents}")
