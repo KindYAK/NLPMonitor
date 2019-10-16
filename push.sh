@@ -10,3 +10,9 @@ cd airflow-worker
 docker build . -f Dockerfile -t vm-registry.ipic.kz/airflow-worker:prod
 docker login vm-registry.ipic.kz
 docker push vm-registry.ipic.kz/airflow-worker:prod
+
+cd ..
+cd visartm
+docker build . -f Dockerfile -t vm-registry.ipic.kz/visartm:prod
+docker login vm-registry.ipic.kz
+docker push vm-registry.ipic.kz/visartm:prod
