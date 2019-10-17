@@ -52,7 +52,18 @@ class TopicDocumentListView(TemplateView):
         topic_modelling = kwargs['topic_modelling']
         documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
             .filter("term", **{f"topics_{topic_modelling}.topic": topic_name}) \
-            .source(['id', 'title', 'source', 'datetime'])[:100].execute()
+            .source(['id', 'title', 'source', 'datetime', f"topics_{topic_modelling}"])[:1000000].execute()
+        for document in documents:
+            topic_index = None
+            for i, topic in enumerate(document[f"topics_{topic_modelling}"]):
+                if topic['topic'] == topic_name:
+                    topic_index = i
+                    break
+            if topic_index:
+                document['weight'] = round(document[f"topics_{topic_modelling}"][topic_index]['weight'], 5)
+            else:
+                raise Exception("Stranger things!")
+        documents = sorted(documents, key=lambda x: x['weight'], reverse=True)
         context['documents'] = documents
         return context
 

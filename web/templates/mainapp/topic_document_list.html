@@ -41,6 +41,7 @@
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
                             <tr role="row">
+                                <th>Вес в топике</th>
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
@@ -50,6 +51,7 @@
                             <tbody>
                             {% for document in documents %}
                                 <tr>
+                                    <td>{{ document.weight }}</td>
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
