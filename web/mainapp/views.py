@@ -38,7 +38,7 @@ class TopicsListView(TemplateView):
         topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
                 .filter("term", **{"name": context['topic_modelling']}) \
                 .filter("term", **{"is_ready": True}).execute()[0]['topics']
-        context['topics'] = topics
+        context['topics'] = [t for t in topics if len(t.topic_words) > 0]
         context['form'] = form
         return context
 
