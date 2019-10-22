@@ -136,7 +136,9 @@ class TopicWord(es.InnerDoc):
 
 class Topic(es.InnerDoc):
     id = es.Keyword()
+    name = es.Keyword()
     topic_words = es.Nested(TopicWord)
+    topic_size = es.Integer()
 
 
 # List of all TMs in the storage
