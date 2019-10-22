@@ -139,6 +139,7 @@ class Topic(es.InnerDoc):
     name = es.Keyword()
     topic_words = es.Nested(TopicWord)
     topic_size = es.Integer()
+    topic_weight = es.Float()
 
 
 # List of all TMs in the storage
