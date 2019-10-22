@@ -148,6 +148,7 @@ class TopicModellingIndex(es.Document):
     source = es.Keyword()
     number_of_documents = es.Integer()
     is_ready = es.Boolean()
+    has_topic_info = es.Boolean()
     name = es.Keyword()
     description = es.Text()
     datetime_created = es.Date()
