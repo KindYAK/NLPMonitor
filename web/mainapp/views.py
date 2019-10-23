@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, TopicChooseForm
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
@@ -51,20 +51,17 @@ class TopicDocumentListView(TemplateView):
         context = super().get_context_data(**kwargs)
         topic_name = kwargs['topic_name']
         topic_modelling = kwargs['topic_modelling']
-        documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
-            .filter("term", **{f"topics_{topic_modelling}.topic": topic_name}) \
-            .source(['id', 'title', 'source', 'datetime', f"topics_{topic_modelling}"])[:1000000].execute()
+        documents_ids = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+            .filter("term", topic_modelling=topic_modelling) \
+            .filter("term", topic_id=topic_name).sort("-topic_weight") \
+            .source(['document_es_id', 'topic_weight'])[:500].execute()
+        documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
+            .filter('terms', _id=[d.document_es_id for d in documents_ids])\
+            .source(('id', 'title', 'source', 'datetime',)).execute()
+        weight_dict = dict((d.document_es_id, d.topic_weight) for d in documents_ids)
         for document in documents:
-            topic_index = None
-            for i, topic in enumerate(document[f"topics_{topic_modelling}"]):
-                if topic['topic'] == topic_name:
-                    topic_index = i
-                    break
-            if topic_index:
-                document['weight'] = round(document[f"topics_{topic_modelling}"][topic_index]['weight'], 5)
-            else:
-                raise Exception("Stranger things!")
-        documents = sorted(documents, key=lambda x: x['weight'], reverse=True)
+            document.weight = weight_dict[document.meta.id]
+        documents = sorted(documents, key=lambda x: x.weight, reverse=True)
         context['documents'] = documents
         return context
 
