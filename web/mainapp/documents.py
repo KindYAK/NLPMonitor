@@ -6,7 +6,7 @@ from elasticsearch_dsl import Index, MetaField
 
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
-    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT
+    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -140,6 +140,19 @@ class Topic(es.InnerDoc):
     topic_words = es.Nested(TopicWord)
     topic_size = es.Integer()
     topic_weight = es.Float()
+
+
+class TopicDocument(es.Document):
+    topic_modelling = es.Keyword()
+    topic_id = es.Keyword()
+    topic_weight = es.Float()
+    document_es_id = es.Keyword()
+    document_datetime = es.Date()
+    document_source = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_TOPIC_DOCUMENT
+        using = ES_CLIENT
 
 
 # List of all TMs in the storage
