@@ -2,8 +2,8 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 
-{% block title %}Список документов топика {{ topic_name }}{% endblock %}
-{% block heading %}Список документов топика {{ topic_name }}{% endblock %}
+{% block title %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
+{% block heading %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
 
 {% block head %}
     <!-- data tables -->
@@ -155,6 +155,7 @@
                 "order": [],
                 "info": true,
                 "autoWidth": true,
+                "pageLength": 50,
             });
         });
     </script>
