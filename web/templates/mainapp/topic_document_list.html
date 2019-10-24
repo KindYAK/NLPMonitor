@@ -2,8 +2,8 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 
-{% block title %}Список топиков{% endblock %}
-{% block heading %}Список топиков{% endblock %}
+{% block title %}Список документов топика {{ topic_name }}{% endblock %}
+{% block heading %}Список документов топика {{ topic_name }}{% endblock %}
 
 {% block head %}
     <!-- data tables -->
@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Select2 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <!-- Plotyly.js -->
+    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
     <style>
         .form-group .row {
             margin-bottom: 15px;
@@ -30,6 +32,67 @@
 {% endblock %}
 
 {% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Динамика топика</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        <div id="topic_dynamics"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in topic_dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in topic_dynamics %}{{ tick.doc_count }}, {% endfor %}],
+                                    name: 'Динамика топика',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Динамика топика',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('topic_dynamics', data, layout);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
