@@ -40,6 +40,7 @@
                 </div>
                 <div class="card-body">
                     <div id="search-results">
+                        {# Мощность #}
                         <div id="topic_dynamics"></div>
                         <script>
                             var selectorOptions = {
@@ -73,11 +74,11 @@
                                     mode: 'lines',
                                     x: [{% for tick in topic_dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
                                     y: [{% for tick in topic_dynamics %}{{ tick.doc_count }}, {% endfor %}],
-                                    name: 'Динамика топика',
+                                    name: 'Мощность топика',
                                 },
                             ];
                             var layout = {
-                                title: 'Динамика топика',
+                                title: 'Мощность топика',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {}
@@ -87,6 +88,56 @@
                                 }
                             };
                             Plotly.plot('topic_dynamics', data, layout);
+                        </script>
+
+                        {# Удельный вес #}
+                        <div id="topic_dynamics_weight"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in topic_dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in topic_dynamics %}{{ tick.dynamics_weight.value|safe }}, {% endfor %}],
+                                    name: 'Удельный вес топика',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Удельный вес топика',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('topic_dynamics_weight', data, layout);
                         </script>
                     </div>
                 </div>

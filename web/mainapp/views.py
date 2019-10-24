@@ -73,20 +73,21 @@ class TopicDocumentListView(TemplateView):
             .filter("term", topic_id=topic_name).sort("-topic_weight") \
             .filter("range", topic_weight={"gte": 0.001}) \
             .source(['document_es_id', 'topic_weight'])[:500]
-        std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1d")
-        documents_ids = std.execute()
+        std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1d") \
+            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+        topic_documents = std.execute()
 
         sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
-            .filter('terms', _id=[d.document_es_id for d in documents_ids])\
+            .filter('terms', _id=[d.document_es_id for d in topic_documents])\
             .source(('id', 'title', 'source', 'datetime',))
         documents = sd.execute()
-        weight_dict = dict((d.document_es_id, d.topic_weight) for d in documents_ids)
+        weight_dict = dict((d.document_es_id, d.topic_weight) for d in topic_documents)
         for document in documents:
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
 
         context['documents'] = documents
-        context['topic_dynamics'] = documents_ids.aggregations.dynamics.buckets
+        context['topic_dynamics'] = topic_documents.aggregations.dynamics.buckets
         context['topic_name'] = Search(using=ES_CLIENT)
         return context
 
