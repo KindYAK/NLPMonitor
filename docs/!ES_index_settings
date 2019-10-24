@@ -17,3 +17,15 @@ Example:
 }  -> all long values would not index in elastic
 
 more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
+
+Q: I get max_buckets error when aggregating stuff like unique dictionary values
+A:
+docker-compose exec elasticsearch bash
+
+curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'
+{
+    "persistent" : {
+        "search.max_buckets": 500000
+    }
+}
+'
