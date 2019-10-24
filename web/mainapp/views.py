@@ -35,11 +35,21 @@ class TopicsListView(TemplateView):
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
         else:
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
+
+        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+            .filter("term", topic_modelling=context['topic_modelling']) \
+            .filter("range", topic_weight={"gte": 0.001})
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)
+        result = s.execute()
+        topic_size_dict = dict((bucket.key, bucket.doc_count) for bucket in result.aggregations.topics.buckets)
+
         topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
-                .filter("term", **{"name": context['topic_modelling']}) \
-                .filter("term", **{"is_ready": True}).execute()[0]['topics']
+            .filter("term", **{"name": context['topic_modelling']}) \
+            .filter("term", **{"is_ready": True}).execute()[0]['topics']
+        for topic in topics:
+            topic.size = topic_size_dict[topic.id]
         context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
-                                   key=lambda x: x.topic_size if x.topic_size else 0, reverse=True)
+                                   key=lambda x: x.size, reverse=True)
         context['form'] = form
         return context
 
@@ -54,6 +64,7 @@ class TopicDocumentListView(TemplateView):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=topic_modelling) \
             .filter("term", topic_id=topic_name).sort("-topic_weight") \
+            .filter("range", topic_weight={"gte": 0.001}) \
             .source(['document_es_id', 'topic_weight'])[:500]
         std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1d")
         documents_ids = std.execute()
