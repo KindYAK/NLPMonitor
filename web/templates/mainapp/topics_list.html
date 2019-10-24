@@ -76,7 +76,8 @@
                             <tr role="row">
                                 <th>Название</th>
                                 <th>Топ 10 слов</th>
-                                <th>Количество новостей</th>
+                                <th>Мощность</th>
+                                <th>Удельный вес</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -92,6 +93,7 @@
                                     </td>
                                     <td>{% for word in topic.topic_words %}{{ word.word }} ({{ word.weight|floatformat:2  }}); {% endfor %}</td>
                                     <td>{{ topic.size }}</td>
+                                    <td>{{ topic.weight }}</td>
                                     <td>
                                         <a href="{% url 'mainapp:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link">
                                             <i class="nav-icon fas fa-eye"></i>Просмотр

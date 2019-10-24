@@ -39,15 +39,22 @@ class TopicsListView(TemplateView):
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=context['topic_modelling']) \
             .filter("range", topic_weight={"gte": 0.001})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
+            .metric("topic_weight", agg_type="sum", field="topic_weight")
         result = s.execute()
-        topic_size_dict = dict((bucket.key, bucket.doc_count) for bucket in result.aggregations.topics.buckets)
+        topic_info_dict = dict(
+            (bucket.key, {
+                "count": bucket.doc_count,
+                "weight_sum": bucket.topic_weight.value
+            }) for bucket in result.aggregations.topics.buckets
+        )
 
         topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
             .filter("term", **{"name": context['topic_modelling']}) \
             .filter("term", **{"is_ready": True}).execute()[0]['topics']
         for topic in topics:
-            topic.size = topic_size_dict[topic.id]
+            topic.size = topic_info_dict[topic.id]['count']
+            topic.weight = round(topic_info_dict[topic.id]['weight_sum'], 2)
         context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
                                    key=lambda x: x.size, reverse=True)
         context['form'] = form
@@ -68,6 +75,7 @@ class TopicDocumentListView(TemplateView):
             .source(['document_es_id', 'topic_weight'])[:500]
         std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1d")
         documents_ids = std.execute()
+
         sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
             .filter('terms', _id=[d.document_es_id for d in documents_ids])\
             .source(('id', 'title', 'source', 'datetime',))
@@ -76,6 +84,7 @@ class TopicDocumentListView(TemplateView):
         for document in documents:
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
+
         context['documents'] = documents
         context['topic_dynamics'] = documents_ids.aggregations.dynamics.buckets
         context['topic_name'] = Search(using=ES_CLIENT)
