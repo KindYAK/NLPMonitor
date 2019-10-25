@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from elasticsearch.helpers import streaming_bulk
+from elasticsearch.helpers import parallel_bulk
 
 from mainapp.models import *
 from mainapp.documents import Document as ESDocument
@@ -43,7 +43,8 @@ class Command(BaseCommand):
         if self.to_id:
             qs = qs.filter(id__lte=self.to_id)
         print("Start build")
-        for ok, result in streaming_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT, chunk_size=self.batch_size, raise_on_error=False, max_retries=10):
+        for ok, result in parallel_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT,
+                                        chunk_size=self.batch_size, raise_on_error=False, thread_count=6):
             if ok:
                 success += 1
             else:
