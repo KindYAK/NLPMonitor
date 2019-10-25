@@ -60,6 +60,9 @@ class TopicsListView(TemplateView):
                 topic.weight = round(topic_info_dict[topic.id]['weight_sum'], 2)
             else:
                 topic.size, topic.weight = 0, 0
+            max_weight = max((word.weight for word in topic.topic_words))
+            for topic_word in topic.topic_words:
+                topic_word.weight /= max_weight
         context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])

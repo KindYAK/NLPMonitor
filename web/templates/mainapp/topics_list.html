@@ -72,14 +72,14 @@
                     <h3>Топ темы</h3>
                 </div>
                 <div class="card-body">
-                    <div id="topicsPie" style="margin-left: 50px; margin-right: 50px;"></div>
+                    <div id="topicsPie" style="margin-left: 100px; margin-right: 100px;"></div>
                     <script>
                         var data = [{
                             values: [{% for topic in topics|slice:'10' %}'{{ topic.weight|safe }}', {% endfor %}, {{ rest_weight|safe }}],
                             labels: [{% for topic in topics|slice:'10' %}'{{ topic.name }}', {% endfor %}, 'Остальные'],
                             domain: {column: 0},
                             hoverinfo: 'label+percent',
-                            hole: .4,
+                            hole: .33,
                             type: 'pie'
                         }];
 
