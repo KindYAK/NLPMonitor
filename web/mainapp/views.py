@@ -1,3 +1,5 @@
+import datetime
+
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
@@ -68,6 +70,25 @@ class TopicDocumentListView(TemplateView):
         context = super().get_context_data(**kwargs)
         topic_name = kwargs['topic_name']
         topic_modelling = kwargs['topic_modelling']
+
+        # Total metrics
+        std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+            .filter("term", topic_modelling=topic_modelling) \
+            .filter("range", topic_weight={"gte": 0.001})
+        std_total.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
+            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+        topic_documents_total = std_total.execute()
+        total_metrics_dict = dict(
+            (
+                t.key_as_string,
+                {
+                    "size": t.doc_count,
+                    "weight": t.dynamics_weight.value
+                }
+            ) for t in topic_documents_total.aggregations.dynamics.buckets
+        )
+
+        # Current topic metrics
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=topic_modelling) \
             .filter("term", topic_id=topic_name).sort("-topic_weight") \
@@ -77,6 +98,7 @@ class TopicDocumentListView(TemplateView):
             .metric("dynamics_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
 
+        # Get documents, set weights
         sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
             .filter('terms', _id=[d.document_es_id for d in topic_documents])\
             .source(('id', 'title', 'source', 'datetime',))[:500]
@@ -86,9 +108,20 @@ class TopicDocumentListView(TemplateView):
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
 
+        # Normalize
+        for bucket in topic_documents.aggregations.dynamics.buckets:
+            total_weight = total_metrics_dict[bucket.key_as_string]['weight']
+            total_size = total_metrics_dict[bucket.key_as_string]['size']
+            if total_weight != 0:
+                bucket.dynamics_weight.value /= total_weight
+            if total_size != 0:
+                bucket.doc_count_normal = bucket.doc_count / total_size
+            else:
+                bucket.doc_count_normal = 0
+
+        # Create context
         context['documents'] = documents
         context['topic_dynamics'] = topic_documents.aggregations.dynamics.buckets
-        context['topic_name'] = Search(using=ES_CLIENT)
         return context
 
 

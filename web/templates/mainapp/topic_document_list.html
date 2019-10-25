@@ -40,7 +40,7 @@
                 </div>
                 <div class="card-body">
                     <div id="search-results">
-                        {# Мощность #}
+                        {# Абсолютная мощность #}
                         <div id="topic_dynamics"></div>
                         <script>
                             var selectorOptions = {
@@ -73,12 +73,12 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in topic_dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in topic_dynamics %}{{ tick.doc_count }}, {% endfor %}],
-                                    name: 'Мощность топика',
+                                    y: [{% for tick in topic_dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    name: 'Абсолютная мощность топика',
                                 },
                             ];
                             var layout = {
-                                title: 'Мощность топика',
+                                title: 'Абсолютная мощность топика',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {}
@@ -90,7 +90,57 @@
                             Plotly.plot('topic_dynamics', data, layout);
                         </script>
 
-                        {# Удельный вес #}
+                        {# Относительная мощность #}
+                        <div id="topic_dynamics_normal"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in topic_dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in topic_dynamics %}{{ tick.doc_count_normal|safe }}, {% endfor %}],
+                                    name: 'Относительная мощность топика',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Относительная мощность топика',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('topic_dynamics_normal', data, layout);
+                        </script>
+
+                        {# Относительный удельный вес #}
                         <div id="topic_dynamics_weight"></div>
                         <script>
                             var selectorOptions = {
