@@ -55,10 +55,13 @@ class TopicsListView(TemplateView):
             .filter("term", **{"name": context['topic_modelling']}) \
             .filter("term", **{"is_ready": True}).execute()[0]['topics']
         for topic in topics:
-            topic.size = topic_info_dict[topic.id]['count']
-            topic.weight = round(topic_info_dict[topic.id]['weight_sum'], 2)
+            if topic.id in topic_info_dict:
+                topic.size = topic_info_dict[topic.id]['count']
+                topic.weight = round(topic_info_dict[topic.id]['weight_sum'], 2)
+            else:
+                topic.size, topic.weight = 0, 0
         context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
-                                   key=lambda x: x.size, reverse=True)
+                                   key=lambda x: x.weight, reverse=True)
         context['form'] = form
         return context
 
