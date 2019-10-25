@@ -194,11 +194,40 @@
             </div>
         </div>
     </div>
+     <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Распределение по СМИ</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        <div id="source_distribution"></div>
+                        {{ source_weight }}
+                        <script>
+                            var data = [
+                                {
+                                    x: [{% for source in source_weight %}'{{ source.key }}', {% endfor %}],
+                                    y: [{% for source in source_weight %}{{ source.source_weight.value|safe }}, {% endfor %}],
+                                    type: 'bar'
+                                }
+                            ];
+                            var layout = {
+                                showlegend: false,
+                                bargap: 0.025
+                            };
+                            Plotly.newPlot('source_distribution', data, layout);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Результаты поиска</h3>
+                    <h3>Главные новости топика</h3>
                 </div>
                 <div class="card-body">
                     <div id="search-results">
@@ -256,7 +285,7 @@
                 "order": [],
                 "info": true,
                 "autoWidth": true,
-                "pageLength": 50,
+                "pageLength": 25,
             });
         });
     </script>

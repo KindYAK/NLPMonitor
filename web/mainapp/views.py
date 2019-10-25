@@ -103,6 +103,8 @@ class TopicDocumentListView(TemplateView):
             .source(['document_es_id', 'topic_weight'])[:500]
         std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
             .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+            .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
 
         # Get documents, set weights
@@ -129,6 +131,7 @@ class TopicDocumentListView(TemplateView):
         # Create context
         context['documents'] = documents
         context['topic_dynamics'] = topic_documents.aggregations.dynamics.buckets
+        context['source_weight'] = topic_documents.aggregations.source.buckets
         return context
 
 
