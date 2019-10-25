@@ -62,6 +62,7 @@ class TopicsListView(TemplateView):
                 topic.size, topic.weight = 0, 0
         context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
                                    key=lambda x: x.weight, reverse=True)
+        context['rest_weight'] = sum([t.weight for t in topics[10:]])
         context['form'] = form
         return context
 

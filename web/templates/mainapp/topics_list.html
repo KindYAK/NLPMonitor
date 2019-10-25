@@ -22,6 +22,8 @@
             margin-bottom: 0;
         }
     </style>
+    <!-- Plotyly.js -->
+    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
 {% endblock %}
 
 {% block bc %}
@@ -59,6 +61,35 @@
                     <button class="btn-block btn-info" type="submit">Поиск</button>
                 </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Топ темы</h3>
+                </div>
+                <div class="card-body">
+                    <div id="topicsPie" style="margin-left: 50px; margin-right: 50px;"></div>
+                    <script>
+                        var data = [{
+                            values: [{% for topic in topics|slice:'10' %}'{{ topic.weight|safe }}', {% endfor %}, {{ rest_weight|safe }}],
+                            labels: [{% for topic in topics|slice:'10' %}'{{ topic.name }}', {% endfor %}, 'Остальные'],
+                            domain: {column: 0},
+                            hoverinfo: 'label+percent',
+                            hole: .4,
+                            type: 'pie'
+                        }];
+
+                        var layout = {
+                            height: 700,
+                            showlegend: true,
+                        };
+                        Plotly.newPlot('topicsPie', data, layout);
+                    </script>
+                </div>
             </div>
         </div>
     </div>
