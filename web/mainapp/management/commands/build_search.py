@@ -52,5 +52,7 @@ class Command(BaseCommand):
                 action, result = result.popitem()
                 print("!!!", action, result)
 
+            if failed > 5:
+                raise Exception("Too many failed!!")
             if (success + failed) % self.batch_size == 0:
                 print(f'{success+failed}/{qs.count()} processed')
