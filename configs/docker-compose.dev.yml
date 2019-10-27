@@ -19,3 +19,10 @@ services:
   kibana:
     ports:
       - "5601:5601"
+  elasticsearch:
+    environment:
+      - cluster.name="elk-nlpmonitor-cluster"
+      - network.host=0.0.0.0
+      - discovery.type=single-node
+      - discovery.zen.minimum_master_nodes=1
+      - ${ELASTIC_JAVA_OPTIONS}

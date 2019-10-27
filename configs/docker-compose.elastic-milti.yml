@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+  elasticsearch:
+    image: "elasticsearch:7.3.1"
+    expose:
+      - 9200
+      - 9300
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - node.name=elasticsearch
+      - discovery.seed_hosts=elasticsearch-2
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch-2
+      - cluster.name="elk-nlpmonitor-cluster"
+      - bootstrap.memory_lock=true
+      - ${ELASTIC_JAVA_OPTIONS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network
+    restart: always
+  elasticsearch-2:
+    image: "elasticsearch:7.3.1"
+    volumes:
+      - elasticsearch_data2:/usr/share/elasticsearch/data
+    environment:
+      - node.name=elasticsearch-2
+      - discovery.seed_hosts=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch-2
+      - cluster.name="elk-nlpmonitor-cluster"
+      - bootstrap.memory_lock=true
+      - ${ELASTIC_JAVA_OPTIONS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network
+    restart: always
+  elasticsearch-3:
+    image: "elasticsearch:7.3.1"
+    volumes:
+      - elasticsearch_data3:/usr/share/elasticsearch/data
+    environment:
+      - node.name=elasticsearch-3
+      - discovery.seed_hosts=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch-2
+      - cluster.name="elk-nlpmonitor-cluster"
+      - bootstrap.memory_lock=true
+      - ${ELASTIC_JAVA_OPTIONS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network
+    restart: always
+  elasticsearch-4:
+    image: "elasticsearch:7.3.1"
+    volumes:
+      - elasticsearch_data4:/usr/share/elasticsearch/data
+    environment:
+      - node.name=elasticsearch-4
+      - discovery.seed_hosts=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch,elasticsearch-2
+      - cluster.name="elk-nlpmonitor-cluster"
+      - bootstrap.memory_lock=true
+      - ${ELASTIC_JAVA_OPTIONS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network
+    restart: always
+
+volumes:
+  elasticsearch_data2:
+    driver: local
+  elasticsearch_data3:
+    driver: local
+  elasticsearch_data4:
+    driver: local

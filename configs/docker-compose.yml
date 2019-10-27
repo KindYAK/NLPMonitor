@@ -50,12 +50,6 @@ services:
       - 9300
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    environment:
-      - cluster.name="elk-nlpmonitor-cluster"
-      - network.host=0.0.0.0
-      - discovery.type=single-node
-      - discovery.zen.minimum_master_nodes=1
-      - ${ELASTIC_JAVA_OPTIONS}
     networks:
       - network
     restart: always
