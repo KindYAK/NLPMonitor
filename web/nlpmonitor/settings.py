@@ -63,6 +63,7 @@ STRONGHOLD_DEFAULTS = False
 STRONGHOLD_PUBLIC_URLS = (
     r'/$',
     r'^/accounts/.+$',
+    r'^/static/.+$',
 )
 
 ROOT_URLCONF = 'nlpmonitor.urls'
