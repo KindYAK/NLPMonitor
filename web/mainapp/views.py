@@ -149,13 +149,14 @@ class SearchView(TemplateView):
             search_request = form.cleaned_data
         results = execute_search(search_request)
         context['documents'] = [{
-            "ID": document['source']['id'],
+            "id": document['source']['id'],
             "datetime": document['source']['datetime'] if 'datetime' in document['source'] else "",
             "title": document['source']['title'],
             "source": document['source']['source'],
             "score": str(document['score']).replace(",", "."),
         } for document in results['hits']]
         context['form'] = form
+        context['total_found'] = results['size']['value']
         return context
 
 

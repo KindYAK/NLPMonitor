@@ -170,7 +170,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Результаты поиска</h3>
+                    <h3>Результаты поиска - {{ total_found }}</h3>
                 </div>
                 <div class="card-body">
                     <div id="search-results">
@@ -181,6 +181,7 @@
                                 <th>Дата публикации</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -190,6 +191,11 @@
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
+                                    <td>
+                                        <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
+                                            <i class="nav-icon fas fa-eye"></i>Просмотр
+                                        </a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
