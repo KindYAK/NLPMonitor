@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Select2 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <!-- Plotyly.js -->
+    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
     <style>
         .form-group .row {
             margin-bottom: 15px;
@@ -30,6 +32,7 @@
 {% endblock %}
 
 {% block content %}
+    {# Поиск #}
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -166,6 +169,171 @@
         </div>
     </div>
 
+    {# Графики #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Динамика публикаций</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        {# Абсолютная мощность #}
+                        <div id="dynamics"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    name: 'Абсолютная мощность выборки',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Абсолютная мощность выборки',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('dynamics', data, layout);
+                        </script>
+
+                        {# Относительная мощность #}
+                        <div id="dynamics_normal"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in dynamics %}{{ tick.doc_count_normal|safe }}, {% endfor %}],
+                                    name: 'Относительная мощность выборки',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Относительная мощность выборки',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('dynamics_normal', data, layout);
+                        </script>
+
+                        {# Относительный удельный вес #}
+                        <div id="dynamics_weight"></div>
+                        <script>
+                            var selectorOptions = {
+                                buttons: [{
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1m'
+                                }, {
+                                    step: 'month',
+                                    stepmode: 'backward',
+                                    count: 6,
+                                    label: '6m'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'todate',
+                                    count: 1,
+                                    label: 'YTD'
+                                }, {
+                                    step: 'year',
+                                    stepmode: 'backward',
+                                    count: 1,
+                                    label: '1y'
+                                }, {
+                                    step: 'all',
+                                }],
+                            };
+
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in dynamics %}{{ tick.dynamics_weight.value|safe }}, {% endfor %}],
+                                    name: 'Удельный вес выборки',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Удельный вес выборки',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {}
+                                },
+                                yaxis: {
+                                    fixedrange: true
+                                }
+                            };
+                            Plotly.plot('dynamics_weight', data, layout);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Результаты поиска #}
     <div class="row">
         <div class="col-12">
             <div class="card">

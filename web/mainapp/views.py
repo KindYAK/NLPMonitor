@@ -147,16 +147,46 @@ class SearchView(TemplateView):
         search_request = {}
         if form.is_valid():
             search_request = form.cleaned_data
-        results = execute_search(search_request)
+
+        # Total metrics
+        sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
+        sd_total.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w")
+        documents_total = sd_total.execute()
+        total_metrics_dict = dict(
+            (
+                t.key_as_string,
+                {
+                    "size": t.doc_count
+                }
+            ) for t in documents_total.aggregations.dynamics.buckets
+        )
+
+        # Search
+        s = execute_search(search_request, return_search_obj=True)
+        s.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
+            .metric("dynamics_weight", agg_type="sum", script="_score")
+        results = s.execute()
         context['documents'] = [{
-            "id": document['source']['id'],
-            "datetime": document['source']['datetime'] if 'datetime' in document['source'] else "",
-            "title": document['source']['title'],
-            "source": document['source']['source'],
-            "score": str(document['score']).replace(",", "."),
-        } for document in results['hits']]
+            "id": document.id,
+            "datetime": document.datetime if hasattr(document, "datetime") else "",
+            "title": document.title,
+            "source": document.source,
+            "score": str(document.meta.score).replace(",", "."),
+        } for document in results]
+
+        # Normalize dynamics
+        for bucket in results.aggregations.dynamics.buckets:
+            total_size = total_metrics_dict[bucket.key_as_string]['size']
+            if total_size != 0:
+                bucket.doc_count_normal = bucket.doc_count / total_size
+                bucket.dynamics_weight.value /= total_size
+            else:
+                bucket.doc_count_normal = 0
+
+        # Create context
+        context['dynamics'] = results.aggregations.dynamics.buckets
+        context['total_found'] = s.count()['value']
         context['form'] = form
-        context['total_found'] = results['size']['value']
         return context
 
 

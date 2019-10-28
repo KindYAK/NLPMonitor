@@ -23,7 +23,7 @@ def es_filter(search, key, value):
     return search.filter(query, **{key: value})
 
 
-def execute_search(search_request):
+def execute_search(search_request, return_search_obj=False):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
     s = s.source(include=SOURCE_FIELDS)
 
@@ -49,6 +49,8 @@ def execute_search(search_request):
         elif key in RANGE_FROM_FIELDS:
             s = s.filter('range', **{key.replace("_from", ""): {'gte': value}})
 
+    if return_search_obj:
+        return s
     s = s[:1000]
     esresult = s.execute().to_dict()
     total_found = esresult['hits']['total']
