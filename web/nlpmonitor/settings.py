@@ -107,6 +107,20 @@ else:
         },
     ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "MAX_ENTRIES": 10000,
+            "CULL_FREQUENCY": 10
+        },
+        "KEY_PREFIX": "nlpmonitor",
+        "TIMEOUT": 60 * 60,
+    }
+}
+
 WSGI_APPLICATION = 'nlpmonitor.wsgi.application'
 
 
