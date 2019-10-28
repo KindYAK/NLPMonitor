@@ -104,7 +104,7 @@ class Document(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()
         hash.update(str(self.source.id).encode())
-        hash.update(str(self.datetime).encode())
+        hash.update(str(self.datetime.date()).encode())
         hash.update(str(self.title).encode())
         self.unique_hash = hash.hexdigest()
         super().save(force_insert, force_update, using, update_fields)
