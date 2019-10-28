@@ -61,7 +61,7 @@ MIDDLEWARE = [
 STRONGHOLD_DEFAULTS = False
 
 STRONGHOLD_PUBLIC_URLS = (
-    r'/',
+    r'/$',
     r'^/accounts/.+$',
 )
 
