@@ -7,7 +7,7 @@ from django.views.decorators.cache import cache_page
 app_name = 'mainapp'
 
 urlpatterns = [
-    path('', cache_page(60*60*8)(TemplateView.as_view(template_name="mainapp/index.html")), name="index"),
+    path('', TemplateView.as_view(template_name="mainapp/index.html"), name="index"),
     path('accounts/login/', cache_page(60*60*8)(auth_views.LoginView.as_view(template_name="mainapp/login.html")), name='login'),
     path('accounts/logout/', cache_page(60*60*8)(auth_views.LogoutView.as_view(next_page="/")), name='logout'),
 
