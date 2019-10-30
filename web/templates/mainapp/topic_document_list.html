@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cache%}
 {% load widget_tweaks %}
 {% load staticfiles %}
 
@@ -34,6 +35,7 @@
 {% endblock %}
 
 {% block content %}
+    {% cache 28800 topic_detail view.kwargs request.GET %}
     {# Управление графиками #}
     <div class="row">
         <div class="col-12">
@@ -333,6 +335,7 @@
             </div>
         </div>
     </div>
+    {% endcache %}
 {% endblock %}
 
 {% block foot %}
