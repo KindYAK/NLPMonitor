@@ -109,7 +109,7 @@ class TopicDocumentListView(TemplateView):
             .filter("term", topic_modelling=topic_modelling) \
             .filter("term", topic_id=topic_name).sort("-topic_weight") \
             .filter("range", topic_weight={"gte": 0.001}) \
-            .source(['document_es_id', 'topic_weight'])[:500]
+            .source(['document_es_id', 'topic_weight'])[:100]
         std.aggs.bucket(name="dynamics",
                         agg_type="date_histogram",
                         field="datetime",
@@ -122,7 +122,7 @@ class TopicDocumentListView(TemplateView):
         # Get documents, set weights
         sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
             .filter('terms', _id=[d.document_es_id for d in topic_documents])\
-            .source(('id', 'title', 'source', 'datetime',))[:500]
+            .source(('id', 'title', 'source', 'datetime',))[:100]
         documents = sd.execute()
         weight_dict = dict((d.document_es_id, d.topic_weight) for d in topic_documents)
         for document in documents:
@@ -179,7 +179,7 @@ class SearchView(TemplateView):
         )
 
         # Search
-        s = execute_search(search_request, return_search_obj=True)
+        s = execute_search(search_request, return_search_obj=True)[:100]
         s.aggs.bucket(name="dynamics",
                       agg_type="date_histogram",
                       field="datetime",
