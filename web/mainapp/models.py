@@ -1,6 +1,8 @@
+import hashlib
+
 from django.db import models
 from topicmodelling.models import Topic, DocumentTopic
-import hashlib
+from .models_user import TopicGroup, TopicID
 
 
 class Corpus(models.Model):

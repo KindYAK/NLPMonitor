@@ -58,3 +58,19 @@ admin.site.register(Tag, TagAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(ScrapRules, ScrapRulesAdmin)
+
+
+class TopicGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'topic_modelling_name', 'owner', 'is_public')
+    list_filter = ('owner', 'is_public', 'topic_modelling_name', )
+    search_fields = ('name', 'topic_modelling_name', )
+
+
+class TopicIDAdmin(admin.ModelAdmin):
+    list_display = ('topic_modelling_name', 'topic_id', )
+    list_filter = ('topic_modelling_name', )
+    search_fields = ('topic_modelling_name', )
+
+
+admin.site.register(TopicGroup, TopicGroupAdmin)
+admin.site.register(TopicID, TopicIDAdmin)
