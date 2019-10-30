@@ -84,8 +84,6 @@ class TopicDocumentListView(TemplateView):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
 
-        print("!!!!!!!!", "MAT EBAL")
-
         # Total metrics
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=topic_modelling) \
@@ -160,9 +158,16 @@ class SearchView(TemplateView):
         if form.is_valid():
             search_request = form.cleaned_data
 
+        # Form Management
+        context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
+        context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+
         # Total metrics
         sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
-        sd_total.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w")
+        sd_total.aggs.bucket(name="dynamics",
+                             agg_type="date_histogram",
+                             field="datetime",
+                             calendar_interval=context['granularity'])
         documents_total = sd_total.execute()
         total_metrics_dict = dict(
             (
@@ -175,7 +180,10 @@ class SearchView(TemplateView):
 
         # Search
         s = execute_search(search_request, return_search_obj=True)
-        s.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
+        s.aggs.bucket(name="dynamics",
+                      agg_type="date_histogram",
+                      field="datetime",
+                      calendar_interval=context['granularity']) \
             .metric("dynamics_weight", agg_type="sum", script="_score")
         results = s.execute()
         context['documents'] = [{
