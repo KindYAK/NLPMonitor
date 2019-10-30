@@ -185,6 +185,7 @@ class SearchView(TemplateView):
                       field="datetime",
                       calendar_interval=context['granularity']) \
             .metric("dynamics_weight", agg_type="sum", script="_score")
+        context['total_found'] = s.count()
         results = s.execute()
         context['documents'] = [{
             "id": document.id,
@@ -205,7 +206,6 @@ class SearchView(TemplateView):
 
         # Create context
         context['dynamics'] = results.aggregations.dynamics.buckets
-        context['total_found'] = s.count()['value']
         context['form'] = form
         return context
 
