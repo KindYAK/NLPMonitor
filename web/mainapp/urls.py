@@ -18,6 +18,6 @@ urlpatterns = [
     path('document_view/<document_id>/', cache_page(60*60*8)(DocumentDetailView.as_view()), name='document_view'),
 
     path('topics_list/', cache_page(60*60*8)(TopicsListView.as_view()), name="topics_list"),
-    path('topic_documents_list/<topic_modelling>/<topic_name>/', cache_page(60*60*8)(TopicDocumentListView.as_view()),
+    path('topic_documents_list/<topic_modelling>/<topic_name>/', TopicDocumentListView.as_view(),
         name="topic_document_list"),
 ]

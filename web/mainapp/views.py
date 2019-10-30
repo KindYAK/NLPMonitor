@@ -80,12 +80,19 @@ class TopicDocumentListView(TemplateView):
         topic_name = kwargs['topic_name']
         topic_modelling = kwargs['topic_modelling']
 
+        # Form Management
+        context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
+        context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+
         # Total metrics
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=topic_modelling) \
             .filter("range", topic_weight={"gte": 0.001})
-        std_total.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
-            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+        std_total.aggs.bucket(name="dynamics",
+                              agg_type="date_histogram",
+                              field="datetime",
+                              calendar_interval=context['granularity']) \
+                      .metric("dynamics_weight", agg_type="sum", field="topic_weight")
         topic_documents_total = std_total.execute()
         total_metrics_dict = dict(
             (
@@ -103,10 +110,13 @@ class TopicDocumentListView(TemplateView):
             .filter("term", topic_id=topic_name).sort("-topic_weight") \
             .filter("range", topic_weight={"gte": 0.001}) \
             .source(['document_es_id', 'topic_weight'])[:500]
-        std.aggs.bucket(name="dynamics", agg_type="date_histogram", field="datetime", calendar_interval="1w") \
-            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+        std.aggs.bucket(name="dynamics",
+                        agg_type="date_histogram",
+                        field="datetime",
+                        calendar_interval=context['granularity']) \
+                .metric("dynamics_weight", agg_type="sum", field="topic_weight")
         std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
-            .metric("source_weight", agg_type="sum", field="topic_weight")
+                .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
 
         # Get documents, set weights
