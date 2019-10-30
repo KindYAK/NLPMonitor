@@ -84,6 +84,8 @@ class TopicDocumentListView(TemplateView):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
 
+        print("!!!!!!!!", "MAT EBAL")
+
         # Total metrics
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=topic_modelling) \

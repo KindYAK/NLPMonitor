@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
 {% load staticfiles %}
-{% load cache %}
 
 {% block title %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
 {% block heading %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
@@ -35,7 +34,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 topic_detail view.kwargs.topic_modelling view.kwargs.topic_name granularity smooth %}
     {# Управление графиками #}
     <div class="row">
         <div class="col-12">
@@ -335,7 +333,6 @@
             </div>
         </div>
     </div>
-    {% endcache %}
 {% endblock %}
 
 {% block foot %}
