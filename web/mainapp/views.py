@@ -1,5 +1,7 @@
 import datetime
 
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
@@ -32,6 +34,9 @@ class TopicsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        key = make_template_fragment_key('topics_list', [self.request.GET])
+        if cache.get(key):
+            return context
         form = self.form_class(data=self.request.GET)
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
@@ -77,6 +82,9 @@ class TopicDocumentListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
+        if cache.get(key):
+            return context
         topic_name = kwargs['topic_name']
         topic_modelling = kwargs['topic_modelling']
 
@@ -153,6 +161,9 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        key = make_template_fragment_key('search_page', [self.request.GET])
+        if cache.get(key):
+            return context
         form = self.form_class(data=self.request.GET)
         search_request = {}
         if form.is_valid():
@@ -247,7 +258,10 @@ class DocumentDetailView(TemplateView):
     template_name = "mainapp/document_detail.html"
 
     def get_context_data(self, **kwargs):
+        key = make_template_fragment_key('document_detail', [kwargs])
         context = super().get_context_data(**kwargs)
+        if cache.get(key):
+            return context
         context['document'] = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
                 .filter("term", **{"id": kwargs['document_id']}).execute()[0]
         return context
