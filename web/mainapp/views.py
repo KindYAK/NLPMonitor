@@ -230,8 +230,22 @@ class SearchView(TemplateView):
             else:
                 bucket.doc_count_normal = 0
 
+        # Separate signals
+        absolute_power = [bucket.doc_count for bucket in results.aggregations.dynamics.buckets]
+        relative_power = [bucket.doc_count_normal for bucket in results.aggregations.dynamics.buckets]
+        relative_weight = [bucket.dynamics_weight.value for bucket in results.aggregations.dynamics.buckets]
+
+        # Smooth
+        if context['smooth']:
+            absolute_power = apply_fir_filter(np.array(absolute_power), granularity=context['granularity'])
+            relative_power = apply_fir_filter(relative_power, granularity=context['granularity'])
+            relative_weight = apply_fir_filter(relative_weight, granularity=context['granularity'])
+
         # Create context
-        context['dynamics'] = results.aggregations.dynamics.buckets
+        context['date_ticks'] = [bucket.key_as_string for bucket in results.aggregations.dynamics.buckets]
+        context['absolute_power'] = absolute_power
+        context['relative_power'] = relative_power
+        context['relative_weight'] = relative_weight
         context['form'] = form
         return context
 

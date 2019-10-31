@@ -273,13 +273,13 @@
                             var data = [
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                    y: [{% for tick in absolute_power %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Абсолютная мощность выборки',
-                                    {% if smooth %}
-                                    line: {shape: 'spline'},
-                                    smoothing: 0.5
-                                    {% endif %}
+{#                                    {% if smooth %}#}
+{#                                    line: {shape: 'spline'},#}
+{#                                    smoothing: 0.5#}
+{#                                    {% endif %}#}
                                 },
                             ];
                             var layout = {
@@ -327,13 +327,13 @@
                             var data = [
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in dynamics %}{{ tick.doc_count_normal|safe }}, {% endfor %}],
+                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                    y: [{% for tick in relative_power %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Относительная мощность выборки',
-                                    {% if smooth %}
-                                    line: {shape: 'spline'},
-                                    smoothing: 0.5
-                                    {% endif %}
+{#                                    {% if smooth %}#}
+{#                                    line: {shape: 'spline'},#}
+{#                                    smoothing: 0.5#}
+{#                                    {% endif %}#}
                                 },
                             ];
                             var layout = {
@@ -381,13 +381,13 @@
                             var data = [
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in dynamics %}{{ tick.dynamics_weight.value|safe }}, {% endfor %}],
+                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                    y: [{% for tick in relative_weight %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Удельный вес выборки',
-                                    {% if smooth %}
-                                    line: {shape: 'spline'},
-                                    smoothing: 0.5
-                                    {% endif %}
+{#                                    {% if smooth %}#}
+{#                                    line: {shape: 'spline'},#}
+{#                                    smoothing: 0.5#}
+{#                                    {% endif %}#}
                                 },
                             ];
                             var layout = {
