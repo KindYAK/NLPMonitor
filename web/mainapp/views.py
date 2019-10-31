@@ -1,4 +1,4 @@
-import datetime
+import numpy as np
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -8,6 +8,7 @@ from elasticsearch_dsl import Search
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, TopicChooseForm
+from .services import apply_fir_filter
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
 from .services_es_documents import execute_search
 
@@ -148,9 +149,23 @@ class TopicDocumentListView(TemplateView):
             else:
                 bucket.doc_count_normal = 0
 
+        # Separate signals
+        absolute_power = [bucket.doc_count for bucket in topic_documents.aggregations.dynamics.buckets]
+        relative_power = [bucket.doc_count_normal for bucket in topic_documents.aggregations.dynamics.buckets]
+        relative_weight = [bucket.dynamics_weight.value for bucket in topic_documents.aggregations.dynamics.buckets]
+
+        # Smooth
+        if context['smooth']:
+            absolute_power = apply_fir_filter(np.array(absolute_power), granularity=context['granularity'])
+            relative_power = apply_fir_filter(relative_power, granularity=context['granularity'])
+            relative_weight = apply_fir_filter(relative_weight, granularity=context['granularity'])
+
         # Create context
         context['documents'] = documents
-        context['topic_dynamics'] = topic_documents.aggregations.dynamics.buckets
+        context['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
+        context['absolute_power'] = absolute_power
+        context['relative_power'] = relative_power
+        context['relative_weight'] = relative_weight
         context['source_weight'] = topic_documents.aggregations.source.buckets
         return context
 
