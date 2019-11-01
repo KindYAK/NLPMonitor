@@ -92,4 +92,38 @@ function run_group_list_management(topic_modelling, csrf_token){
         $('#publicTopicGroupsList').html(generate_topic_group_list(topic_groups_list.public_groups, "public", topic_id));
         $('#topicGroupModal').modal();
     });
+
+    $('#addGroup').click(function() {
+        $.ajax(
+            {
+                url: '/api/topic_group/',
+                method: 'POST',
+                data: {
+                    "name": $('#newGroupName').val(),
+                    "topic_modelling": topic_modelling,
+                },
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-CSRFToken", csrf_token);
+                },
+                success: function (result) {
+                    if (result.status === 500) {
+                        alert(result.error);
+                        return;
+                    } else if (result.status !== 200) {
+                        alert("Что-то пошло не так :( Истекла сессия? Попробуйте обновить страницу или " +
+                                "обратитесь к Администратору системы");
+                            return;
+                    }
+                    topic_groups_list.my_groups.push({
+                        "id": result.id,
+                        "name": result.name,
+                        "topic_modelling_name": topic_modelling,
+                        "is_public": result.is_public,
+                        "topics": [],
+                    });
+                    $('#topicGroupModal').modal('hide');
+                }
+            }
+        );
+    });
 }

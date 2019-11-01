@@ -1,4 +1,5 @@
 from mainapp.models import *
+from django.db.utils import IntegrityError
 from annoying.functions import get_object_or_None
 from .serializers import *
 from rest_framework import viewsets
@@ -15,7 +16,7 @@ class TopicGroupViewSet(viewsets.ViewSet):
                 }
             )
         topic_modelling_name = request.GET['topic_modelling']
-        topic_groups = TopicGroup.objects.filter(topic_modelling_name=topic_modelling_name)
+        topic_groups = TopicGroup.objects.filter(topic_modelling_name=topic_modelling_name).order_by('name')
         topic_groups_my = topic_groups.filter(owner=request.user).prefetch_related('topics')
         topic_groups_public = topic_groups.filter(is_public=True).prefetch_related('topics')
 
@@ -74,3 +75,33 @@ class TopicGroupViewSet(viewsets.ViewSet):
                     "group_id": topic_group.id,
                 }
             )
+
+    def create(self, request):
+        if 'name' not in request.POST or 'topic_modelling' not in request.POST:
+            return Response(
+                {
+                    "status": 500,
+                    "error": "You need to specify topic_id and is_checked POST parameters"
+                }
+            )
+        try:
+            group = TopicGroup.objects.create(name=request.POST['name'],
+                                      topic_modelling_name=request.POST['topic_modelling'],
+                                      owner=request.user,
+                                      is_public=request.user.is_superuser
+                                      )
+        except IntegrityError:
+            return Response(
+                {
+                    "status": 500,
+                    "error": "Группа с таким названием уже существует",
+                }
+            )
+        return Response(
+            {
+                "status": 200,
+                "id": group.id,
+                "name": group.name,
+                "is_public": group.is_public,
+            }
+        )
