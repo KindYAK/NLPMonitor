@@ -35,7 +35,7 @@ class TopicsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        key = make_template_fragment_key('topics_list', [self.request.GET])
+        key = make_template_fragment_key('topic_groups_list', [self.request.GET])
         if cache.get(key):
             return context
         form = self.form_class(data=self.request.GET)
