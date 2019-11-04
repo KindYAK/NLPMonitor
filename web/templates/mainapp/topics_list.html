@@ -124,9 +124,7 @@
                             <input class="form-control" type="text" id="topicSearchInput" placeholder="Поиск...">
                         </div>
                         <div class="col-3">
-{#                            <select class="form-control" id="topicFilterInput">#}
-{#                                <option>Default select</option>#}
-{#                            </select>#}
+                            <select class="form-control" id="topicFilterInput"></select>
                         </div>
                         <div class="col-3"></div>
                     </div>
@@ -139,6 +137,7 @@
                                 <th>Мощность</th>
                                 <th>Удельный вес</th>
                                 <th></th>
+                                <th hidden></th>
                             </tr>
                             </thead>
                             <tbody  class="list" id="tableBody">
@@ -163,6 +162,7 @@
                                                style="font-size: 36px; padding: .5rem 1rem;"></i>
                                         </a>
                                     </td>
+                                    <td hidden class="topic-id">{{ topic.id }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -224,36 +224,5 @@
         run_group_list_management('{{ topic_modelling }}', '{{ csrf_token }}')
     </script>
 
-    <script>
-        function init_table(){
-            return $('#search-results-table').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": false,
-                "ordering": true,
-                "order": [],
-                "info": true,
-                "autoWidth": true,
-                "pageLength": 25,
-            });
-        }
-        var table = init_table();
-
-        {# Search by text input #}
-        var options = {
-            valueNames: ['topic-name', 'topic-words'],
-        };
-        var searchEngine = new List('search-results', options);
-
-        typeHandler = function(e){
-            table.destroy();
-            searchEngine.search(e.target.value);
-            table = init_table();
-        };
-        var searchInput = document.querySelector('#topicSearchInput');
-        searchInput.addEventListener('input', typeHandler);
-        searchInput.addEventListener('propertychange', typeHandler);
-
-        {# Search by group select #}
-    </script>
+    <script src="{% static 'js/topics_list_search_filter.js' %}"></script>
 {% endblock %}

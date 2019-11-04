@@ -11,6 +11,15 @@ function run_group_list_management(topic_modelling, csrf_token){
                     return;
                 }
                 topic_groups_list = result;
+                var options = "<option selected value='-1'>Группа топиков...</option>";
+                for (group of topic_groups_list.my_groups){
+                    options += "<option value='" + group.name + "'>" + group.name + "</option>"
+                }
+                options += "<option value='-1'>-----Публичные группы-----</option>";
+                for (group of topic_groups_list.public_groups){
+                    options += "<option value='" + group.name + "'>" + group.name + "</option>"
+                }
+                $('#topicFilterInput').html(options);
             }
         }
     );
