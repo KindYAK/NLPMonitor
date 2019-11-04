@@ -105,3 +105,12 @@ class TopicGroupViewSet(viewsets.ViewSet):
                 "is_public": group.is_public,
             }
         )
+
+    def destroy(self, request, pk=None):
+        TopicGroup.objects.get(id=pk).delete()
+        return Response(
+            {
+                "status": 200,
+                "group_id": int(pk),
+            }
+        )

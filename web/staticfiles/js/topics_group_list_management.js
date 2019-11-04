@@ -33,6 +33,7 @@ function run_group_list_management(topic_modelling, csrf_token){
                 '           <label for="groupCheck_' + prefix + '_' + topic_group.id + '"></label>\n' +
                 '         </div>';
             list_html += " " + topic_group.name + '(' + topic_group.topics.length + ' топиков)';
+            list_html += (prefix === "my" ? '<i class="fas fa-times remove-topic" id="removeTopic_' + topic_group.id + '" data-toggle="tooltip" data-placement="top" title="Удалить группу топиков"></i>' : '');
             list_html += "</li>";
         }
         list_html += "</ul>";
@@ -91,6 +92,34 @@ function run_group_list_management(topic_modelling, csrf_token){
 
         $('#publicTopicGroupsList').html(generate_topic_group_list(topic_groups_list.public_groups, "public", topic_id));
         $('#topicGroupModal').modal();
+
+        $('.remove-topic').tooltip();
+        $('.remove-topic').click(function(e){
+            if (confirm("Вы уверены, что хотите удалить группу " + e.target.id)) {
+                $.ajax(
+                    {
+                        url: '/api/topic_group/' + e.target.id.split('removeTopic_')[1],
+                        method: 'DELETE',
+                        beforeSend: function (request) {
+                            request.setRequestHeader("X-CSRFToken", csrf_token);
+                        },
+                        success: function (result) {
+                            if (result.status !== 200) {
+                                alert("Что-то пошло не так :( Истекла сессия? Попробуйте обновить страницу");
+                                return;
+                            }
+                            topic_groups_list.my_groups = topic_groups_list.my_groups.filter(function (value, index, arr) {
+                                return value.id !== result.group_id;
+                            });
+                            topic_groups_list.public_groups = topic_groups_list.public_groups.filter(function (value, index, arr) {
+                                return value.id !== result.group_id;
+                            });
+                            $('#topicGroupModal').modal('hide');
+                        }
+                    }
+                );
+            }
+        });
     });
 
     $('#addGroup').click(function() {
