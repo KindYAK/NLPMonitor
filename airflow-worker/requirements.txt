@@ -2,3 +2,4 @@
 # Move all of the stuff here to -base on every major update
 stop_words==2018.7.23
 numba==0.46.0
+djangorestframework==3.9.4
