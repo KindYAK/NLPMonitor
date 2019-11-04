@@ -9,7 +9,7 @@ from elasticsearch_dsl import Search, Q
 
 
 class TopicChooseForm(forms.Form):
-    topic_modelling = forms.ChoiceField()
+    topic_modelling = forms.ChoiceField(label="Тематическое моделирование")
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,

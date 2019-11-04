@@ -30,11 +30,13 @@
         .remove-topic {
             cursor: pointer;
             color: red;
-            
+
         }
     </style>
     <!-- Plotyly.js -->
     <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+    <!-- List.js -->
+    <script src="{% static 'js/list.min.js' %}"></script>
 {% endblock %}
 
 {% block bc %}
@@ -44,14 +46,15 @@
 
 {% block content %}
     {% cache 28800 topics_list request.GET %}
+    {# TM select #}
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <form action="" method="GET">
                 <div class="card-header">
-                    <h3>Поиск и фильтры</h3>
+                    <h3>Выбор тематического моделирования</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="padding-bottom: 0;">
                     <div id="search-form">
                         <div class="row">
                             <div class="col-lg-12">
@@ -77,6 +80,7 @@
         </div>
     </div>
 
+    {# Pie plot #}
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -106,13 +110,26 @@
         </div>
     </div>
 
+    {# Topics #}
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Результаты поиска</h3>
+                    <h3>Топики</h3>
                 </div>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <input class="form-control" type="text" id="topicSearchInput" placeholder="Поиск...">
+                        </div>
+                        <div class="col-3">
+{#                            <select class="form-control" id="topicFilterInput">#}
+{#                                <option>Default select</option>#}
+{#                            </select>#}
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
                     <div id="search-results">
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
@@ -124,20 +141,20 @@
                                 <th></th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody  class="list" id="tableBody">
                             {% for topic in topics %}
                                 <tr>
-                                    <td>
+                                    <td class="topic-name">
                                         {% if topic.name %}
                                             {{ topic.name }}
                                         {% else %}
                                             {{ topic.id }}
                                         {% endif %}
                                     </td>
-                                    <td>{% for word in topic.topic_words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2  }}); {% endfor %}</td>
-                                    <td>{{ topic.size }}</td>
-                                    <td>{{ topic.weight }}</td>
-                                    <td>
+                                    <td class="topic-words">{% for word in topic.topic_words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2  }}); {% endfor %}</td>
+                                    <td class="topic-size">{{ topic.size }}</td>
+                                    <td class="topic-weight">{{ topic.weight }}</td>
+                                    <td class="topic-actions">
                                         <a href="{% url 'mainapp:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link nowrap">
                                             <i class="nav-icon fas fa-eye" style="font-size: 36px;"></i>
                                         </a>
@@ -208,8 +225,8 @@
     </script>
 
     <script>
-        $(function () {
-            $('#search-results-table').DataTable({
+        function init_table(){
+            return $('#search-results-table').DataTable({
                 "paging": true,
                 "lengthChange": true,
                 "searching": false,
@@ -219,6 +236,24 @@
                 "autoWidth": true,
                 "pageLength": 25,
             });
-        });
+        }
+        var table = init_table();
+
+        {# Search by text input #}
+        var options = {
+            valueNames: ['topic-name', 'topic-words'],
+        };
+        var searchEngine = new List('search-results', options);
+
+        typeHandler = function(e){
+            table.destroy();
+            searchEngine.search(e.target.value);
+            table = init_table();
+        };
+        var searchInput = document.querySelector('#topicSearchInput');
+        searchInput.addEventListener('input', typeHandler);
+        searchInput.addEventListener('propertychange', typeHandler);
+
+        {# Search by group select #}
     </script>
 {% endblock %}
