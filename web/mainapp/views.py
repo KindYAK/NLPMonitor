@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -81,26 +82,14 @@ class TopicsListView(TemplateView):
 class TopicDocumentListView(TemplateView):
     template_name = "mainapp/topic_document_list.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
-        if cache.get(key):
-            return context
-        topic_name = kwargs['topic_name']
-        topic_modelling = kwargs['topic_modelling']
-
-        # Form Management
-        context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
-        context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
-
-        # Total metrics
+    def get_total_metrics(self, granularity):
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-            .filter("term", topic_modelling=topic_modelling) \
+            .filter("term", topic_modelling=self.topic_modelling) \
             .filter("range", topic_weight={"gte": 0.001})
         std_total.aggs.bucket(name="dynamics",
                               agg_type="date_histogram",
                               field="datetime",
-                              calendar_interval=context['granularity']) \
+                              calendar_interval=granularity) \
                       .metric("dynamics_weight", agg_type="sum", field="topic_weight")
         topic_documents_total = std_total.execute()
         total_metrics_dict = dict(
@@ -112,33 +101,36 @@ class TopicDocumentListView(TemplateView):
                 }
             ) for t in topic_documents_total.aggregations.dynamics.buckets
         )
+        return total_metrics_dict
 
-        # Current topic metrics
+    def get_current_topics_metrics(self, topics, granularity):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-            .filter("term", topic_modelling=topic_modelling) \
-            .filter("term", topic_id=topic_name).sort("-topic_weight") \
-            .filter("range", topic_weight={"gte": 0.001}) \
-            .source(['document_es_id', 'topic_weight'])[:100]
+                  .filter("term", topic_modelling=self.topic_modelling) \
+                  .filter("term", topic_id=topics).sort("-topic_weight") \
+                  .filter("range", topic_weight={"gte": 0.001}) \
+                  .source(['document_es_id', 'topic_weight'])[:100]
         std.aggs.bucket(name="dynamics",
                         agg_type="date_histogram",
                         field="datetime",
-                        calendar_interval=context['granularity']) \
-                .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+                        calendar_interval=granularity) \
+            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
         std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
-                .metric("source_weight", agg_type="sum", field="topic_weight")
+            .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
+        return topic_documents
 
-        # Get documents, set weights
-        sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
-            .filter('terms', _id=[d.document_es_id for d in topic_documents])\
-            .source(('id', 'title', 'source', 'datetime',))[:100]
+    def get_documents_with_weights(self, topic_documents):
+        sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
+                 .filter('terms', _id=[d.document_es_id for d in topic_documents]) \
+                 .source(('id', 'title', 'source', 'datetime',))[:100]
         documents = sd.execute()
         weight_dict = dict((d.document_es_id, d.topic_weight) for d in topic_documents)
         for document in documents:
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
+        return documents
 
-        # Normalize
+    def normalize_topic_documnets(self, topic_documents, total_metrics_dict):
         for bucket in topic_documents.aggregations.dynamics.buckets:
             total_weight = total_metrics_dict[bucket.key_as_string]['weight']
             total_size = total_metrics_dict[bucket.key_as_string]['size']
@@ -148,6 +140,36 @@ class TopicDocumentListView(TemplateView):
                 bucket.doc_count_normal = bucket.doc_count / total_size
             else:
                 bucket.doc_count_normal = 0
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
+        if cache.get(key):
+            return context
+        self.topic_modelling = kwargs['topic_modelling']
+
+        is_group = True
+        if 'topic_name' in kwargs:
+            topic_name = kwargs['topic_name']
+            is_group = False
+
+        # Forms Management
+        context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
+        context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+        topics = json.loads(self.request.GET['topics'])
+        is_too_many_groups = len(topics) > 50
+
+        # Total metrics
+        total_metrics_dict = self.get_total_metrics(context['granularity'])
+
+        # Current topic metrics
+        topic_documents = self.get_current_topics_metrics(topic_name, context['granularity'])
+
+        # Get documents, set weights
+        documents = self.get_documents_with_weights(topic_documents)
+
+        # Normalize
+        self.normalize_topic_documnets(topic_documents, total_metrics_dict)
 
         # Separate signals
         absolute_power = [bucket.doc_count for bucket in topic_documents.aggregations.dynamics.buckets]
