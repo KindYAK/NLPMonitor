@@ -148,16 +148,17 @@ class TopicDocumentListView(TemplateView):
             return context
         self.topic_modelling = kwargs['topic_modelling']
 
-        is_group = True
         if 'topic_name' in kwargs:
             topic_name = kwargs['topic_name']
             is_group = False
+        else:
+            topics = json.loads(self.request.GET['topics'])
+            is_too_many_groups = len(topics) > 50
+            is_group = True
 
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
-        topics = json.loads(self.request.GET['topics'])
-        is_too_many_groups = len(topics) > 50
 
         # Total metrics
         total_metrics_dict = self.get_total_metrics(context['granularity'])
