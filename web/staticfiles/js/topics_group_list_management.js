@@ -1,5 +1,17 @@
 var topic_groups_list = null;
 
+function initialize_groups_select(){
+    var options = "<option selected value='-1'>-----Группа топиков...-----</option>";
+    for (group of topic_groups_list.my_groups){
+        options += "<option value='" + group.name + "'>" + group.name + "</option>"
+    }
+    options += "<option value='-1'>-----Публичные группы-----</option>";
+    for (group of topic_groups_list.public_groups){
+        options += "<option value='" + group.name + "'>" + group.name + "</option>"
+    }
+    $('#topicFilterInput').html(options);
+}
+
 function run_group_list_management(topic_modelling, csrf_token){
     $.ajax(
         {
@@ -11,15 +23,7 @@ function run_group_list_management(topic_modelling, csrf_token){
                     return;
                 }
                 topic_groups_list = result;
-                var options = "<option selected value='-1'>Группа топиков...</option>";
-                for (group of topic_groups_list.my_groups){
-                    options += "<option value='" + group.name + "'>" + group.name + "</option>"
-                }
-                options += "<option value='-1'>-----Публичные группы-----</option>";
-                for (group of topic_groups_list.public_groups){
-                    options += "<option value='" + group.name + "'>" + group.name + "</option>"
-                }
-                $('#topicFilterInput').html(options);
+                initialize_groups_select();
             }
         }
     );
@@ -49,9 +53,8 @@ function run_group_list_management(topic_modelling, csrf_token){
         return list_html;
     }
 
-    $('.manage-topic-groups').click(function (e) {
-        e.preventDefault();
-        topic_id = e.target.id.split("manageTopics_")[1];
+    function manage_topics_onclick(topic_id){
+        $('#addGroup').attr('topic_id', topic_id);
 
         $('#myTopicGroupsList').html(generate_topic_group_list(topic_groups_list.my_groups, "my", topic_id));
         $('.group-check-my').click(function (e) {
@@ -129,9 +132,15 @@ function run_group_list_management(topic_modelling, csrf_token){
                 );
             }
         });
+    }
+
+    $('.manage-topic-groups').click(function (e) {
+        e.preventDefault();
+        topic_id = e.target.id.split("manageTopics_")[1];
+        manage_topics_onclick(topic_id);
     });
 
-    $('#addGroup').click(function() {
+    $('#addGroup').click(function(e) {
         $.ajax(
             {
                 url: '/api/topic_group/',
@@ -159,7 +168,8 @@ function run_group_list_management(topic_modelling, csrf_token){
                         "is_public": result.is_public,
                         "topics": [],
                     });
-                    $('#topicGroupModal').modal('hide');
+                    initialize_groups_select();
+                    manage_topics_onclick($('#addGroup').attr('topic_id'));
                 }
             }
         );
