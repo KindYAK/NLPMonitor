@@ -1,3 +1,3 @@
 #!/bin/sh
 
-gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=30 --workers=4 --reload
+gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=30 --workers=4 --limit-request-line 16000 --reload

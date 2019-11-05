@@ -20,4 +20,6 @@ urlpatterns = [
     path('topics_list/', TopicsListView.as_view(), name="topics_list"),
     path('topic_documents_list/<topic_modelling>/<topic_name>/', TopicDocumentListView.as_view(),
         name="topic_document_list"),
+    path('topic_documents_list/<topic_modelling>/', TopicDocumentListView.as_view(),
+        name="topics_group_document_list"),
 ]

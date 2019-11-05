@@ -1,13 +1,13 @@
+// Initital stuff
 function init_table(){
     return $('#search-results-table').DataTable({
-        "paging": true,
+        "paging": false,
         "lengthChange": true,
         "searching": false,
         "ordering": true,
         "order": [],
         "info": true,
         "autoWidth": true,
-        "pageLength": 25,
     });
 }
 $('#topicSearchInput').val("");
@@ -60,3 +60,16 @@ searchInput.addEventListener('propertychange', search_filter);
 
 // Search by group select
 $('#topicFilterInput').change(search_filter);
+
+// Getting topics group detail - form management
+$('#topicGroupDetailSubmit').click(function(e){
+    e.preventDefault();
+
+    var topic_ids = [];
+    for (topic of searchEngine.matchingItems){
+        topic_ids.push(topic._values['topic-id']);
+    }
+    $('#topicGroupFiltered').val(JSON.stringify(topic_ids));
+
+    $('#topicGroupDetailForm').submit();
+});

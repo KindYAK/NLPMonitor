@@ -3,8 +3,20 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 
-{% block title %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
-{% block heading %}Список документов топика "{{ request.GET.topic_name }}"{% endblock %}
+{% block title %}
+    {% if request.GET.topic_name %}
+        Список документов топика "{{ request.GET.topic_name }}"
+    {% else %}
+        Список документов выбранной группы
+    {% endif %}
+{% endblock %}
+{% block heading %}
+    {% if request.GET.topic_name %}
+        Список документов топика "{{ request.GET.topic_name }}"
+    {% else %}
+        Список документов выбранной группы
+    {% endif %}
+{% endblock %}
 
 {% block head %}
     <!-- data tables -->
@@ -48,6 +60,7 @@
                         <div class="row">
                             <form method="GET" action="" style="display: contents;">
                             <input type="hidden" value="{{ request.GET.topic_name }}" name="topic_name">
+                            <input type="hidden" value="{{ request.GET.topics }}" name="topics">
                             <div class="col-lg-3"></div>
                             <div class="col-lg-2">
                                 <div class="form-group">

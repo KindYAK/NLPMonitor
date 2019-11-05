@@ -104,9 +104,11 @@ class TopicDocumentListView(TemplateView):
         return total_metrics_dict
 
     def get_current_topics_metrics(self, topics, granularity):
+        if type(topics) != list:
+            topics = [topics]
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=self.topic_modelling) \
-                  .filter("term", topic_id=topics).sort("-topic_weight") \
+                  .filter("terms", topic_id=topics).sort("-topic_weight") \
                   .filter("range", topic_weight={"gte": 0.001}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
         std.aggs.bucket(name="dynamics",
@@ -146,15 +148,13 @@ class TopicDocumentListView(TemplateView):
         key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
         if cache.get(key):
             return context
-        self.topic_modelling = kwargs['topic_modelling']
 
+        self.topic_modelling = kwargs['topic_modelling']
         if 'topic_name' in kwargs:
-            topic_name = kwargs['topic_name']
-            is_group = False
+            topics = kwargs['topic_name']
         else:
             topics = json.loads(self.request.GET['topics'])
             is_too_many_groups = len(topics) > 50
-            is_group = True
 
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -164,7 +164,7 @@ class TopicDocumentListView(TemplateView):
         total_metrics_dict = self.get_total_metrics(context['granularity'])
 
         # Current topic metrics
-        topic_documents = self.get_current_topics_metrics(topic_name, context['granularity'])
+        topic_documents = self.get_current_topics_metrics(topics, context['granularity'])
 
         # Get documents, set weights
         documents = self.get_documents_with_weights(topic_documents)
