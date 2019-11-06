@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 {% load cache %}
+{% load l10n %}
 
 {% block title %}Список топиков{% endblock %}
 {% block heading %}Список топиков{% endblock %}
@@ -158,9 +159,9 @@
                                             {{ topic.id }}
                                         {% endif %}
                                     </td>
-                                    <td class="topic-words">{% for word in topic.topic_words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2  }}); {% endfor %}</td>
+                                    <td class="topic-words">{% for word in topic.topic_words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2|unlocalize }}); {% endfor %}</td>
                                     <td class="topic-size">{{ topic.size }}</td>
-                                    <td class="topic-weight">{{ topic.weight }}</td>
+                                    <td class="topic-weight">{{ topic.weight|unlocalize }}</td>
                                     <td class="topic-actions">
                                         <a href="{% url 'mainapp:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link nowrap">
                                             <i class="nav-icon fas fa-eye" style="font-size: 36px;"></i>

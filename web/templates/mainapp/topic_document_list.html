@@ -2,6 +2,7 @@
 {% load cache%}
 {% load widget_tweaks %}
 {% load staticfiles %}
+{% load l10n %}
 
 {% block title %}
     {% if request.GET.topic_name %}
@@ -330,7 +331,7 @@
                             <tbody>
                             {% for document in documents %}
                                 <tr>
-                                    <td>{{ document.weight }}</td>
+                                    <td>{{ document.weight|floatformat:3|unlocalize }}</td>
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
