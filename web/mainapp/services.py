@@ -15,6 +15,13 @@ def date_generator(date_start, date_finish):
         date_start = date_start + datetime.timedelta(days=1)
 
 
+def ascend_signal_to_zero(signal):
+    signal_min = min(signal)
+    if signal_min < 0:
+        signal = [s - signal_min for s in signal]
+    return signal
+
+
 # Band-pass fir-filter
 # f1 - начальная пропускная граница; f1 in (0,1]
 # f2 - конечная пропускная граница; f2 in (0,1]
@@ -56,4 +63,4 @@ def apply_fir_filter(time_series, granularity):
 
     # Делаем фильтрацию
     filtered_data = filtfilt(coefficients, 1.0, time_series, method="gust")
-    return filtered_data
+    return ascend_signal_to_zero(filtered_data)
