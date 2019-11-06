@@ -45,6 +45,7 @@ class TopicsListView(TemplateView):
         else:
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
 
+        # Get topics aggregation
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=context['topic_modelling']) \
             .filter("range", topic_weight={"gte": 0.001})
@@ -58,21 +59,30 @@ class TopicsListView(TemplateView):
             }) for bucket in result.aggregations.topics.buckets
         )
 
+        # Get actual topics
         topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
             .filter("term", **{"name": context['topic_modelling']}) \
             .filter("term", **{"is_ready": True}).execute()[0]['topics']
+        # Fill topic objects with meta data
         for topic in topics:
             if topic.id in topic_info_dict:
                 topic.size = topic_info_dict[topic.id]['count']
-                topic.weight = round(topic_info_dict[topic.id]['weight_sum'], 2)
+                topic.weight = topic_info_dict[topic.id]['weight_sum']
             else:
                 topic.size, topic.weight = 0, 0
             if not topic.topic_words:
                 continue
-            max_weight = max((word.weight for word in topic.topic_words))
+            max_word_weight = max((word.weight for word in topic.topic_words))
             for topic_word in topic.topic_words:
-                topic_word.weight /= max_weight
-        context['topics'] = sorted([t for t in topics if len(t.topic_words) > 0],
+                topic_word.weight /= max_word_weight
+
+        # Normalize topic weights by max
+        max_topic_weight = max((topic.weight for topic in topics))
+        for topic in topics:
+            topic.weight /= max_topic_weight
+
+        # Create context
+        context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
         context['form'] = form
