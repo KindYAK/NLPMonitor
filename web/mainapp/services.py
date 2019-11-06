@@ -32,23 +32,26 @@ def apply_fir_filter(time_series, granularity):
     year_length = 365.259
     if granularity == "1d":
         fs = year_length / 365
-        f1, f2 = 0.000001, 0.03  # Band-pass frequencies [Hz percentiles]
+        f1, f2 = 0.000001, 0.01  # Band-pass frequencies [Hz percentiles]
     elif granularity == "1w":
         fs = year_length / 7
-        f1, f2 = 0.000001, 0.06  # Band-pass frequencies [Hz percentiles]
+        f1, f2 = 0.000001, 0.05  # Band-pass frequencies [Hz percentiles]
     elif granularity == "1M":
         fs = year_length / 30
-        f1, f2 = 0.000001, 0.09  # Band-pass frequencies [Hz percentiles]
+        f1, f2 = 0.000001, 0.1  # Band-pass frequencies [Hz percentiles]
     elif granularity == "1q":
         fs = year_length / 90
-        f1, f2 = 0.000001, 0.12  # Band-pass frequencies [Hz percentiles]
+        f1, f2 = 0.000001, 0.2  # Band-pass frequencies [Hz percentiles]
     elif granularity == "1y":
         fs = year_length / 1
-        f1, f2 = 0.000001, 0.2  # Band-pass frequencies [Hz percentiles]
+        f1, f2 = 0.000001, 0.33  # Band-pass frequencies [Hz percentiles]
     else:
         raise Exception("Granularity not implemented")
 
-    N = 111  # Length of the filter (number of coefficients)
+    filter_length_by_signal_length = int(len(time_series) * 0.2)
+    if filter_length_by_signal_length % 2 == 0:
+        filter_length_by_signal_length += 1
+    N = min(filter_length_by_signal_length, 401)  # Length of the filter (number of coefficients)
     coefficients = filter_coefficients(f1, f2, fs, N)
 
     # Делаем фильтрацию
