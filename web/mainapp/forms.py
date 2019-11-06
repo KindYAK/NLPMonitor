@@ -23,6 +23,8 @@ class TopicChooseForm(forms.Form):
                            # 'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
                            # 'tau_decorrelator_phi', 'tau_coherence_phi',
                            ])[:100]
+        topic_modellings = s.execute()
+        topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
         # self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков - "
         #                                                     f"PRPLX={round(tm.perplexity, 1) if hasattr(tm, 'perplexity') else 'None'} "
         #                                                     f"SST={round(tm.tau_smooth_sparse_theta, 1) if hasattr(tm, 'perplexity') else 'None'} "
@@ -30,11 +32,13 @@ class TopicChooseForm(forms.Form):
         #                                                     f"DEC={round(tm.tau_decorrelator_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
         #                                                     f"COH={round(tm.tau_coherence_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
         #                                            ) for tm in s.scan()]
-        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
-                                                            (f"{tm.source} - " if hasattr(tm, 'source') and tm.source else f"Все СМИ") +
-                                                            (f"С {tm.datetime_from[:10]} - " if hasattr(tm, 'datetime_from') and tm.datetime_from else f"") +
-                                                            (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
-                                                   ) for tm in s.scan()]
+
+        topic_modellings = ((tm.name, f"{tm.name} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
+                                                   (f"{tm.source} - " if hasattr(tm, 'source') and tm.source else f"Все СМИ") +
+                                                   (f"С {tm.datetime_from[:10]} - " if hasattr(tm, 'datetime_from') and tm.datetime_from else f"") +
+                                                   (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
+                                                  ) for tm in topic_modellings)
+        self.fields['topic_modelling'].choices = topic_modellings
 
 
 class KibanaSearchForm(forms.Form):
