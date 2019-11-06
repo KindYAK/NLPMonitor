@@ -16,10 +16,4 @@ urlpatterns = [
     path('kibana_dashboard/', KibanaDashboardView.as_view(), name="kibana_dashboard"),
 
     path('document_view/<document_id>/', DocumentDetailView.as_view(), name='document_view'),
-
-    path('topics_list/', TopicsListView.as_view(), name="topics_list"),
-    path('topic_documents_list/<topic_modelling>/<topic_name>/', TopicDocumentListView.as_view(),
-        name="topic_document_list"),
-    path('topic_documents_list/<topic_modelling>/', TopicDocumentListView.as_view(),
-        name="topics_group_document_list"),
 ]

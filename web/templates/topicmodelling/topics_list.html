@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% block bc %}
-    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item"><a href="/venv">NLPMonitor</a></li>
     <li class="breadcrumb-item active">Список топиков</li>
 {% endblock %}
 
@@ -128,7 +128,7 @@
                             <select class="form-control" id="topicFilterInput"></select>
                         </div>
                         <div class="col-lg-2" style="text-align: center;">
-                            <form action="{% url 'mainapp:topics_group_document_list' topic_modelling %}"
+                            <form action="{% url 'topicmodelling:topics_group_document_list' topic_modelling %}"
                                   id="topicGroupDetailForm" method="GET">
                                 <button type="submit" class="btn btn-primary" id="topicGroupDetailSubmit"
                                         style="width: 100%;">Анализ</button>
@@ -163,7 +163,7 @@
                                     <td class="topic-size">{{ topic.size }}</td>
                                     <td class="topic-weight">{{ topic.weight|floatformat:3|unlocalize }}</td>
                                     <td class="topic-actions">
-                                        <a href="{% url 'mainapp:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link nowrap">
+                                        <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link nowrap">
                                             <i class="nav-icon fas fa-eye" style="font-size: 36px;"></i>
                                         </a>
                                         <a href="#" class="nav-link nowrap" style="padding: 0">
