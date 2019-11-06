@@ -19,6 +19,20 @@ class DocumentEvalAdmin(admin.ModelAdmin):
     search_fields = ('corpus__name', 'evaluation_criterion__name', 'document__name', )
 
 
+class TopicsEvalAdmin(admin.ModelAdmin):
+    list_display = ('criterion', 'value', 'topics', )
+    list_filter = ('criterion', )
+    search_fields = ()
+
+
+class TopicIDEvalAdmin(admin.ModelAdmin):
+    list_display = ('topic_id', 'topics_eval', 'weight', )
+    list_filter = ('topic_id', 'topics_eval', 'topic_modelling_name', )
+    search_fields = ()
+
+
 admin.site.register(EvalCorpus, EvalCorpusAdmin)
 admin.site.register(EvalCriterion, EvalCriterionAdmin)
 admin.site.register(DocumentEval, DocumentEvalAdmin)
+admin.site.register(TopicsEval, TopicsEvalAdmin)
+admin.site.register(TopicIDEval, TopicIDEvalAdmin)
