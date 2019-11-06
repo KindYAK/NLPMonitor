@@ -14,10 +14,12 @@ $('#topicSearchInput').val("");
 var table = init_table();
 
 // Search+Filter function
+var typed = 0;
+var last_search = "";
 function search_filter(){
     table.destroy();
-
-    searchEngine.search($('#topicSearchInput').val());
+    let search_query = $('#topicSearchInput').val();
+    searchEngine.search(search_query);
     if($('#topicFilterInput').val() === "-1"){
         searchEngine.filter();
     } else {
@@ -44,9 +46,21 @@ function search_filter(){
             return topic_ids.indexOf(item._values['topic-id']) !== -1;
         });
     }
-
     table = init_table();
+    last_search = search_query;
 }
+function search_filter_type_wrapper(){
+    typed += 1;
+    if(typed % 5 == 0 && last_search != $('#topicSearchInput').val()){
+        search_filter();
+    }
+}
+
+setInterval(function () {
+    if(last_search != $('#topicSearchInput').val()){
+        search_filter();
+    }
+}, 1111);
 
 // Search by text input
 var optionsText = {
@@ -55,8 +69,8 @@ var optionsText = {
 var searchEngine = new List('search-results', optionsText);
 
 var searchInput = document.querySelector('#topicSearchInput');
-searchInput.addEventListener('input', search_filter);
-searchInput.addEventListener('propertychange', search_filter);
+searchInput.addEventListener('input', search_filter_type_wrapper);
+$('#topicSearchInput').change(search_filter);
 
 // Search by group select
 $('#topicFilterInput').change(search_filter);
