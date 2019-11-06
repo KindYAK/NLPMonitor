@@ -17,16 +17,23 @@ class TopicChooseForm(forms.Form):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter('term', is_ready=True) \
-                  .source(['name', 'algorithm', 'number_of_topics',
-                           'perplexity', 'purity', 'contrast', 'coherence',
-                           'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
-                           'tau_decorrelator_phi', 'tau_coherence_phi',])[:100]
-        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков - "
-                                                            f"PRPLX={round(tm.perplexity, 1) if hasattr(tm, 'perplexity') else 'None'} "
-                                                            f"SST={round(tm.tau_smooth_sparse_theta, 1) if hasattr(tm, 'perplexity') else 'None'} "
-                                                            f"SSP={round(tm.tau_smooth_sparse_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
-                                                            f"DEC={round(tm.tau_decorrelator_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
-                                                            f"COH={round(tm.tau_coherence_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+                  .source(['name', 'algorithm', 'number_of_topics', 'number_of_documents',
+                           'source', 'datetime_from', 'datetime_to'
+                           # 'perplexity', 'purity', 'contrast', 'coherence',
+                           # 'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
+                           # 'tau_decorrelator_phi', 'tau_coherence_phi',
+                           ])[:100]
+        # self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.algorithm} - {tm.number_of_topics} топиков - "
+        #                                                     f"PRPLX={round(tm.perplexity, 1) if hasattr(tm, 'perplexity') else 'None'} "
+        #                                                     f"SST={round(tm.tau_smooth_sparse_theta, 1) if hasattr(tm, 'perplexity') else 'None'} "
+        #                                                     f"SSP={round(tm.tau_smooth_sparse_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+        #                                                     f"DEC={round(tm.tau_decorrelator_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+        #                                                     f"COH={round(tm.tau_coherence_phi, 1) if hasattr(tm, 'perplexity') else 'None'} "
+        #                                            ) for tm in s.scan()]
+        self.fields['topic_modelling'].choices = [(tm.name, f"{tm.name} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
+                                                            (f"СМИ {tm.source} - " if hasattr(tm, 'source') and tm.source else f"") +
+                                                            (f"С {tm.datetime_from[:10]} - " if hasattr(tm, 'datetime_from') and tm.datetime_from else f"") +
+                                                            (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
                                                    ) for tm in s.scan()]
 
 
