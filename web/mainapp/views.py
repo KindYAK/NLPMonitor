@@ -126,7 +126,12 @@ class TopicDocumentListView(TemplateView):
                  .filter('terms', _id=[d.document_es_id for d in topic_documents]) \
                  .source(('id', 'title', 'source', 'datetime',))[:100]
         documents = sd.execute()
-        weight_dict = dict((d.document_es_id, d.topic_weight) for d in topic_documents)
+        weight_dict = {}
+        for td in topic_documents:
+            if td.document_es_id not in weight_dict:
+                weight_dict[td.document_es_id] = td.topic_weight
+            else:
+                weight_dict[td.document_es_id] += td.topic_weight
         for document in documents:
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
