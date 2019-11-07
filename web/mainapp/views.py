@@ -1,4 +1,3 @@
-import numpy as np
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
@@ -95,7 +94,7 @@ class SearchView(TemplateView):
 
         # Smooth
         if context['smooth']:
-            absolute_power = apply_fir_filter(np.array(absolute_power), granularity=context['granularity'])
+            absolute_power = apply_fir_filter(absolute_power, granularity=context['granularity'])
             relative_power = apply_fir_filter(relative_power, granularity=context['granularity'])
             relative_weight = apply_fir_filter(relative_weight, granularity=context['granularity'])
 
