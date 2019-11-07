@@ -20,7 +20,7 @@ class DocumentEvalAdmin(admin.ModelAdmin):
 
 
 class TopicsEvalAdmin(admin.ModelAdmin):
-    list_display = ('criterion', 'value', 'topics', )
+    list_display = ('criterion', 'value', )
     list_filter = ('criterion', )
     search_fields = ()
 
