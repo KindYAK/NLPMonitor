@@ -50,6 +50,9 @@ services:
       - 9300
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./es_backup.sh:/es_backup.sh
     environment:
       - cluster.name="elk-nlpmonitor-cluster"
       - network.host=0.0.0.0

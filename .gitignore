@@ -12,7 +12,9 @@ web/venv
 web/media_root/
 web/static_root/
 
+db_airflow_backup
 db_backup
+es_backup
 stuff
 dags
 logs
