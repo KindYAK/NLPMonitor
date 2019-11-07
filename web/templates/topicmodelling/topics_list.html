@@ -164,12 +164,19 @@
                                     <td class="topic-weight">{{ topic.weight|floatformat:3|unlocalize }}</td>
                                     <td class="topic-actions">
                                         <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.id %}?topic_name={{ topic.name }}" class="nav-link nowrap">
-                                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"></i>
+                                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"
+                                            data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
                                         </a>
                                         <a href="#" class="nav-link nowrap" style="padding: 0">
                                             <i class="nav-icon fas fa-folder-plus manage-topic-groups" id="manageTopics_{{ topic.id }}"
-                                               style="font-size: 36px; padding: .5rem 1rem;"></i>
+                                               style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Добавить в группу"></i>
                                         </a>
+                                        {% if request.user.is_superuser %}
+                                            <a href="#" class="nav-link nowrap" style="padding: 0">
+                                                <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
+                                                   style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
+                                            </a>
+                                        {% endif %}
                                     </td>
                                     <td hidden class="topic-id">{{ topic.id }}</td>
                                 </tr>
@@ -230,7 +237,7 @@
     {# Custom script #}
     <script src="{% static 'js/topics_group_list_management.js' %} "></script>
     <script>
-        run_group_list_management('{{ topic_modelling }}', '{{ csrf_token }}')
+        run_group_list_management('{{ topic_modelling }}', '{{ csrf_token }}');
     </script>
 
     <script src="{% static 'js/topics_list_search_filter.js' %}"></script>

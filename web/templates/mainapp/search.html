@@ -436,7 +436,8 @@
                                     <td>{{ document.source }}</td>
                                     <td>
                                         <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
-                                            <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"></i>
+                                            <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
+                                            data-toggle="tooltip" data-placement="top" title="Просмотреть новость"></i>
                                         </a>
                                     </td>
                                 </tr>
