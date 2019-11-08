@@ -5,6 +5,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
+from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING
@@ -188,4 +189,6 @@ class TopicsListView(TemplateView):
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
         context['form'] = form
+        if self.request.user.is_superuser:
+            context['criterions'] = EvalCriterion.objects.all()
         return context

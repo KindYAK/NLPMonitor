@@ -3,7 +3,7 @@ from .models import *
 
 
 class EvalCriterionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_categorical', )
+    list_display = ('name', 'is_categorical', 'is_integer', )
     list_filter = ('is_categorical', 'is_integer', )
     search_fields = ('name', )
 
@@ -32,6 +32,7 @@ admin.site.register(TopicsEval, TopicsEvalAdmin)
 admin.site.register(TopicIDEval, TopicIDEvalAdmin)
 
 
+# Potentially depricated
 class DocumentEvalAdmin(admin.ModelAdmin):
     list_display = ('document', 'evaluation_criterion', 'corpus', 'value', )
     list_filter = ('evaluation_criterion', 'corpus', )

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Select2 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
     <!-- iCheck Bootstrap -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
     <style>
@@ -31,7 +32,21 @@
         .remove-topic {
             cursor: pointer;
             color: red;
-
+        }
+        #evalValue {
+            width: 99%;
+            margin-top: 5px;
+        }
+        #evalTooltip {
+            padding: 5px;
+            margin-top: -3px;
+            display: inline-block;
+        }
+        .hide {
+            display: none;
+        }
+        #evalControl.col-md-12 {
+            padding: 0;
         }
     </style>
     <!-- Plotyly.js -->
@@ -167,16 +182,14 @@
                                             <i class="nav-icon fas fa-eye" style="font-size: 36px;"
                                             data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
                                         </a>
-                                        <a href="#" class="nav-link nowrap" style="padding: 0">
+                                        <a href="" class="nav-link nowrap" style="padding: 0">
                                             <i class="nav-icon fas fa-folder-plus manage-topic-groups" id="manageTopics_{{ topic.id }}"
                                                style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Добавить в группу"></i>
                                         </a>
-                                        {% if request.user.is_superuser %}
-                                            <a href="#" class="nav-link nowrap" style="padding: 0">
-                                                <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
-                                                   style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
-                                            </a>
-                                        {% endif %}
+                                        <a href="" class="nav-link nowrap set-topic-eval-wrapper" style="padding: 0; display: none;">
+                                            <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
+                                               style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
+                                        </a>
                                     </td>
                                     <td hidden class="topic-id">{{ topic.id }}</td>
                                 </tr>
@@ -189,7 +202,7 @@
         </div>
     </div>
 
-    {# Topic grop modal #}
+    {# Topic group modal #}
     <div class="modal fade" id="topicGroupModal" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -219,6 +232,36 @@
             </div>
         </div>
     </div>
+
+    {% if request.user.is_superuser %}
+    {# Topic eval modal #}
+    <div class="modal fade" id="topicEvalModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Оценка топика</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="topicEval">
+                    <select class="form-control select2bs4" id="criterionSelect" style="width: 100%;"></select>
+
+                    <div class="form-group card" style="margin-top: 1em;">
+                        <div class="row" style="margin: 0;">
+                            <div class="col-md-11" id="evalControl"></div>
+                            <div class="col-md-1" id="evalValueWrapper"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: unset; text-align: center;">
+                    <button type="button" class="btn btn-success" id="evalSave" data-dismiss="modal">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     {% endcache %}
 {% endblock %}
 
@@ -240,5 +283,36 @@
         run_group_list_management('{{ topic_modelling }}', '{{ csrf_token }}');
     </script>
 
+    {% if request.user.is_superuser %}
+        <script src="{% static 'js/topic_evaluation.js' %} "></script>
+        <script>
+            $('.set-topic-eval-wrapper').show();
+            run_topics_eval('{{ csrf_token }}',
+                {
+                    {% for criterion in criterions %}
+                        {{ criterion.id }}: {
+                            "id": '{{ criterion.id }}',
+                            "name": '{{ criterion.name }}',
+                            "value_range_from": {{ criterion.value_range_from }},
+                            "value_range_to": {{ criterion.value_range_to }},
+                            "is_integer": {{ criterion.is_integer|yesno:"true,false" }},
+                            "is_categorical": {{ criterion.is_categorical|yesno:"true,false" }},
+                            {% if criterion.is_categorical %}
+                                "cat_values": {
+                                    {% for cat_value in criterion.cat_values.all %}
+                                        {{ cat_value.int_value }}: {
+                                            "id": {{ cat_value.id }},
+                                            "int_value": {{ cat_value.int_value }},
+                                            "char_value": '{{ cat_value.char_value }}',
+                                        },
+                                    {% endfor %}
+                                }
+                            {% endif %}
+                        },
+                    {% endfor %}
+                }
+            );
+        </script>
+    {% endif %}
     <script src="{% static 'js/topics_list_search_filter.js' %}"></script>
 {% endblock %}

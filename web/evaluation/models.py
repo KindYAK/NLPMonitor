@@ -24,7 +24,7 @@ class CategoricalCriterionValue(models.Model):
         verbose_name_plural = "Категориальные значения критериев"
         unique_together = (('criterion', 'char_value'), ('criterion', 'int_value'), ('int_value', 'char_value'))
 
-    criterion = models.ForeignKey('EvalCriterion', on_delete=models.CASCADE)
+    criterion = models.ForeignKey('EvalCriterion', on_delete=models.CASCADE, related_name='cat_values')
     int_value = models.SmallIntegerField()
     char_value = models.CharField(max_length=100)
 
