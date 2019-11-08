@@ -287,7 +287,7 @@
         <script src="{% static 'js/topic_evaluation.js' %} "></script>
         <script>
             $('.set-topic-eval-wrapper').show();
-            run_topics_eval('{{ csrf_token }}',
+            run_topics_eval('{{ topic_modelling }}', '{{ csrf_token }}',
                 {
                     {% for criterion in criterions %}
                         {{ criterion.id }}: {

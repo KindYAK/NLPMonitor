@@ -1,4 +1,5 @@
 from mainapp.models import *
+from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval, CategoricalCriterionValue
 from django.db.utils import IntegrityError
 from annoying.functions import get_object_or_None
 from .serializers import *
@@ -112,5 +113,37 @@ class TopicGroupViewSet(viewsets.ViewSet):
             {
                 "status": 200,
                 "group_id": int(pk),
+            }
+        )
+
+
+class CriterionEvalViewSet(viewsets.ViewSet):
+    def list(self, request):
+        if not 'topic_modelling' in request.GET:
+            return Response(
+                {
+                    "status": 500,
+                    "error": "You need to specify topic_modelling GET parameter"
+                }
+            )
+
+        topic_modelling = request.GET['topic_modelling']
+        topic_id_evals = TopicIDEval.objects.filter(weight=1, topic_modelling_name=topic_modelling)
+        topics_evals = TopicsEval.objects.filter(topicideval__in=topic_id_evals, author=request.user)
+        criterions = EvalCriterion.objects.filter(topicseval__in=topics_evals)
+
+        criterions_dict = {}
+        for criterion in criterions:
+            for topics_eval in topics_evals:
+                if topics_eval.criterion != criterion:
+                    continue
+                if criterion.id not in criterions_dict:
+                    criterions_dict[criterion.id] = {}
+                print("!!!", topics_eval.topics.first().topic_id)
+                criterions_dict[criterion.id][topics_eval.topics.first().topic_id] = topics_eval.value
+        return Response(
+            {
+                "status": 200,
+                "criterions": criterions_dict,
             }
         )

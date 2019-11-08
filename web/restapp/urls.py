@@ -4,6 +4,7 @@ from restapp.views import *
 
 router = routers.DefaultRouter()
 router.register("topic_group", TopicGroupViewSet, basename="topic_group")
+router.register("criterion_eval", CriterionEvalViewSet, basename="criterion_eval")
 
 app_name = 'restapp'
 

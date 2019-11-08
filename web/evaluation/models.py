@@ -47,6 +47,7 @@ class TopicIDEval(models.Model):
     class Meta:
         verbose_name = "Связь оценки и топика"
         verbose_name_plural = "Связи оценок и топиков"
+        unique_together = (('topic_id', 'topics_eval'),)
 
     topic_id = models.ForeignKey('mainapp.TopicID', on_delete=models.CASCADE)
     topics_eval = models.ForeignKey('TopicsEval', on_delete=models.CASCADE)
@@ -60,8 +61,8 @@ class TopicIDEval(models.Model):
 # !!!!!!!!!!!!! POTENTIALLY DEPRICATED !!!!!!!!!!!!!!
 class EvalCorpus(models.Model):
     class Meta:
-        verbose_name = "Корпус оценок"
-        verbose_name_plural = "Корпусы оценок"
+        verbose_name = "OLD? Корпус оценок"
+        verbose_name_plural = "OLD? Корпусы оценок"
         unique_together = (('corpus', 'name'), )
 
     corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE)
@@ -73,8 +74,8 @@ class EvalCorpus(models.Model):
 
 class DocumentEval(models.Model):
     class Meta:
-        verbose_name = "Оценка документа"
-        verbose_name_plural = "Оценки документов"
+        verbose_name = "OLD? Оценка документа"
+        verbose_name_plural = "OLD? Оценки документов"
         unique_together = (('corpus', 'document', 'evaluation_criterion'), )
 
     corpus = models.ForeignKey('EvalCorpus', on_delete=models.CASCADE)

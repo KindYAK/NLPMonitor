@@ -142,7 +142,6 @@ class TopicsListView(TemplateView):
         form = self.form_class(data=self.request.GET)
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
-
         else:
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
         form.fields['topic_modelling'].initial = context['topic_modelling']
