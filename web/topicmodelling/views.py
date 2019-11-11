@@ -136,15 +136,18 @@ class TopicsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        key = make_template_fragment_key('topics_list', [self.request.GET])
-        if cache.get(key):
-            return context
+        if self.request.user.is_superuser:
+            context['criterions'] = EvalCriterion.objects.all()
         form = self.form_class(data=self.request.GET)
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
         else:
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
         form.fields['topic_modelling'].initial = context['topic_modelling']
+
+        key = make_template_fragment_key('topics_list', [self.request.GET])
+        if cache.get(key):
+            return context
 
         # Get topics aggregation
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
@@ -188,6 +191,4 @@ class TopicsListView(TemplateView):
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
         context['form'] = form
-        if self.request.user.is_superuser:
-            context['criterions'] = EvalCriterion.objects.all()
         return context
