@@ -34,7 +34,7 @@ class TopicChooseForm(forms.Form):
         #                                            ) for tm in s.scan()]
 
         topic_modellings = ((tm.name, f"{tm.name} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
-                                                   (f"{tm.source} - " if hasattr(tm, 'source') and tm.source else f"Все СМИ") +
+                                                   (f"{tm.source} - " if hasattr(tm, 'source') and tm.source else f"Все СМИ ") +
                                                    (f"С {tm.datetime_from[:10]} - " if hasattr(tm, 'datetime_from') and tm.datetime_from else f"") +
                                                    (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
                                                   ) for tm in topic_modellings)
