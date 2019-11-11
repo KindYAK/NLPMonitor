@@ -12,6 +12,7 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                     return;
                 }
                 evaluations_dict = result.criterions;
+                color_evaluated_buttons();
             }
         }
     );
@@ -73,9 +74,18 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
         }
     }
 
+    // Color evaluated buttons
+    function color_evaluated_buttons() {
+        $('.set-topic-eval').removeClass('is-evaluated');
+        for (var topic_id in evaluations_dict[$('#criterionSelect').val()]){
+            $('#evalTopic_' + topic_id).addClass('is-evaluated');
+        }
+    }
+
+
     // Event management, init
     create_eval_control();
-    $('#criterionSelect').change(create_eval_control);
+    $('#criterionSelect').change(function() {create_eval_control(); color_evaluated_buttons();});
     $('.set-topic-eval').click(function(e) {
         e.preventDefault();
         var topic_id = e.target.id.split("evalTopic_")[1];
@@ -124,6 +134,7 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                         evaluations_dict[parseInt(result.criterion_id)] = {};
                     }
                     evaluations_dict[parseInt(result.criterion_id)][result.topic_id] = result.value;
+                    $('#evalTopic_' + result.topic_id).addClass('is-evaluated');
                 }
             }
         );

@@ -48,6 +48,9 @@
         #evalControl.col-md-12 {
             padding: 0;
         }
+        .is-evaluated {
+            color: #00ff84 !important;
+        }
     </style>
     <!-- Plotyly.js -->
     <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
@@ -186,10 +189,12 @@
                                             <i class="nav-icon fas fa-folder-plus manage-topic-groups" id="manageTopics_{{ topic.id }}"
                                                style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Добавить в группу"></i>
                                         </a>
-                                        <a href="" class="nav-link nowrap set-topic-eval-wrapper" style="padding: 0; display: none;">
-                                            <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
-                                               style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
-                                        </a>
+                                        {% if request.user.is_superuser %}
+                                            <a href="" class="nav-link nowrap set-topic-eval-wrapper" style="padding: 0; display: none;">
+                                                <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
+                                                   style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
+                                            </a>
+                                        {% endif %}
                                     </td>
                                     <td hidden class="topic-id">{{ topic.id }}</td>
                                 </tr>
