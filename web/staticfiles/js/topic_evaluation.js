@@ -130,11 +130,11 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                             "обратитесь к Администратору системы");
                         return;
                     }
-                    if(!parseInt(result.criterion_id) in evaluations_dict) {
+                    $('#evalTopic_' + result.topic_id).addClass('is-evaluated');
+                    if(!(parseInt(result.criterion_id) in evaluations_dict)) {
                         evaluations_dict[parseInt(result.criterion_id)] = {};
                     }
                     evaluations_dict[parseInt(result.criterion_id)][result.topic_id] = result.value;
-                    $('#evalTopic_' + result.topic_id).addClass('is-evaluated');
                 }
             }
         );
