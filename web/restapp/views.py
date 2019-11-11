@@ -128,7 +128,7 @@ class CriterionEvalViewSet(viewsets.ViewSet):
             )
 
         topic_modelling = request.GET['topic_modelling']
-        topic_id_evals = TopicIDEval.objects.filter(weight=1, topic_modelling_name=topic_modelling)
+        topic_id_evals = TopicIDEval.objects.filter(weight=1, topic_id__topic_modelling_name=topic_modelling).distinct()
         topics_evals = TopicsEval.objects.filter(topicideval__in=topic_id_evals, author=request.user)
         criterions = EvalCriterion.objects.filter(topicseval__in=topics_evals)
 
@@ -145,5 +145,46 @@ class CriterionEvalViewSet(viewsets.ViewSet):
             {
                 "status": 200,
                 "criterions": criterions_dict,
+            }
+        )
+
+    def create(self, request):
+        if 'topic_modelling' not in request.POST or \
+                    'topic_id' not in request.POST or \
+                    'criterion_id' not in request.POST or \
+                    'value' not in request.POST:
+            return Response(
+                {
+                    "status": 500,
+                    "error": "You need to specify topic_modelling, topic_id, criterion_id and value POST parameters"
+                }
+            )
+
+        topic_modelling = request.POST['topic_modelling']
+        topic_id = request.POST['topic_id']
+        criterion_id = request.POST['criterion_id']
+        value = float(request.POST['value'])
+
+        topic_id_obj = get_object_or_None(TopicID, topic_modelling_name=topic_modelling, topic_id=topic_id)
+        if not topic_id_obj:
+            topic_id_obj = TopicID.objects.create(topic_modelling_name=topic_modelling, topic_id=topic_id)
+        topics_eval = get_object_or_None(TopicsEval, topics=topic_id_obj, topicideval__weight=1, criterion__id=criterion_id, author=request.user)
+        if topics_eval:
+            topics_eval.value = value
+            topics_eval.save()
+        else:
+            topics_eval = TopicsEval.objects.create(criterion_id=criterion_id, value=value, author=request.user)
+            TopicIDEval.objects.create(
+                topic_id=topic_id_obj,
+                topics_eval=topics_eval,
+                weight=1
+            )
+
+        return Response(
+            {
+                "status": 200,
+                "value": value,
+                "criterion_id": criterion_id,
+                "topic_id": topic_id,
             }
         )

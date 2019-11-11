@@ -22,7 +22,7 @@ class TopicsEvalAdmin(admin.ModelAdmin):
 
 class TopicIDEvalAdmin(admin.ModelAdmin):
     list_display = ('topic_id', 'topics_eval', 'weight', )
-    list_filter = ('topic_id', 'topics_eval', 'topic_modelling_name', )
+    list_filter = ('topic_id', 'topics_eval', )
     search_fields = ()
 
 

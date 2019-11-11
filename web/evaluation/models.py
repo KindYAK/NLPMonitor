@@ -51,7 +51,6 @@ class TopicIDEval(models.Model):
 
     topic_id = models.ForeignKey('mainapp.TopicID', on_delete=models.CASCADE)
     topics_eval = models.ForeignKey('TopicsEval', on_delete=models.CASCADE)
-    topic_modelling_name = models.CharField(max_length=100, verbose_name="Название ТМ")
     weight = models.FloatField()
 
     def __str__(self):
