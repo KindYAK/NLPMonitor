@@ -139,7 +139,6 @@ class CriterionEvalViewSet(viewsets.ViewSet):
                     continue
                 if criterion.id not in criterions_dict:
                     criterions_dict[criterion.id] = {}
-                print("!!!", topics_eval.topics.first().topic_id)
                 criterions_dict[criterion.id][topics_eval.topics.first().topic_id] = topics_eval.value
         return Response(
             {

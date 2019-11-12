@@ -113,7 +113,7 @@
                 <div class="card-body">
                     <div id="search-results">
                         {# Абсолютная мощность #}
-                        <div id="topic_dynamics"></div>
+                        <div class="dynamics-plot" id="topic_dynamics"></div>
                         <script>
                             var selectorOptions = {
                                 buttons: [{
@@ -167,34 +167,8 @@
                         </script>
 
                         {# Относительная мощность #}
-                        <div id="topic_dynamics_normal"></div>
+                        <div class="dynamics-plot" id="topic_dynamics_normal"></div>
                         <script>
-                            var selectorOptions = {
-                                buttons: [{
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1m'
-                                }, {
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 6,
-                                    label: '6m'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'todate',
-                                    count: 1,
-                                    label: 'YTD'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1y'
-                                }, {
-                                    step: 'all',
-                                }],
-                            };
-
                             var data = [
                                 {
                                     mode: 'lines',
@@ -221,34 +195,8 @@
                         </script>
 
                         {# Относительный удельный вес #}
-                        <div id="topic_dynamics_weight"></div>
+                        <div class="dynamics-plot" id="topic_dynamics_weight"></div>
                         <script>
-                            var selectorOptions = {
-                                buttons: [{
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1m'
-                                }, {
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 6,
-                                    label: '6m'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'todate',
-                                    count: 1,
-                                    label: 'YTD'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1y'
-                                }, {
-                                    step: 'all',
-                                }],
-                            };
-
                             var data = [
                                 {
                                     mode: 'lines',
@@ -377,5 +325,11 @@
                 "pageLength": 25,
             });
         });
+    </script>
+
+    {# Custom script #}
+    <script src="{% static 'js/range_plots_management.js' %} "></script>
+    <script>
+        run_range_plot_management('{{ csrf_token }}');
     </script>
 {% endblock %}
