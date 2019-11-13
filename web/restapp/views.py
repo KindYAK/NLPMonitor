@@ -1,10 +1,15 @@
-from mainapp.models import *
-from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval, CategoricalCriterionValue
-from django.db.utils import IntegrityError
+import json
+import datetime
+
 from annoying.functions import get_object_or_None
-from .serializers import *
+from django.db.utils import IntegrityError
+from elasticsearch_dsl import Search
 from rest_framework import viewsets
 from rest_framework.response import Response
+
+from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
+from .serializers import *
 
 
 class TopicGroupViewSet(viewsets.ViewSet):
@@ -185,5 +190,58 @@ class CriterionEvalViewSet(viewsets.ViewSet):
                 "value": value,
                 "criterion_id": criterion_id,
                 "topic_id": topic_id,
+            }
+        )
+
+
+class RangeDocumentsViewSet(viewsets.ViewSet):
+    def list(self, request):
+        topic_modelling = request.GET['topic_modelling']
+        topics = json.loads(request.GET['topics'])
+        date_from = datetime.datetime.strptime(request.GET['date_from'][:10], "%Y-%m-%d")
+        date_to = datetime.datetime.strptime(request.GET['date_to'][:10], "%Y-%m-%d")
+
+        std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+                  .filter("term", topic_modelling=topic_modelling) \
+                  .filter("terms", topic_id=topics).sort("-topic_weight") \
+                  .filter("range", topic_weight={"gte": 0.001}) \
+                  .filter("range", datetime={"gte": date_from}) \
+                  .filter("range", datetime={"lte": date_to}) \
+                  .source(['document_es_id', 'topic_weight'])[:100]
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+            .metric("source_weight", agg_type="sum", field="topic_weight")
+        topic_documents = std.execute()
+
+        sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
+                 .filter('terms', _id=[d.document_es_id for d in topic_documents]) \
+                 .source(('id', 'title', 'source', 'datetime',))[:100]
+        documents = sd.execute()
+        weight_dict = {}
+        for td in topic_documents:
+            if td.document_es_id not in weight_dict:
+                weight_dict[td.document_es_id] = td.topic_weight
+            else:
+                weight_dict[td.document_es_id] += td.topic_weight
+        for document in documents:
+            document.weight = weight_dict[document.meta.id]
+        documents = sorted(documents, key=lambda x: x.weight, reverse=True)
+
+        return Response(
+            {
+                "status": 200,
+                "documents": [
+                    {
+                        "id": document.id,
+                        "title": document.title,
+                        "source": document.source,
+                        "datetime": document.datetime,
+                    } for document in documents
+                ],
+                "source_weights": [
+                    {
+                        "source": bucket.key,
+                        "weight": bucket.source_weight.value,
+                    } for bucket in topic_documents.aggregations.source.buckets
+                ]
             }
         )

@@ -36,8 +36,6 @@ class TopicDocumentListView(TemplateView):
         return total_metrics_dict
 
     def get_current_topics_metrics(self, topics, granularity):
-        if type(topics) != list:
-            topics = [topics]
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=self.topic_modelling) \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
@@ -88,7 +86,7 @@ class TopicDocumentListView(TemplateView):
 
         self.topic_modelling = kwargs['topic_modelling']
         if 'topic_name' in kwargs:
-            topics = kwargs['topic_name']
+            topics = [kwargs['topic_name']]
         else:
             topics = json.loads(self.request.GET['topics'])
             is_too_many_groups = len(topics) > 50

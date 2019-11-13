@@ -331,6 +331,8 @@
     {# Custom script #}
     <script src="{% static 'js/range_plots_management.js' %} "></script>
     <script>
-        run_range_plot_management('{{ csrf_token }}');
+        run_range_plot_management('{{ view.kwargs.topic_modelling }}',
+                                   {% if 'topic_name' in view.kwargs %}'[{{ view.kwargs.topic_name }}]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
+                                  '{{ csrf_token }}');
     </script>
 {% endblock %}
