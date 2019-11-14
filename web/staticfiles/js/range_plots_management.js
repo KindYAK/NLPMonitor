@@ -15,7 +15,6 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
     var table = init_table();
 
     function request_documents(range_from, range_to) {
-        console.log('!!!REQUEST');
         $.ajax(
             {
                 url: '/api/range_documents/?topic_modelling=' + topic_modelling +

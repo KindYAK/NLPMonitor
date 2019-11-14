@@ -50,10 +50,11 @@
                 <div class="card-header">
                     <h3>Поиск и фильтры</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="padding-bottom: 0;">
                     <div id="search-form">
                         <div class="row">
-                            <div class="col-lg-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-5">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="form-group">
@@ -74,7 +75,23 @@
                                                 <div class="col-md-8">{% render_field form.authors data-placeholder="Выберите авторов"  class="form-control select2" multiple="multiple" %}</div>
                                             </div>
                                         </div>
-                                        <div class="input-group">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.title.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.title placeholder="Заголовок" class="form-control" %}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.text.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.text placeholder="Текст" class="form-control" %}</div>
+                                            </div>
+                                             <div class="input-group">
                                             <div class="row" style="width: 100%;">
                                                 <div class="col-md-5">
                                                     <button type="button" class="btn btn-default float-right"
@@ -89,85 +106,11 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="form-group form-group-intervals">
-                                            <div class="row">
-                                                <div style="width: 100%; text-align: center;">
-                                                    <label>Количество просмотров</label>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-1"><label>От</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_views_from class="form-control" type="number" %}</div>
-                                                    <div class="col-md-1"><label>До</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_views_to class="form-control" type="number" %}</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div style="width: 100%; text-align: center;">
-                                                    <label>Количество репостов</label>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-1"><label>От</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_shares_from class="form-control" type="number" %}</div>
-                                                    <div class="col-md-1"><label>До</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_shares_to class="form-control" type="number" %}</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div style="width: 100%; text-align: center;">
-                                                    <label>Количество комментариев</label>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-1"><label>От</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_comments_from class="form-control" type="number" %}</div>
-                                                    <div class="col-md-1"><label>До</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_comments_to class="form-control" type="number" %}</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div style="width: 100%; text-align: center;">
-                                                    <label>Количество лайков</label>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-1"><label>От</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_likes_from class="form-control" type="number" %}</div>
-                                                    <div class="col-md-1"><label>До</label></div>
-                                                    <div class="col-md-5">{% render_field form.num_likes_to class="form-control" type="number" %}</div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">{{ form.title.label_tag }}</div>
-                                                <div class="col-md-8">{% render_field form.title placeholder="Заголовок" class="form-control" %}</div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4">{{ form.text.label_tag }}</div>
-                                                <div class="col-md-8">{% render_field form.text placeholder="Текст" class="form-control" %}</div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4">{{ form.tags.label_tag }}</div>
-                                                <div class="col-md-8">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2" multiple="multiple" %}</div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-4">{{ form.categories.label_tag }}</div>
-                                                <div class="col-md-8">{% render_field form.categories data-placeholder="Выберите категории" class="form-control select2" multiple="multiple" %}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="col-md-1"></div>
                         </div>
                     </div>
                 </div>
