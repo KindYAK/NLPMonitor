@@ -232,6 +232,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 "documents": [
                     {
                         "id": document.id,
+                        "weight": round(document.weight, 3),
                         "title": document.title,
                         "source": document.source,
                         "datetime": document.datetime,
