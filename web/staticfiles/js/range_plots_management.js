@@ -15,6 +15,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
     var table = init_table();
 
     function request_documents(range_from, range_to) {
+        console.log('!!!REQUEST');
         $.ajax(
             {
                 url: '/api/range_documents/?topic_modelling=' + topic_modelling +
@@ -113,7 +114,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
         var main_plot = document.getElementById('topic_dynamics');
         var range_from = main_plot.layout.xaxis.range[0];
         var range_to = main_plot.layout.xaxis.range[1];
-        if (last_req_range_from && last_req_range_from && (last_req_range_from !== range_from || last_req_range_from !== range_to)) {
+        if (last_req_range_from && last_req_range_to && (last_req_range_from !== range_from || last_req_range_to !== range_to)) {
             request_documents(range_from, range_to);
         }
     }, 3333);
@@ -126,14 +127,13 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
             var range_to = target.xaxis.range[1];
 
             n_redraw_plot += 1;
-            if (n_redraw_plot === 0 || n_redraw_plot % 3 !== 0) {
-                return;
+            if (n_redraw_plot !== 0 && n_redraw_plot % 3 === 0) {
+                rerender_new_range(range_from, range_to, e.target.id);
             }
-            rerender_new_range(range_from, range_to, e.target.id);
-            if (n_redraw_plot === 0 || n_redraw_plot % 33 !== 0) {
-                return;
+            if (n_redraw_plot === 1 || n_redraw_plot % 33 === 0) {
+                request_documents(range_from, range_to);
             }
-            request_documents(range_from, range_to);
+
         }
     );
 }
