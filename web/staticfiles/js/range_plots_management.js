@@ -81,6 +81,8 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
                 }
             }
         );
+        last_req_range_from = range_from;
+        last_req_range_to = range_to;
     }
 
     function rerender_new_range(range_from, range_to, id_to_skip) {
@@ -92,20 +94,29 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
         }
         last_range_from = range_from;
         last_range_to = range_to;
-
-        request_documents(range_from, range_to);
     }
 
     var last_range_from = null;
     var last_range_to = null;
+    var last_req_range_from = null;
+    var last_req_range_to = null;
     setInterval(function () {
         var main_plot = document.getElementById('topic_dynamics');
         var range_from = main_plot.layout.xaxis.range[0];
         var range_to = main_plot.layout.xaxis.range[1];
         if (last_range_to && last_range_from && (last_range_from !== range_from || last_range_to !== range_to)) {
-            rerender_new_range(0, 1, null);
+            rerender_new_range(range_from, range_to, "topic_dynamics");
         }
-    }, 1111);
+    }, 1000);
+
+    setInterval(function () {
+        var main_plot = document.getElementById('topic_dynamics');
+        var range_from = main_plot.layout.xaxis.range[0];
+        var range_to = main_plot.layout.xaxis.range[1];
+        if (last_req_range_from && last_req_range_from && (last_req_range_from !== range_from || last_req_range_from !== range_to)) {
+            request_documents(range_from, range_to);
+        }
+    }, 3333);
 
     var n_redraw_plot = 0;
     $('.dynamics-plot').on('plotly_relayout',
@@ -119,6 +130,10 @@ function run_range_plot_management(topic_modelling, topics, csrf_token) {
                 return;
             }
             rerender_new_range(range_from, range_to, e.target.id);
+            if (n_redraw_plot === 0 || n_redraw_plot % 33 !== 0) {
+                return;
+            }
+            request_documents(range_from, range_to);
         }
     );
 }
