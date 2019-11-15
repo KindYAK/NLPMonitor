@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 {% load cache %}
+{% load request_get_list %}
 
 {% block title %}Поиск{% endblock %}
 {% block heading %}Поиск{% endblock %}
@@ -58,10 +59,6 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-4">{{ form.id.label_tag }}</div>
-                                                <div class="col-md-8">{% render_field form.id placeholder="ID" class="form-control" %}</div>
-                                            </div>
                                             <div class="row">
                                                 <div class="col-md-4">{{ form.corpuses.label_tag }}</div>
                                                 <div class="col-md-8">{% render_field form.corpuses data-placeholder="Выберите корпусы"  class="form-control select2" multiple="multiple" %}</div>
@@ -183,9 +180,9 @@
                     <h3>Динамика публикаций</h3>
                 </div>
                 <div class="card-body">
-                    <div id="search-results">
+                    <div id="dynamic-plots">
                         {# Абсолютная мощность #}
-                        <div id="dynamics"></div>
+                        <div id="dynamics" class="dynamics-plot"></div>
                         <script>
                             var selectorOptions = {
                                 buttons: [{
@@ -239,34 +236,8 @@
                         </script>
 
                         {# Относительная мощность #}
-                        <div id="dynamics_normal"></div>
+                        <div id="dynamics_normal" class="dynamics-plot"></div>
                         <script>
-                            var selectorOptions = {
-                                buttons: [{
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1m'
-                                }, {
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 6,
-                                    label: '6m'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'todate',
-                                    count: 1,
-                                    label: 'YTD'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1y'
-                                }, {
-                                    step: 'all',
-                                }],
-                            };
-
                             var data = [
                                 {
                                     mode: 'lines',
@@ -293,34 +264,8 @@
                         </script>
 
                         {# Относительный удельный вес #}
-                        <div id="dynamics_weight"></div>
+                        <div id="dynamics_weight" class="dynamics-plot"></div>
                         <script>
-                            var selectorOptions = {
-                                buttons: [{
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1m'
-                                }, {
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 6,
-                                    label: '6m'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'todate',
-                                    count: 1,
-                                    label: 'YTD'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1y'
-                                }, {
-                                    step: 'all',
-                                }],
-                            };
-
                             var data = [
                                 {
                                     mode: 'lines',
@@ -363,8 +308,8 @@
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
                             <tr role="row">
-                                <th>ES Score</th>
-                                <th>Дата публикации</th>
+                                <th>Релевантность</th>
+                                <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
                                 <th></th>
@@ -408,17 +353,6 @@
     <!-- date-range-picker -->
     <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
     <script>
-        $(function () {
-            $('#search-results-table').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": false,
-                "ordering": true,
-                "order": [],
-                "info": true,
-                "autoWidth": true,
-            });
-        });
         $('.select2').select2();
         $('#daterange-btn').daterangepicker(
             {
@@ -451,5 +385,21 @@
         {% if request.GET.datetime_from or request.GET.datetime_to %}
             $('#daterange-selected').html('{{ request.GET.datetime_from }}' + ' - ' + '{{ request.GET.datetime_to }}');
         {% endif %}
+    </script>
+
+    <!-- Range select -->
+    <script src="{% static 'js/range_plots_management.js' %}"></script>
+    <script>
+        run_range_plot_management('{{ view.kwargs.topic_modelling }}',
+                                   {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
+                                  '{{ csrf_token }}', false,
+                                   {
+                                        "corpuses": "{{ request.GET|get_item:'corpuses'|safe }}",
+                                        "sources": "{{ request.GET|get_item:'sources'|safe }}",
+                                        "authors": "{{ request.GET|get_item:'authors'|safe }}",
+                                        "title": '{{ request.GET.title }}',
+                                        "text": '{{ request.GET.text }}',
+                                   }
+        );
     </script>
 {% endblock %}

@@ -3,11 +3,12 @@ import datetime
 
 from annoying.functions import get_object_or_None
 from django.db.utils import IntegrityError
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
+from mainapp.services_es_documents import execute_search
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
 from .serializers import *
 
@@ -195,11 +196,11 @@ class CriterionEvalViewSet(viewsets.ViewSet):
 
 
 class RangeDocumentsViewSet(viewsets.ViewSet):
-    def list(self, request):
-        topic_modelling = request.GET['topic_modelling']
-        topics = json.loads(request.GET['topics'])
-        date_from = datetime.datetime.strptime(request.GET['date_from'][:10], "%Y-%m-%d")
-        date_to = datetime.datetime.strptime(request.GET['date_to'][:10], "%Y-%m-%d")
+    def topics_search(self):
+        topic_modelling = self.request.GET['topic_modelling']
+        topics = json.loads(self.request.GET['topics'])
+        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
+        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
 
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=topic_modelling) \
@@ -225,6 +226,56 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         for document in documents:
             document.weight = weight_dict[document.meta.id]
         documents = sorted(documents, key=lambda x: x.weight, reverse=True)
+        return documents, topic_documents.aggregations.source.buckets
+
+    def search_search(self):
+        datetime_from = datetime.datetime.strptime(self.request.GET['datetime_from'][:10], "%Y-%m-%d")
+        datetime_to = datetime.datetime.strptime(self.request.GET['datetime_to'][:10], "%Y-%m-%d")
+        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).source(('id', 'datetime', 'title', 'source', ))
+        s = s.filter('range', datetime={"gte": datetime_from})
+        s = s.filter('range', datetime={"lte": datetime_to})
+        if self.request.GET['corpuses'] and self.request.GET['corpuses'] != "None":
+            corpus_ids = json.loads(self.request.GET['corpuses'].replace("'", '"'))
+            cs = Corpus.objects.filter(id__in=corpus_ids)
+            s = s.filter('terms', **{"corpus": [c.name for c in cs]})
+        if self.request.GET['sources'] and self.request.GET['sources'] != "None":
+            sources_ids = json.loads(self.request.GET['sources'].replace("'", '"'))
+            ss = Source.objects.filter(id__in=sources_ids)
+            s = s.filter('terms', **{"source": [s.name for s in ss]})
+        if self.request.GET['authors'] and self.request.GET['authors'] != "None":
+            author_ids = json.loads(self.request.GET['authors'].replace("'", '"'))
+            aus = Author.objects.filter(id__in=author_ids)
+            s = s.filter('terms', **{"author.keyword": [a.id for a in aus]})
+        if self.request.GET['title']:
+            s = s.filter('match', title=self.request.GET['title'])
+        if self.request.GET['text']:
+            q = Q('multi_match',
+                  query=self.request.GET['text'],
+                  fields=['title^10',
+                          'tags^3',
+                          'categories^3',
+                          'text^2'])
+            s = s.query(q)
+
+        s = s[:100]
+        s.aggs.bucket(name="source", agg_type="terms", field="source.keyword") \
+            .metric("source_weight", agg_type="sum", field="topic_weight")
+        documents = s.execute()
+        return documents, documents.aggregations.source.buckets
+
+    def list(self, request):
+        filter_type = request.GET['type']
+        if filter_type == "topics":
+            documents, source_buckets = self.topics_search()
+        elif filter_type == "search":
+            documents, source_buckets = self.search_search()
+        else:
+            return Response(
+                {
+                    "status": 400,
+                    "error": "Search type not implemented",
+                }
+            )
 
         return Response(
             {
@@ -232,7 +283,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 "documents": [
                     {
                         "id": document.id,
-                        "weight": round(document.weight, 3),
+                        "weight": round(document.weight, 3) if hasattr(document, "weight") else
+                                                            (round(document.meta.score, 3) if document.meta.score != 0 else 1.000),
                         "title": document.title,
                         "source": document.source,
                         "datetime": document.datetime,
@@ -242,7 +294,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     {
                         "source": bucket.key,
                         "weight": bucket.source_weight.value,
-                    } for bucket in topic_documents.aggregations.source.buckets
+                    } for bucket in source_buckets
                 ]
             }
         )

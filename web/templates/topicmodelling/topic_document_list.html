@@ -319,6 +319,6 @@
     <script>
         run_range_plot_management('{{ view.kwargs.topic_modelling }}',
                                    {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
-                                  '{{ csrf_token }}');
+                                  '{{ csrf_token }}', true);
     </script>
 {% endblock %}
