@@ -6,7 +6,8 @@ from elasticsearch_dsl import Index, MetaField
 
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
-    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT
+    ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
+    ES_INDEX_CUSTOM_DICTIONARY_WORD
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -254,4 +255,13 @@ class Dictionary(es.Document):
 
     class Index:
         name = ES_INDEX_DICTIONARY_INDEX
+        using = ES_CLIENT
+
+
+class CustomDictionaryWord(es.Document):
+    word = es.Keyword()
+    word_normal = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_CUSTOM_DICTIONARY_WORD
         using = ES_CLIENT

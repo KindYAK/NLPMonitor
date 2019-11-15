@@ -210,6 +210,7 @@ ES_INDEX_TOPIC_DOCUMENT = 'topic_document_sharded'
 ES_INDEX_CLASSIFIER = 'classifier'
 ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
 ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
+ES_INDEX_CUSTOM_DICTIONARY_WORD = 'custom_dictionary_word'
 
 ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
