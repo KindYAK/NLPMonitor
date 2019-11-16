@@ -156,7 +156,7 @@ class TopicDocument(es.Document):
         using = ES_CLIENT
 
 
-class TopicEval(es.Document):
+class DocumentEval(es.Document):
     criterion_id = es.Keyword()
     criterion_name = es.Keyword()
     value = es.Float()
