@@ -157,6 +157,7 @@ class TopicDocument(es.Document):
 
 
 class DocumentEval(es.Document):
+    topic_modelling = es.Keyword()
     criterion_id = es.Keyword()
     criterion_name = es.Keyword()
     value = es.Float()
