@@ -7,7 +7,7 @@ from elasticsearch_dsl import Index, MetaField
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
-    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_TOPIC_EVAL
+    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -148,7 +148,7 @@ class TopicDocument(es.Document):
     topic_id = es.Keyword()
     topic_weight = es.Float()
     document_es_id = es.Keyword()
-    document_datetime = es.Date()
+    datetime = es.Date()
     document_source = es.Keyword()
 
     class Index:
@@ -165,7 +165,7 @@ class TopicEval(es.Document):
     document_source = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_EVAL
+        name = ES_INDEX_DOCUMENT_EVAL
         using = ES_CLIENT
 
 
