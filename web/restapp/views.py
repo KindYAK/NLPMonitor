@@ -8,7 +8,6 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
-from mainapp.services_es_documents import execute_search
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
 from .serializers import *
 
