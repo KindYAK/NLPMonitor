@@ -177,6 +177,9 @@ class TopicsListView(TemplateView):
             max_word_weight = max((word.weight for word in topic.topic_words))
             for topic_word in topic.topic_words:
                 topic_word.weight /= max_word_weight
+                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:] # Stub - upper case
+            #Stub - topic name upper case
+            topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
 
         # Normalize topic weights by max
         max_topic_weight = max((topic.weight for topic in topics))
