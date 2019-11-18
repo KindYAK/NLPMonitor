@@ -135,8 +135,8 @@ class CriterionEvalViewSet(viewsets.ViewSet):
 
         topic_modelling = request.GET['topic_modelling']
         topic_id_evals = TopicIDEval.objects.filter(weight=1, topic_id__topic_modelling_name=topic_modelling).distinct()
-        topics_evals = TopicsEval.objects.filter(topicideval__in=topic_id_evals, author=request.user)
-        criterions = EvalCriterion.objects.filter(topicseval__in=topics_evals)
+        topics_evals = TopicsEval.objects.filter(topicideval__in=topic_id_evals, author=request.user).distinct()
+        criterions = EvalCriterion.objects.filter(topicseval__in=topics_evals).distinct()
 
         criterions_dict = {}
         for criterion in criterions:
