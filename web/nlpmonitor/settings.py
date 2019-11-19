@@ -243,7 +243,7 @@ MIN_DOCS_PER_AUTHOR = 100
 SHELL_PLUS_PRE_IMPORTS = (
     ('nlpmonitor.settings', ('ES_CLIENT', 'ES_INDEX_DOCUMENT', 'ES_INDEX_DASHOBARD', 'ES_INDEX_EMBEDDING',
                              'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT', 'ES_INDEX_CLASSIFIER',
-                             'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD')),
+                             'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL', )),
     ('elasticsearch_dsl', ('Search', 'Q')),
     'datetime',
 )

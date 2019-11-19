@@ -3,6 +3,7 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 {% load l10n %}
+{% load dictionary_getter %}
 
 {% block title %}
     Оценка по критерию
@@ -56,20 +57,28 @@
                                 <div class="form-group">
                                     <label for="granularity">Тематическое моделирование</label>
                                     <select class="custom-select form-control" name="topic_modelling" id="topic_modelling">
-                                        {% for topic_modelling in topic_modellings %}
-                                            <option value="{{ topic_modelling }}">{{ topic_modelling }}</option>
+                                        {% for topic_modelling_opt in topic_modellings %}
+                                            <option value="{{ topic_modelling_opt }}">{{ topic_modelling_opt }}</option>
                                         {% endfor %}
                                     </select>
+                                    <script>
+                                        $('#topic_modelling').val('{{ topic_modelling }}');
+                                    </script>
                                 </div>
                             </div>
                             <div class="col-lg-5">
                                 <div class="form-group">
                                     <label for="granularity">Критерии</label>
-                                    <select class="custom-select form-control select2" name="granularity" id="granularity" multiple="multiple">
-                                        {% for criterion in criterions %}
+                                    <select class="custom-select form-control select2" name="criterions" id="criterions" multiple="multiple">
+                                        {% for criterion in criterions_list %}
                                             <option value="{{ criterion.id }}">{{ criterion.name }}</option>
                                         {% endfor %}
                                     </select>
+                                    <script>
+                                        {% for criterion in criterions %}
+                                            $("#criterions option[value='" + {{ criterion.id }} + "']").prop("selected", true);
+                                        {% endfor %}
+                                    </script>
                                 </div>
                             </div>
                             <div class="col-lg-2">
@@ -144,8 +153,8 @@
                 </div>
                 <div class="card-body">
                     <div id="dynamic_plots">
-                        {# Абсолютная мощность #}
-                        <div class="dynamics-plot" id="topic_dynamics"></div>
+                        {# Абсолютные значения #}
+                        <div class="dynamics-plot" id="value_dynamics"></div>
                         <script>
                             var selectorOptions = {
                                 buttons: [{
@@ -174,19 +183,17 @@
                             };
 
                             var data = [
+                                {% for criterion in criterions %}
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_power %}{{ tick|safe }}, {% endfor %}],
-                                    name: 'Абсолютная мощность топика',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
+                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    name: '{{ criterion.name }}',
                                 },
+                                {% endfor %}
                             ];
                             var layout = {
-                                title: 'Абсолютная мощность топика',
+                                title: 'Значение критериев',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {},
@@ -196,63 +203,7 @@
                                     fixedrange: true
                                 }
                             };
-                            Plotly.plot('topic_dynamics', data, layout);
-                        </script>
-
-                        {# Относительная мощность #}
-                        <div class="dynamics-plot" id="topic_dynamics_normal"></div>
-                        <script>
-                            var data = [
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_power %}{{ tick|safe }}, {% endfor %}],
-                                    name: 'Относительная мощность топика',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
-                                },
-                            ];
-                            var layout = {
-                                title: 'Относительная мощность топика',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {}
-                                },
-                                yaxis: {
-                                    fixedrange: true
-                                }
-                            };
-                            Plotly.plot('topic_dynamics_normal', data, layout);
-                        </script>
-
-                        {# Относительный удельный вес #}
-                        <div class="dynamics-plot" id="topic_dynamics_weight"></div>
-                        <script>
-                            var data = [
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_weight %}{{ tick|safe }}, {% endfor %}],
-                                    name: 'Удельный вес топика',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
-                                },
-                            ];
-                            var layout = {
-                                title: 'Удельный вес топика',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {}
-                                },
-                                yaxis: {
-                                    fixedrange: true
-                                }
-                            };
-                            Plotly.plot('topic_dynamics_weight', data, layout);
+                            Plotly.plot('value_dynamics', data, layout);
                         </script>
                     </div>
                 </div>
@@ -267,25 +218,28 @@
                 <div class="card-header">
                     <h3>Распределение по СМИ</h3>
                 </div>
+                {% for criterion in criterions %}
                 <div class="card-body">
                     <div id="bar_plot">
-                        <div id="source_distribution"></div>
+                        <div id="source_distribution_{{ criterion.id }}"></div>
                         <script>
                             var data = [
                                 {
-                                    x: [{% for source in source_weight %}'{{ source.key }}', {% endfor %}],
-                                    y: [{% for source in source_weight %}{{ source.source_weight.value|safe }}, {% endfor %}],
+                                    x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                    y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|safe }}, {% endfor %}],
                                     type: 'bar'
                                 }
                             ];
                             var layout = {
+                                title: '{{ criterion.name }}',
                                 showlegend: false,
                                 bargap: 0.025
                             };
-                            Plotly.newPlot('source_distribution', data, layout);
+                            Plotly.newPlot('source_distribution_{{ criterion.id }}', data, layout);
                         </script>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -295,14 +249,16 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Главные новости топика</h3>
+                    <h3>Ключевые новости по критериям</h3>
                 </div>
                 <div class="card-body">
                     <div id="search-results">
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
                             <tr role="row">
-                                <th>Вес в топике</th>
+                                {% for criterion in criterions %}
+                                    <th>{{ criterion.name }}</th>
+                                {% endfor %}
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
@@ -310,14 +266,16 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for document in documents %}
-                                <tr>
-                                    <td>{{ document.weight|floatformat:3|unlocalize }}</td>
-                                    <td>{{ document.datetime }}</td>
-                                    <td>{{ document.title }}</td>
-                                    <td>{{ document.source }}</td>
+                            {% for key, document in documents.items %}
+                                  <tr>
+                                    {% for criterion in criterions %}
+                                        <td>{{ document|get_item:criterion.id|floatformat:3|unlocalize }}</td>
+                                    {% endfor %}
+                                    <td>{{ document|get_item:'document'|get_item:'datetime' }}</td>
+                                    <td>{{ document|get_item:'document'|get_item:'title' }}</td>
+                                    <td>{{ document|get_item:'document'|get_item:'source' }}</td>
                                     <td>
-                                        <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link nowrap">
+                                        <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}" class="nav-link nowrap">
                                             <i class="nav-icon fas fa-eye" style="font-size: 36px;"
                                             data-toggle="tooltip" data-placement="top" title="Просмотреть новость"></i>
                                         </a>
@@ -350,8 +308,23 @@
     <script src="{% static 'js/range_plots_management.js' %} "></script>
     <script>
         $('.select2').select2();
-        run_range_plot_management('{{ view.kwargs.topic_modelling }}',
-                                   {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
-                                  '{{ csrf_token }}', true);
+
+        $('#search-results-table').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "order": [
+                [0, 'desc'],
+                [1, 'desc'],
+                [2, 'desc'],
+            ],
+            "info": true,
+            "autoWidth": true,
+            "pageLength": 25
+        });
+        {#run_range_plot_management('{{ view.kwargs.topic_modelling }}',#}
+        {#                           {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},#}
+        {#                          '{{ csrf_token }}', true);#}
     </script>
 {% endblock %}
