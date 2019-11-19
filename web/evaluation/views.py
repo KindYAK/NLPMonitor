@@ -105,7 +105,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['smooth'] = True if 'smooth' in self.request.GET else (
             True if 'granularity' not in self.request.GET else False)
         context['topic_modelling'] = self.request.GET['topic_modelling'] \
-                                        if 'topic_modelling' in self.request.GET['topic_modelling'] else \
+                                        if 'topic_modelling' in self.request.GET else \
                                         context['topic_modellings'][0]
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
                                     if 'criterions' in self.request.GET else \
