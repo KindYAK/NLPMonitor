@@ -126,7 +126,7 @@ class CriterionEvalAnalysisView(TemplateView):
             self.normalize_topic_documnets(document_evals, total_metrics_dict)
 
             # Separate signals
-            absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]
+            absolute_value = [(bucket.dynamics_weight.value if bucket.dynamics_weight.value else 0) for bucket in document_evals.aggregations.dynamics.buckets]
 
             # Smooth
             if context['smooth']:
