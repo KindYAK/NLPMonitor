@@ -40,9 +40,9 @@ class CriterionEvalAnalysisView(TemplateView):
                         agg_type="date_histogram",
                         field="document_datetime",
                         calendar_interval=granularity) \
-                .metric("dynamics_weight", agg_type="sum", field="value")
+                .metric("dynamics_weight", agg_type="avg", field="value")
         std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
-            .metric("source_value", agg_type="sum", field="value")
+            .metric("source_value", agg_type="avg", field="value")
         document_evals = std.execute()
 
         # Top_news ids
