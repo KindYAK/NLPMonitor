@@ -1,4 +1,4 @@
-import json
+import datetime
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -18,7 +18,8 @@ class CriterionEvalAnalysisView(TemplateView):
     def get_total_metrics(self, topic_modelling, criterion, granularity):
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
             .filter("term", topic_modelling=topic_modelling) \
-            .filter("term", criterion_id=criterion.id)
+            .filter("term", criterion_id=criterion.id) \
+            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
         std_total.aggs.bucket(name="dynamics",
                               agg_type="date_histogram",
                               field="document_datetime",
@@ -51,6 +52,7 @@ class CriterionEvalAnalysisView(TemplateView):
         std_min = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
                   .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
                   .filter("term", criterion_id=criterion.id).sort('value') \
+                  .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
                   .source(['document_es_id'])[:100]
         document_evals_min = std_min.execute()
         top_news.update((d.document_es_id for d in document_evals_min))
@@ -66,6 +68,7 @@ class CriterionEvalAnalysisView(TemplateView):
         std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
                 .filter("terms", **{'document_es_id.keyword': list(top_news_total)}) \
                 .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
+                .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
                 .source(['document_es_id', 'value', 'criterion_id'])[:1000]
         document_evals = std.execute()
 
@@ -96,7 +99,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['criterions_list'] = EvalCriterion.objects.all()
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
-        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL)
+        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL).filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
         s.aggs.bucket(name="topic_modelling", agg_type="terms", field="topic_modelling.keyword")
         context['topic_modellings'] = [tm.key for tm in s.execute().aggregations.topic_modelling.buckets]
 
