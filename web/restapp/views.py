@@ -293,7 +293,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     {
                         "source": bucket.key,
                         "weight": bucket.source_weight.value,
-                    } for bucket in source_buckets
+                    } for bucket in sorted(source_buckets, key=lambda x: x.source_weight.value, reverse=True)
                 ]
             }
         )
