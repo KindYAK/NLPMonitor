@@ -31,6 +31,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
               .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
               .filter("term", criterion_id=criterion.id).sort('-value') \
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
               .source(['document_es_id'])
     if documents_ids_to_filter:
         std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
