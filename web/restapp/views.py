@@ -8,6 +8,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
+from evaluation.services import *
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
 from .serializers import *
 
@@ -262,12 +263,48 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         documents = s.execute()
         return documents, documents.aggregations.source.buckets
 
+    def search_criterions(self):
+        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
+        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
+        topic_modelling = self.request.GET['topic_modelling']
+        criterions = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions'))
+        keyword = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
+        group = TopicGroup.objects.get(id=self.request.GET['group']) \
+            if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", "None", None] \
+            else None
+        topics_to_filter = None
+        if group:
+            topics_to_filter = [topic.topic_id for topic in group.topics.all()]
+
+        is_empty_search, documents_ids_to_filter = get_documents_ids_filter(topics_to_filter, keyword,
+                                                                            group.topic_modelling_name if group else None)
+        if is_empty_search:
+            return [], []
+
+        source_weight = {}
+        top_news_total = set()
+        for criterion in criterions:
+            # Current topic metrics
+            document_evals, top_news = get_current_document_evals(topic_modelling, criterion, None,
+                                                                  documents_ids_to_filter, date_from, date_to)
+            top_news_total.update(top_news)
+            source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
+                                                            key=lambda x: x.source_value.value,
+                                                            reverse=True)
+
+        # Get documents, set weights
+        documents_eval_dict = get_documents_with_values(top_news_total, criterions, topic_modelling,
+                                                        date_from, date_to).values()
+        return documents_eval_dict, source_weight
+
     def list(self, request):
         filter_type = request.GET['type']
         if filter_type == "topics":
             documents, source_buckets = self.topics_search()
         elif filter_type == "search":
             documents, source_buckets = self.search_search()
+        elif filter_type == "criterions":
+            documents, source_buckets = self.search_criterions()
         else:
             return Response(
                 {
@@ -276,24 +313,53 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 }
             )
 
+        def get_value_or_weight(document):
+            if hasattr(document, "weight"):
+                return round(document.weight, 3)
+            if hasattr(document, "value"):
+                return round(document.value, 3)
+            if document.meta.score:
+                return round(document.meta.score, 3) if document.meta.score != 0 else 1.000
+            return None
+        if filter_type in ["topics", "search"]:
+            source_weights = [
+                        {
+                            "source": bucket.key,
+                            "weight": bucket.source_weight.value,
+                        } for bucket in sorted(source_buckets, key=lambda x: x.source_weight.value, reverse=True)
+                    ]
+            documents = [
+                {
+                    "id": document.id,
+                    "weight": get_value_or_weight(document),
+                    "title": document.title,
+                    "source": document.source,
+                    "datetime": document.datetime,
+                } for document in documents
+            ]
+        else:
+            source_weights = dict(
+                (source_id,
+                    [
+                        {
+                            "source": bucket.key,
+                            "weight": bucket.source_value.value,
+                        } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
+                    ]
+                ) for source_id, buckets in source_buckets.items()
+            )
+            for document in documents:
+                document["document"] = {
+                    "id": document["document"].id,
+                    "title": document["document"].title,
+                    "source": document["document"].source,
+                    "datetime": document["document"].datetime,
+                }
+
         return Response(
             {
                 "status": 200,
-                "documents": [
-                    {
-                        "id": document.id,
-                        "weight": round(document.weight, 3) if hasattr(document, "weight") else
-                                                            (round(document.meta.score, 3) if document.meta.score != 0 else 1.000),
-                        "title": document.title,
-                        "source": document.source,
-                        "datetime": document.datetime,
-                    } for document in documents
-                ],
-                "source_weights": [
-                    {
-                        "source": bucket.key,
-                        "weight": bucket.source_weight.value,
-                    } for bucket in sorted(source_buckets, key=lambda x: x.source_weight.value, reverse=True)
-                ]
+                "documents": documents,
+                "source_weights": source_weights,
             }
         )
