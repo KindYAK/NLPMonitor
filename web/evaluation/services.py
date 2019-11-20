@@ -75,9 +75,9 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
              .filter('terms', _id=list(top_news_total)) \
              .source(('id', 'title', 'source', 'datetime',))[:1000]
     if date_from:
-        std = sd.filter("range", document_datetime={"gte": date_from})
+        sd = sd.filter("range", document_datetime={"gte": date_from})
     if date_to:
-        std = sd.filter("range", document_datetime={"lte": date_to})
+        sd = sd.filter("range", document_datetime={"lte": date_to})
     documents = sd.scan()
     documents_dict = dict((d.meta.id, d) for d in documents)
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
