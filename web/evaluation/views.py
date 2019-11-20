@@ -3,11 +3,12 @@ import datetime
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
 
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm
 from mainapp.services import apply_fir_filter
+from mainapp.services_es import filter_by_elscore
 from mainapp.models_user import TopicGroup
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 
@@ -15,11 +16,13 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOC
 class CriterionEvalAnalysisView(TemplateView):
     template_name = "evaluation/criterion_analysis.html"
 
-    def get_total_metrics(self, topic_modelling, criterion, granularity):
+    def get_total_metrics(self, topic_modelling, criterion, granularity, documents_ids_to_filter):
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
             .filter("term", topic_modelling=topic_modelling) \
             .filter("term", criterion_id=criterion.id) \
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
+        if documents_ids_to_filter:
+            std_total = std_total.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
         std_total.aggs.bucket(name="dynamics",
                               agg_type="date_histogram",
                               field="document_datetime",
@@ -32,11 +35,14 @@ class CriterionEvalAnalysisView(TemplateView):
         )
         return total_metrics_dict
 
-    def get_current_document_evals(self, topic_modelling, criterion, granularity):
+    def get_current_document_evals(self, topic_modelling, criterion, granularity, documents_ids_to_filter):
         std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
                   .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
                   .filter("term", criterion_id=criterion.id).sort('-value') \
-                  .source(['document_es_id'])[:100]
+                  .source(['document_es_id'])
+        if documents_ids_to_filter:
+            std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
+        std = std[:100]
         std.aggs.bucket(name="dynamics",
                         agg_type="date_histogram",
                         field="document_datetime",
@@ -53,7 +59,10 @@ class CriterionEvalAnalysisView(TemplateView):
                   .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
                   .filter("term", criterion_id=criterion.id).sort('value') \
                   .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-                  .source(['document_es_id'])[:100]
+                  .source(['document_es_id'])
+        if documents_ids_to_filter:
+            std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
+        std = std[:100]
         document_evals_min = std_min.execute()
         top_news.update((d.document_es_id for d in document_evals_min))
         return document_evals, top_news
@@ -113,16 +122,58 @@ class CriterionEvalAnalysisView(TemplateView):
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
                                     if 'criterions' in self.request.GET else \
                                     [context['criterions_list'].first()]
+        context['keyword'] = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
+        context['group'] = TopicGroup.objects.get(id=self.request.GET['group']) \
+                                    if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
+                                    else None
+        topics_to_filter = None
+        if context['group']:
+            topics_to_filter = [topic.topic_id for topic in context['group'].topics.all()]
+
+        is_empty_search = False
+        documents_ids_to_filter = []
+        if topics_to_filter:
+            s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+                        .filter("terms", **{"topic_id.keyword": topics_to_filter}) \
+                        .filter("term", **{"topic_modelling.keyword": context['group'].topic_modelling_name}) \
+                        .filter("range", topic_weight={"gte": 0.1}) \
+                        .source(("document_es_id", ))[:10000000]
+            documents_ids_to_filter = list(set([d.document_es_id for d in s.scan()]))
+            if not documents_ids_to_filter:
+                is_empty_search = True
+
+        if context['keyword']:
+            s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
+            q = Q('multi_match',
+                  query=context['keyword'],
+                  fields=['title^10',
+                          'tags^3',
+                          'categories^3',
+                          'text^2'])
+            s = s.query(q)
+            s = s.source(tuple())
+            s = s[:500000]
+            r = s.execute()
+            cutoff = filter_by_elscore([d.meta.score for d in r], "SEARCH_LVL_HARD")
+            keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
+            if topics_to_filter:
+                documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))
+            else:
+                documents_ids_to_filter = keyword_ids_to_filter
+            if not documents_ids_to_filter:
+                is_empty_search = True
+        if is_empty_search:
+            return context
 
         context['absolute_value'] = {}
         context['source_weight'] = {}
         top_news_total = set()
         for criterion in context['criterions']:
             # Total metrics
-            total_metrics_dict = self.get_total_metrics(context['topic_modelling'], criterion, context['granularity'])
+            total_metrics_dict = self.get_total_metrics(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
 
             # Current topic metrics
-            document_evals, top_news = self.get_current_document_evals(context['topic_modelling'], criterion, context['granularity'])
+            document_evals, top_news = self.get_current_document_evals(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
             top_news_total.update(top_news)
 
             # Normalize

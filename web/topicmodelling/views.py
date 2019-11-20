@@ -18,7 +18,7 @@ class TopicDocumentListView(TemplateView):
     def get_total_metrics(self, granularity):
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=self.topic_modelling) \
-            .filter("range", topic_weight={"gte": 0.001}) \
+            .filter("range", topic_weight={"gte": 0.1}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
         std_total.aggs.bucket(name="dynamics",
                               agg_type="date_histogram",
@@ -41,7 +41,7 @@ class TopicDocumentListView(TemplateView):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=self.topic_modelling) \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
-                  .filter("range", topic_weight={"gte": 0.001}) \
+                  .filter("range", topic_weight={"gte": 0.1}) \
                   .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
         std.aggs.bucket(name="dynamics",
@@ -153,7 +153,7 @@ class TopicsListView(TemplateView):
         # Get topics aggregation
         s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=context['topic_modelling']) \
-            .filter("range", topic_weight={"gte": 0.001}) \
+            .filter("range", topic_weight={"gte": 0.1}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
         s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
             .metric("topic_weight", agg_type="sum", field="topic_weight")

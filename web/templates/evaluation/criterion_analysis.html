@@ -32,6 +32,12 @@
         .form-group {
             margin-bottom: 0;
         }
+        .select2-container {
+            height: 38px !important;
+        }
+        .select2-selection {
+            height: 100% !important;
+        }
     </style>
 {% endblock %}
 
@@ -78,6 +84,59 @@
                                         {% for criterion in criterions %}
                                             $("#criterions option[value='" + {{ criterion.id }} + "']").prop("selected", true);
                                         {% endfor %}
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default float-right" style="margin-top: 30px;">Применить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Фильтрация #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Фильтрация</h3>
+                </div>
+                <div class="card-body">
+                    <div id="plotsMenu">
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <div class="form-group">
+                                    <label for="granularity">Ключевое слово</label>
+                                    <input class="form-control" type="text" name="keyword" id="keyword" placeholder="Поиск...">
+                                    <script>
+                                        $('#keyword').val('{{ keyword }}');
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="form-group">
+                                    <label for="granularity">Группы</label>
+                                    <select class="custom-select form-control select2" name="group" id="group">
+                                    <option selected value='-1'>-----Группа топиков...-----</option>
+                                        {% for group in my_groups %}
+                                            <option value='{{ group.id }}'>{{ group.name }}</option>
+                                        {% endfor %}
+                                        <option value='-2'>-----Публичные группы-----</option>
+                                        {% for group in public_groups %}
+                                            <option value='{{ group.id }}'>{{ group.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <script>
+                                        {% if group %}
+                                            $('#group').val('{{ group.id }}');
+                                        {% else %}
+                                            $('#group').val('-1');
+                                        {% endif %}
                                     </script>
                                 </div>
                             </div>
