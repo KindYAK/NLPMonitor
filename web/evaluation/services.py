@@ -91,7 +91,8 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
     documents_eval_dict = {}
     seen_id = set()
     for td in document_evals:
-        if td.document_es_id in documents_eval_dict and documents_eval_dict[td.document_es_id]['document'].id in seen_id:
+        if td.document_es_id in documents_dict and documents_dict[td.document_es_id].id in seen_id \
+                and td.document_es_id not in documents_eval_dict:
             continue
         if td.document_es_id not in documents_eval_dict:
             documents_eval_dict[td.document_es_id] = {}
