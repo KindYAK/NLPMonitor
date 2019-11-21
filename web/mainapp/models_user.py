@@ -6,7 +6,7 @@ class TopicGroup(models.Model):
     class Meta:
         verbose_name = "Группа топиков"
         verbose_name_plural = "Группы топиков"
-        unique_together = (('name', 'owner'), )
+        unique_together = (('name', 'owner', 'topic_modelling_name'), )
 
     name = models.CharField(max_length=50, verbose_name="Название группы")
     topic_modelling_name = models.CharField(max_length=100, verbose_name="Название ТМ")

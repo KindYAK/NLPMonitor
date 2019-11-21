@@ -458,7 +458,7 @@
                         "&criterions=" + '{{ criterion.id }}' +
                         {% endfor %}
                         "&keyword=" + "{{ keyword }}" +
-                        "&group=" + "{{ group }}" +
+                        "&group=" + "{{ group.id }}" +
                         "&type=criterions",
                     method: 'GET',
                     success: function (result) {
