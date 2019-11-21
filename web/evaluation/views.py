@@ -40,6 +40,9 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_modelling'] = self.request.GET['topic_modelling'] \
                                         if 'topic_modelling' in self.request.GET else \
                                         context['topic_modellings'][0]
+        context['public_groups'] = context['public_groups'].filter(topic_modelling_name=context['topic_modelling'])
+        context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
+
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
                                     if 'criterions' in self.request.GET else \
                                     [context['criterions_list'].first()]
