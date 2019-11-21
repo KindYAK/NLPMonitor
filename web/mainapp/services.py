@@ -70,4 +70,9 @@ def apply_fir_filter(time_series, granularity):
 
 def unique_ize(list, key):
     seen = set()
-    return [seen.add(key(obj)) or obj for obj in list if key(obj) not in seen]
+    results = []
+    for obj in list:
+        if key(obj) not in seen:
+            results.append(obj)
+            seen.add(key(obj))
+    return results
