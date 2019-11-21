@@ -8,7 +8,7 @@ from elasticsearch_dsl import Search
 
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm
-from mainapp.services import apply_fir_filter
+from mainapp.services import apply_fir_filter, unique_ize
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING
 
 
@@ -122,7 +122,7 @@ class TopicDocumentListView(TemplateView):
             relative_weight = apply_fir_filter(relative_weight, granularity=context['granularity'])
 
         # Create context
-        context['documents'] = documents
+        context['documents'] = unique_ize(documents, key=lambda x: x.id)
         context['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power

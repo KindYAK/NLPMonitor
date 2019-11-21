@@ -66,3 +66,8 @@ def apply_fir_filter(time_series, granularity):
     # Делаем фильтрацию
     filtered_data = filtfilt(coefficients, 1.0, time_series, method="gust")
     return ascend_signal_to_zero(filtered_data)
+
+
+def unique_ize(list, key):
+    seen = set()
+    return [seen.add(key(obj)) or obj for obj in list if key(obj) not in seen]

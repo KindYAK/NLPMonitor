@@ -6,7 +6,7 @@ from elasticsearch_dsl import Search
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
-from .services import apply_fir_filter
+from .services import apply_fir_filter, unique_ize
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
 from .services_es_documents import execute_search
 
@@ -77,6 +77,7 @@ class SearchView(TemplateView):
             "source": document.source,
             "score": str(document.meta.score).replace(",", "."),
         } for document in results]
+        context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])
 
         # Normalize dynamics
         for bucket in results.aggregations.dynamics.buckets:
