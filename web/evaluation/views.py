@@ -20,10 +20,6 @@ class CriterionEvalAnalysisView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        key = make_template_fragment_key('criterion_analysis', [self.request.GET])
-        if cache.get(key):
-            return context
-
         # Form creation
         context['criterions_list'] = EvalCriterion.objects.all()
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
@@ -50,6 +46,11 @@ class CriterionEvalAnalysisView(TemplateView):
         context['group'] = TopicGroup.objects.get(id=self.request.GET['group']) \
                                     if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
                                     else None
+
+        key = make_template_fragment_key('criterion_analysis', [self.request.GET])
+        if cache.get(key):
+            return context
+
         topics_to_filter = None
         if context['group']:
             topics_to_filter = [topic.topic_id for topic in context['group'].topics.all()]
