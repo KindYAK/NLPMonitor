@@ -29,8 +29,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL)\
-            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-            .filter("term", is_ready=True)
+            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
         s.aggs.bucket(name="topic_modelling", agg_type="terms", field="topic_modelling.keyword")
         context['topic_modellings'] = [tm.key for tm in s.execute().aggregations.topic_modelling.buckets]
 

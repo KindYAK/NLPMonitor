@@ -85,18 +85,18 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
             .filter("terms", **{'criterion_id': [c.id for c in criterions]}) \
             .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-            .source(["id", 'document_es_id', 'value', 'criterion_id'])[:1000]
+            .source(['document_es_id', 'value', 'criterion_id'])[:1000]
     document_evals = std.scan()
 
     documents_eval_dict = {}
     seen_id = set()
     for td in document_evals:
-        if td.id in seen_id:
+        if td.document_es_id in documents_eval_dict and documents_eval_dict[td.document_es_id]['document'].id in seen_id:
             continue
         if td.document_es_id not in documents_eval_dict:
-            seen_id.add(td.id)
             documents_eval_dict[td.document_es_id] = {}
             documents_eval_dict[td.document_es_id]['document'] = documents_dict[td.document_es_id]
+            seen_id.add(documents_dict[td.document_es_id].id)
         documents_eval_dict[td.document_es_id][td.criterion_id] = td.value
     return documents_eval_dict
 
