@@ -22,7 +22,7 @@ class CriterionEvalAnalysisView(TemplateView):
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL)\
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
         s.aggs.bucket(name="topic_modelling", agg_type="terms", field="topic_modelling.keyword")
-        context['topic_modellings'] = [tm.key for tm in s.execute().aggregations.topic_modelling.buckets]
+        context['topic_modellings'] = [(tm.key, tm.key.replace("bigartm", "tm")) for tm in s.execute().aggregations.topic_modelling.buckets]
 
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -30,7 +30,7 @@ class CriterionEvalAnalysisView(TemplateView):
             True if 'granularity' not in self.request.GET else False)
         context['topic_modelling'] = self.request.GET['topic_modelling'] \
                                         if 'topic_modelling' in self.request.GET else \
-                                        context['topic_modellings'][0]
+                                        context['topic_modellings'][0][0]
         context['public_groups'] = context['public_groups'].filter(topic_modelling_name=context['topic_modelling'])
         context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
 

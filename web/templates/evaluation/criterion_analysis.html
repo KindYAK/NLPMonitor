@@ -64,7 +64,7 @@
                                     <label for="granularity">Тематическое моделирование</label>
                                     <select class="custom-select form-control" name="topic_modelling" id="topic_modelling">
                                         {% for topic_modelling_opt in topic_modellings %}
-                                            <option value="{{ topic_modelling_opt }}">{{ topic_modelling_opt }}</option>
+                                            <option value="{{ topic_modelling_opt.0 }}">{{ topic_modelling_opt.1 }}</option>
                                         {% endfor %}
                                     </select>
                                     <script>
