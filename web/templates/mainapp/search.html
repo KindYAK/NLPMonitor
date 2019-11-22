@@ -3,6 +3,7 @@
 {% load staticfiles %}
 {% load cache %}
 {% load request_get_list %}
+{% load l10n %}
 
 {% block title %}Поиск{% endblock %}
 {% block heading %}Поиск{% endblock %}
@@ -324,7 +325,7 @@
                             <tbody>
                             {% for document in documents %}
                                 <tr>
-                                    <td>{{ document.score }}</td>
+                                    <td>{{ document.score|floatformat:3|unlocalize }}</td>
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>

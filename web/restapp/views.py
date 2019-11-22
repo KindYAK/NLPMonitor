@@ -320,7 +320,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 return round(document.value, 3)
             if document.meta.score:
                 return round(document.meta.score, 3) if document.meta.score != 0 else 1.000
-            return None
+            return 1
         if filter_type in ["topics", "search"]:
             source_weights = [
                         {
