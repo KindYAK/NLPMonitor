@@ -166,7 +166,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling):
         s = s.source(tuple())
         s = s[:500000]
         r = s.execute()
-        cutoff = get_elscore_cutoff([d.meta.score for d in r], "SEARCH_LVL_HARD")
+        cutoff = get_elscore_cutoff([d.meta.score for d in r], "SEARCH_LVL_LIGHT")
         keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
         if topics:
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))
