@@ -216,6 +216,7 @@
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in absolute_power %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Абсолютная мощность выборки',
+                                    fill: 'tozeroy',
 {#                                    {% if smooth %}#}
 {#                                    line: {shape: 'spline'},#}
 {#                                    smoothing: 0.5#}
@@ -226,7 +227,8 @@
                                 title: 'Абсолютная мощность выборки',
                                 xaxis: {
                                     rangeselector: selectorOptions,
-                                    rangeslider: {}
+                                    rangeslider: {},
+                                    fixedrange: true
                                 },
                                 yaxis: {
                                     fixedrange: true
@@ -244,6 +246,7 @@
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in relative_power %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Относительная мощность выборки',
+                                    fill: 'tozeroy',
 {#                                    {% if smooth %}#}
 {#                                    line: {shape: 'spline'},#}
 {#                                    smoothing: 0.5#}
@@ -254,7 +257,8 @@
                                 title: 'Относительная мощность выборки',
                                 xaxis: {
                                     rangeselector: selectorOptions,
-                                    rangeslider: {}
+                                    rangeslider: {},
+                                    fixedrange: true
                                 },
                                 yaxis: {
                                     fixedrange: true
@@ -272,6 +276,7 @@
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in relative_weight %}{{ tick|safe }}, {% endfor %}],
                                     name: 'Удельный вес выборки',
+                                    fill: 'tozeroy',
 {#                                    {% if smooth %}#}
 {#                                    line: {shape: 'spline'},#}
 {#                                    smoothing: 0.5#}
@@ -282,7 +287,8 @@
                                 title: 'Удельный вес выборки',
                                 xaxis: {
                                     rangeselector: selectorOptions,
-                                    rangeslider: {}
+                                    rangeslider: {},
+                                    fixedrange: true
                                 },
                                 yaxis: {
                                     fixedrange: true

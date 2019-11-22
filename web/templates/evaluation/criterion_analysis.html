@@ -248,6 +248,7 @@
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
+                                    fill: 'tozeroy',
                                 },
                                 {% endfor %}
                             ];
