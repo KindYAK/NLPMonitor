@@ -65,7 +65,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, is_topic
         }
         for (doc of result.documents) {
             table_html += "<tr>";
-            table_html += "<td>" + doc.weight.toString().toFixed(3).replace(".", ",") + "</td>";
+            table_html += "<td>" + doc.weight.toFixed(3).toString().replace(".", ",") + "</td>";
             table_html += "<td>" + doc.datetime + "</td>";
             table_html += "<td>" + doc.title + "</td>";
             table_html += "<td>" + doc.source + " </td>";
