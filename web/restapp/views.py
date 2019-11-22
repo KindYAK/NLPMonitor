@@ -281,7 +281,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         if is_empty_search:
             return [], []
 
-        max_criterion_value_dict = get_criterions_max_values(criterions, topic_modelling)
+        max_criterion_value_dict, _ = get_criterions_values_for_normalization(criterions, topic_modelling)
         source_weight = {}
         top_news_total = set()
         for criterion in criterions:

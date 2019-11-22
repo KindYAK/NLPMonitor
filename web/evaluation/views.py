@@ -55,7 +55,9 @@ class CriterionEvalAnalysisView(TemplateView):
         if is_empty_search:
             return context
 
-        max_criterion_value_dict = get_criterions_max_values(context['criterions'], context['topic_modelling'])
+        max_criterion_value_dict, total_criterion_date_value_dict = \
+            get_criterions_values_for_normalization(context['criterions'], context['topic_modelling'],
+                                                   granularity=context['granularity'] if ((context['keyword'] or context['group'])) else None)
         context['absolute_value'] = {}
         context['source_weight'] = {}
         top_news_total = set()
@@ -65,7 +67,7 @@ class CriterionEvalAnalysisView(TemplateView):
             top_news_total.update(top_news)
 
             # Normalize
-            normalize_documents_eval_dynamics(document_evals)
+            normalize_documents_eval_dynamics(document_evals, total_criterion_date_value_dict[criterion.id])
 
             # Separate signals
             absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]
@@ -81,9 +83,14 @@ class CriterionEvalAnalysisView(TemplateView):
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
                                                             key=lambda x: x.source_value.value,
                                                             reverse=True)
+            context['y_axis_from'] = min(-1,
+                                         context['y_axis_from'] if 'y_axis_from' in context else -1,
+                                         min(absolute_value))
+            context['y_axis_to'] = max(1,
+                                       context['y_axis_to'] if 'y_axis_to' in context else 1,
+                                       max(absolute_value))
 
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)
         context['documents'] = documents_eval_dict
-        context['has_negatives'] = any([c.value_range_from < 0 for c in context['criterions']])
         return context

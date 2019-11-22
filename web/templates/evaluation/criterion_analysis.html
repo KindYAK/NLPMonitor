@@ -261,11 +261,7 @@
                                 },
                                 yaxis: {
                                     fixedrange: true,
-                                    {% if has_negatives %}
-                                        range: [-1, 1]
-                                    {% else %}
-                                        range: [0, 1],
-                                    {% endif %}
+                                    range: [{{ y_axis_from }}, {{ y_axis_to }}]
                                 }
                             };
                             Plotly.plot('value_dynamics', data, layout);
