@@ -50,7 +50,7 @@ dag_discovery_safe_mode=True
 
 [cli]
 api_client=airflow.api.client.local_client
-endpoint_url=http://{hostname}:8001
+endpoint_url=http://{hostname}:8001/airflow
 
 [api]
 auth_backend=airflow.api.auth.backend.default
@@ -76,7 +76,7 @@ default_gpus=0
 default_hive_mapred_queue=
 
 [webserver]
-base_url=http://{hostname}:8001
+base_url=http://{hostname}:8001/airflow
 web_server_host=0.0.0.0
 web_server_port=8001
 web_server_ssl_cert=
