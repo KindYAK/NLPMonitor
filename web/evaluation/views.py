@@ -79,7 +79,7 @@ class CriterionEvalAnalysisView(TemplateView):
 
             # Smooth
             if context['smooth']:
-                absolute_value = apply_fir_filter(absolute_value, granularity=context['granularity'])
+                absolute_value = apply_fir_filter(absolute_value, granularity=context['granularity'], allow_negatives=True)
 
             # Create context
             if not 'date_ticks' in context or len(document_evals.aggregations.dynamics.buckets) > len(context['date_ticks']):

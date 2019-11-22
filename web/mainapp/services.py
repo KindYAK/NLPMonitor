@@ -35,7 +35,7 @@ def filter_coefficients(f1, f2, fs, N):
     return firwin(N, [f1 * nyq, f2 * nyq], scale=True, nyq=0.5 * fs, pass_zero=False)
 
 
-def apply_fir_filter(time_series, granularity):
+def apply_fir_filter(time_series, granularity, allow_negatives=False):
     if not time_series:
         return time_series
     year_length = 365.259
@@ -60,12 +60,14 @@ def apply_fir_filter(time_series, granularity):
     filter_length_by_signal_length = int(len(time_series) * 0.2)
     if filter_length_by_signal_length % 2 == 0:
         filter_length_by_signal_length += 1
-    N = min(filter_length_by_signal_length, 401)  # Length of the filter (number of coefficients)
-    coefficients = filter_coefficients(f1, f2, fs, N)
+    filter_length_by_signal_length = min(filter_length_by_signal_length, 401)  # Length of the filter (number of coefficients)
+    coefficients = filter_coefficients(f1, f2, fs, filter_length_by_signal_length)
 
     # Делаем фильтрацию
     filtered_data = filtfilt(coefficients, 1.0, time_series, method="gust")
-    return ascend_signal_to_zero(filtered_data)
+    if not allow_negatives:
+        filtered_data = ascend_signal_to_zero(filtered_data)
+    return filtered_data
 
 
 def unique_ize(list, key):
