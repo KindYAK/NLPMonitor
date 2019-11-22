@@ -63,7 +63,7 @@ class SearchView(TemplateView):
         )
 
         # Search
-        s = execute_search(search_request, return_search_obj=True)[:100]
+        s = execute_search(search_request, return_search_obj=True)[:200]
         s.aggs.bucket(name="dynamics",
                       agg_type="date_histogram",
                       field="datetime",
@@ -81,8 +81,8 @@ class SearchView(TemplateView):
             "title": document.title,
             "source": document.source,
             "score": str(document.meta.score).replace(",", "."),
-        } for document in results[:relevant_count]]
-        context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])
+        } for document in results[:relevant_count*2]]
+        context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
 
         # Normalize dynamics
         for bucket in results.aggregations.dynamics.buckets:
