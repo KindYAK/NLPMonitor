@@ -6,27 +6,6 @@ from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
 
 
-def get_total_metrics(topic_modelling, criterion, granularity, documents_ids_to_filter):
-    std_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-        .filter("term", topic_modelling=topic_modelling) \
-        .filter("term", criterion_id=criterion.id) \
-        .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
-    if documents_ids_to_filter:
-        std_total = std_total.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
-    if granularity:
-        std_total.aggs.bucket(name="dynamics",
-                              agg_type="date_histogram",
-                              field="document_datetime",
-                              calendar_interval=granularity)
-    topic_documents_total = std_total.execute()
-    total_metrics_dict = dict(
-        (
-            t.key_as_string, t.doc_count,
-        ) for t in topic_documents_total.aggregations.dynamics.buckets
-    )
-    return total_metrics_dict
-
-
 def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter, date_from=None, date_to=None):
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
               .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
@@ -70,7 +49,36 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     return document_evals, top_news
 
 
-def get_documents_with_values(top_news_total, criterions, topic_modelling, date_from=None, date_to=None):
+def get_criterions_max_values(criterions, topic_modelling):
+    # Get max positive/negative values for criterion
+    max_criterion_value_dict = {}
+    for criterion in criterions:
+        max_criterion_value_dict[criterion.id] = {}
+        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
+                    .filter("term", criterion_id=criterion.id) \
+                    .filter("term", **{'topic_modelling.keyword': topic_modelling})[:0]
+        s.aggs.metric(name="max_value", agg_type="max", field="value")
+        if criterion.value_range_from < 0:
+            s.aggs.metric(name="min_value", agg_type="min", field="value")
+        r = s.execute()
+        max_criterion_value_dict[criterion.id]["max_positive"] = r.aggregations.max_value.value
+        if criterion.value_range_from < 0:
+            max_criterion_value_dict[criterion.id]["max_negative"] = r.aggregations.min_value.value
+    return max_criterion_value_dict
+
+
+def normalize_documents_eval_dynamics(document_evals, max_criterion_value_dict, criterion_id):
+    for bucket in document_evals.aggregations.dynamics.buckets:
+        if not bucket.dynamics_weight.value:
+            bucket.dynamics_weight.value = 0
+        elif bucket.dynamics_weight.value > 0:
+            bucket.dynamics_weight.value /= max_criterion_value_dict[criterion_id]['max_positive']
+        else:
+            bucket.dynamics_weight.value /= max_criterion_value_dict[criterion_id]['max_negative']
+
+
+def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):
+    # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
              .source(('id', 'title', 'source', 'datetime',))[:1000]
@@ -88,6 +96,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
             .source(['document_es_id', 'value', 'criterion_id'])[:1000]
     document_evals = std.scan()
 
+    # Creating final documents dict
     documents_eval_dict = {}
     seen_id = set()
     for td in document_evals:
@@ -100,7 +109,12 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
             documents_eval_dict[td.document_es_id] = {}
             documents_eval_dict[td.document_es_id]['document'] = documents_dict[td.document_es_id]
             seen_id.add(documents_dict[td.document_es_id].id)
-        documents_eval_dict[td.document_es_id][td.criterion_id] = td.value
+        if td.value > 0:
+            documents_eval_dict[td.document_es_id][td.criterion_id] = \
+                td.value / max_criterion_value_dict[td.criterion_id]["max_positive"]
+        else:
+            documents_eval_dict[td.document_es_id][td.criterion_id] = \
+                td.value / max_criterion_value_dict[td.criterion_id]["max_negative"]
     return documents_eval_dict
 
 

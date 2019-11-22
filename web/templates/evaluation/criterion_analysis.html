@@ -260,7 +260,12 @@
                                     fixedrange: true
                                 },
                                 yaxis: {
-                                    fixedrange: true
+                                    fixedrange: true,
+                                    {% if has_negatives %}
+                                        range: [-1, 1]
+                                    {% else %}
+                                        range: [0, 1],
+                                    {% endif %}
                                 }
                             };
                             Plotly.plot('value_dynamics', data, layout);
@@ -406,7 +411,7 @@
                     if(k === "document"){
                         continue;
                     }
-                    table_html += "<td>" + doc[k].toString().replace(".", ",") + "</td>";
+                    table_html += "<td>" + doc[k].toFixed(3).toString().replace(".", ",") + "</td>";
                 }
                 table_html += "<td>" + doc.document.datetime + "</td>";
                 table_html += "<td>" + doc.document.title + "</td>";

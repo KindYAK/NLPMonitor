@@ -1,17 +1,12 @@
-import datetime
-
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
-from elasticsearch_dsl import Search, Q
 
-from .services import *
 from evaluation.models import EvalCriterion
-from mainapp.forms import TopicChooseForm
-from mainapp.services import apply_fir_filter
-from mainapp.services_es import get_elscore_cutoff
 from mainapp.models_user import TopicGroup
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
+from mainapp.services import apply_fir_filter
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
+from .services import *
 
 
 class CriterionEvalAnalysisView(TemplateView):
@@ -60,19 +55,20 @@ class CriterionEvalAnalysisView(TemplateView):
         if is_empty_search:
             return context
 
+        max_criterion_value_dict = get_criterions_max_values(context['criterions'], context['topic_modelling'])
         context['absolute_value'] = {}
         context['source_weight'] = {}
         top_news_total = set()
         for criterion in context['criterions']:
-            # Total metrics
-            total_metrics_dict = get_total_metrics(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
-
             # Current topic metrics
             document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
             top_news_total.update(top_news)
 
+            # Normalize
+            normalize_documents_eval_dynamics(document_evals, max_criterion_value_dict, criterion.id)
+
             # Separate signals
-            absolute_value = [(bucket.dynamics_weight.value if bucket.dynamics_weight.value else 0) for bucket in document_evals.aggregations.dynamics.buckets]
+            absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]
 
             # Smooth
             if context['smooth']:
@@ -87,6 +83,7 @@ class CriterionEvalAnalysisView(TemplateView):
                                                             reverse=True)
 
         # Get documents, set weights
-        documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'], context['topic_modelling'])
+        documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)
         context['documents'] = documents_eval_dict
+        context['has_negatives'] = any([c.value_range_from < 0 for c in context['criterions']])
         return context
