@@ -71,9 +71,6 @@ class CriterionEvalAnalysisView(TemplateView):
             document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
             top_news_total.update(top_news)
 
-            # Normalize
-            normalize_topic_documnets(document_evals, total_metrics_dict)
-
             # Separate signals
             absolute_value = [(bucket.dynamics_weight.value if bucket.dynamics_weight.value else 0) for bucket in document_evals.aggregations.dynamics.buckets]
 

@@ -39,7 +39,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std = std.filter("range", document_datetime={"gte": date_from})
     if date_to:
         std = std.filter("range", document_datetime={"lte": date_to})
-    std = std[:100]
+    std = std[:200]
     if granularity:
         std.aggs.bucket(name="dynamics",
                         agg_type="date_histogram",
@@ -64,7 +64,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
     if date_to:
         std_min = std_min.filter("range", document_datetime={"lte": date_to})
-    std_min = std_min[:100]
+    std_min = std_min[:200]
     document_evals_min = std_min.execute()
     top_news.update((d.document_es_id for d in document_evals_min))
     return document_evals, top_news
@@ -91,6 +91,8 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
     documents_eval_dict = {}
     seen_id = set()
     for td in document_evals:
+        if len(documents_eval_dict.keys()) >= 200:
+            break
         if td.document_es_id in documents_dict and documents_dict[td.document_es_id].id in seen_id \
                 and td.document_es_id not in documents_eval_dict:
             continue
@@ -100,15 +102,6 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, date_
             seen_id.add(documents_dict[td.document_es_id].id)
         documents_eval_dict[td.document_es_id][td.criterion_id] = td.value
     return documents_eval_dict
-
-
-def normalize_topic_documnets(topic_documents, total_metrics_dict):
-    for bucket in topic_documents.aggregations.dynamics.buckets:
-        total_size = total_metrics_dict[bucket.key_as_string]
-        if total_size != 0:
-            bucket.doc_count_normal = bucket.doc_count / total_size
-        else:
-            bucket.doc_count_normal = 0
 
 
 def get_documents_ids_filter(topics, keyword, topic_modelling):
