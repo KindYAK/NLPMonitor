@@ -68,8 +68,8 @@ def get_criterions_max_values(criterions, topic_modelling):
 
 
 def normalize_documents_eval_dynamics(document_evals):
-    normalizer = max(abs(max(bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets)),
-                     abs(max(-bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets)))
+    normalizer = max(abs(max(bucket.dynamics_weight.value if bucket.dynamics_weight.value else 0 for bucket in document_evals.aggregations.dynamics.buckets)),
+                     abs(max(-bucket.dynamics_weight.value if bucket.dynamics_weight.value else 0 for bucket in document_evals.aggregations.dynamics.buckets)))
     for bucket in document_evals.aggregations.dynamics.buckets:
         if not bucket.dynamics_weight.value:
             bucket.dynamics_weight.value = 0
