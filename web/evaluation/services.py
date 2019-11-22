@@ -2,7 +2,7 @@ import datetime
 
 from elasticsearch_dsl import Search, Q
 
-from mainapp.services_es import filter_by_elscore
+from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
 
 
@@ -136,7 +136,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling):
         s = s.source(tuple())
         s = s[:500000]
         r = s.execute()
-        cutoff = filter_by_elscore([d.meta.score for d in r], "SEARCH_LVL_HARD")
+        cutoff = get_elscore_cutoff([d.meta.score for d in r], "SEARCH_LVL_HARD")
         keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
         if topics:
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))

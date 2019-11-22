@@ -9,7 +9,7 @@ def pairwise(iterable):
     return list(zip(a, b))
 
 
-def filter_by_elscore(scores_array, lvl):
+def get_elscore_cutoff(scores_array, lvl):
     """Given a set of scores"""
     conf = SEARCH_CUTOFF_CONFIG[lvl]
     RC = conf["RIGID_CUTOFF"]

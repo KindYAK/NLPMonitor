@@ -3,6 +3,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
+from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
@@ -68,15 +69,19 @@ class SearchView(TemplateView):
                       field="datetime",
                       calendar_interval=context['granularity']) \
             .metric("dynamics_weight", agg_type="sum", script="_score")
-        context['total_found'] = s.count()
         results = s.execute()
+        if search_request['text']:
+            relevant_count = get_elscore_cutoff([d.meta.score for d in results], "SEARCH_LVL_LIGHT")
+        else:
+            relevant_count = s.count().value
+        context['total_found'] = relevant_count
         context['documents'] = [{
             "id": document.id,
             "datetime": document.datetime if hasattr(document, "datetime") else "",
             "title": document.title,
             "source": document.source,
             "score": str(document.meta.score).replace(",", "."),
-        } for document in results]
+        } for document in results[:relevant_count]]
         context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])
 
         # Normalize dynamics

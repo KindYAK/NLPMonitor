@@ -9,7 +9,7 @@ from .services import *
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm
 from mainapp.services import apply_fir_filter
-from mainapp.services_es import filter_by_elscore
+from mainapp.services_es import get_elscore_cutoff
 from mainapp.models_user import TopicGroup
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 
