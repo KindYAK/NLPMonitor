@@ -83,25 +83,27 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, is_topic
         $('#search-results').html(table_html);
         table = init_table();
 
-        // Redraw source distribution plot
-        var x = [];
-        var y = [];
-        for (sw of result.source_weights) {
-            x.push(sw.source);
-            y.push(sw.weight);
-        }
-        var data = [
-            {
-                x: x,
-                y: y,
-                type: 'bar'
+        if(type === "topics") {
+            // Redraw source distribution plot
+            var x = [];
+            var y = [];
+            for (sw of result.source_weights) {
+                x.push(sw.source);
+                y.push(sw.weight);
             }
-        ];
-        var layout = {
-            showlegend: false,
-            bargap: 0.025
-        };
-        Plotly.newPlot('source_distribution', data, layout);
+            var data = [
+                {
+                    x: x,
+                    y: y,
+                    type: 'bar'
+                }
+            ];
+            var layout = {
+                showlegend: false,
+                bargap: 0.025
+            };
+            Plotly.newPlot('source_distribution', data, layout);
+        }
     }
 
     function request_documents(range_from, range_to, is_topic) {

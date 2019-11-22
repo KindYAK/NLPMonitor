@@ -314,9 +314,9 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
             )
 
         def get_value_or_weight(document):
-            if hasattr(document, "weight"):
+            if hasattr(document, "weight") and document.weight:
                 return round(document.weight, 3)
-            if hasattr(document, "value"):
+            if hasattr(document, "value") and document.value:
                 return round(document.value, 3)
             if document.meta.score:
                 return round(document.meta.score, 3) if document.meta.score != 0 else 1.000
