@@ -74,7 +74,7 @@ def normalize_documents_eval_dynamics(document_evals, max_criterion_value_dict, 
         elif bucket.dynamics_weight.value > 0:
             bucket.dynamics_weight.value /= max_criterion_value_dict[criterion_id]['max_positive']
         else:
-            bucket.dynamics_weight.value /= max_criterion_value_dict[criterion_id]['max_negative']
+            bucket.dynamics_weight.value /= -max_criterion_value_dict[criterion_id]['max_negative']
 
 
 def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):
@@ -114,7 +114,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
                 td.value / max_criterion_value_dict[td.criterion_id]["max_positive"]
         else:
             documents_eval_dict[td.document_es_id][td.criterion_id] = \
-                td.value / max_criterion_value_dict[td.criterion_id]["max_negative"]
+                td.value / -max_criterion_value_dict[td.criterion_id]["max_negative"]
     return documents_eval_dict
 
 
