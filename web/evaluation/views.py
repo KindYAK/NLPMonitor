@@ -65,7 +65,7 @@ class CriterionEvalAnalysisView(TemplateView):
             top_news_total.update(top_news)
 
             # Normalize
-            normalize_documents_eval_dynamics(document_evals, max_criterion_value_dict, criterion.id)
+            normalize_documents_eval_dynamics(document_evals)
 
             # Separate signals
             absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]

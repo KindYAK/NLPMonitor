@@ -67,14 +67,13 @@ def get_criterions_max_values(criterions, topic_modelling):
     return max_criterion_value_dict
 
 
-def normalize_documents_eval_dynamics(document_evals, max_criterion_value_dict, criterion_id):
+def normalize_documents_eval_dynamics(document_evals):
+    normalizer = max(abs(max(bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets)),
+                     abs(max(-bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets)))
     for bucket in document_evals.aggregations.dynamics.buckets:
         if not bucket.dynamics_weight.value:
             bucket.dynamics_weight.value = 0
-        elif bucket.dynamics_weight.value > 0:
-            bucket.dynamics_weight.value /= max_criterion_value_dict[criterion_id]['max_positive']
-        else:
-            bucket.dynamics_weight.value /= -max_criterion_value_dict[criterion_id]['max_negative']
+        bucket.dynamics_weight.value /= normalizer
 
 
 def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):
