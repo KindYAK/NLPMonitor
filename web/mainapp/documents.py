@@ -144,7 +144,6 @@ class Topic(es.InnerDoc):
 
 
 class TopicDocument(es.Document):
-    topic_modelling = es.Keyword()
     topic_id = es.Keyword()
     topic_weight = es.Float()
     document_es_id = es.Keyword()
@@ -154,6 +153,31 @@ class TopicDocument(es.Document):
     class Index:
         name = ES_INDEX_TOPIC_DOCUMENT
         using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 8,
+            "number_of_replicas": 0,
+            "max_result_window": 5000000,
+        }
+        mappings = {
+            "properties": {
+                "datetime": {
+                    "type": "date"
+                },
+                "document_es_id": {
+                    "type": "keyword",
+                },
+                "document_source": {
+                    "type": "keyword",
+                },
+                "topic_id": {
+                    "type": "keyword",
+                },
+                "topic_weight": {
+                    "type": "float"
+                }
+            }
+        }
 
 
 class DocumentEval(es.Document):

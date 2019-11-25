@@ -145,9 +145,8 @@ def get_documents_ids_filter(topics, keyword, topic_modelling):
     is_empty_search = False
     documents_ids_to_filter = []
     if topics:
-        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
                 .filter("terms", **{"topic_id.keyword": topics}) \
-                .filter("term", **{"topic_modelling.keyword": topic_modelling}) \
                 .filter("range", topic_weight={"gte": 0.1}) \
                 .source(("document_es_id",))[:10000000]
         documents_ids_to_filter = list(set([d.document_es_id for d in s.scan()]))
