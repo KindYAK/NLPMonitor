@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 from evaluation.models import EvalCriterion
 from mainapp.models_user import TopicGroup
 from mainapp.services import apply_fir_filter
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
 from .services import *
 
 
@@ -19,10 +18,8 @@ class CriterionEvalAnalysisView(TemplateView):
         context['criterions_list'] = EvalCriterion.objects.all()
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
-        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL)\
-            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})
-        s.aggs.bucket(name="topic_modelling", agg_type="terms", field="topic_modelling.keyword")
-        context['topic_modellings'] = [(tm.key, tm.key.replace("bigartm", "tm")) for tm in s.execute().aggregations.topic_modelling.buckets]
+        indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_*").keys()
+        context['topic_modellings'] = list(set([("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in indices]))
 
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"

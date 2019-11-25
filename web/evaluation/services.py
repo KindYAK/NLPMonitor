@@ -7,13 +7,11 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_C
 
 
 def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter, date_from=None, date_to=None):
-    std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-              .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
-              .filter("term", criterion_id=criterion.id).sort('-value') \
+    std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-              .source(['document_es_id'])
+              .source(['document_es_id']).sort('-value')
     if documents_ids_to_filter:
-        std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
+        std = std.filter("terms", **{'document_es_id': documents_ids_to_filter})
     if date_from:
         std = std.filter("range", document_datetime={"gte": date_from})
     if date_to:
@@ -25,20 +23,18 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                         field="document_datetime",
                         calendar_interval=granularity) \
                 .metric("dynamics_weight", agg_type="avg", field="value")
-    std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+    std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
         .metric("source_value", agg_type="avg", field="value")
     document_evals = std.execute()
 
     # Top_news ids
     top_news = set()
     top_news.update((d.document_es_id for d in document_evals))
-    std_min = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-              .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
-              .filter("term", criterion_id=criterion.id).sort('value') \
+    std_min = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-              .source(['document_es_id'])
+              .source(['document_es_id']).sort('value')
     if documents_ids_to_filter:
-        std_min = std_min.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
+        std_min = std_min.filter("terms", **{'document_es_id': documents_ids_to_filter})
     if date_from:
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
     if date_to:
@@ -55,9 +51,7 @@ def get_criterions_values_for_normalization(criterions, topic_modelling, granula
     total_criterion_date_value_dict = {}
     for criterion in criterions:
         max_criterion_value_dict[criterion.id] = {}
-        s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-                    .filter("term", criterion_id=criterion.id) \
-                    .filter("term", **{'topic_modelling.keyword': topic_modelling})[:0]
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}")[:0]
         s.aggs.metric(name="max_value", agg_type="max", field="value")
         if criterion.value_range_from < 0:
             s.aggs.metric(name="min_value", agg_type="min", field="value")
@@ -111,12 +105,10 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
         sd = sd.filter("range", datetime={"lte": date_to})
     documents = sd.scan()
     documents_dict = dict((d.meta.id, d) for d in documents)
-    std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-            .filter("terms", **{'document_es_id.keyword': list(top_news_total)}) \
-            .filter("terms", **{'criterion_id': [c.id for c in criterions]}) \
-            .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
+    std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{c.id}" for c in criterions]) \
+            .filter("terms", **{'document_es_id': list(top_news_total)}) \
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-            .source(['document_es_id', 'value', 'criterion_id'])[:1000]
+            .source(['document_es_id', 'value'])[:1000]
     document_evals = std.scan()
 
     # Creating final documents dict
@@ -132,12 +124,13 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id] = {}
             documents_eval_dict[td.document_es_id]['document'] = documents_dict[td.document_es_id]
             seen_id.add(documents_dict[td.document_es_id].id)
+        criterion_id = int(td.meta.index.split("_")[-1])
         if td.value > 0:
-            documents_eval_dict[td.document_es_id][td.criterion_id] = \
-                td.value / max_criterion_value_dict[td.criterion_id]["max_positive"]
+            documents_eval_dict[td.document_es_id][criterion_id] = \
+                td.value / max_criterion_value_dict[criterion_id]["max_positive"]
         else:
-            documents_eval_dict[td.document_es_id][td.criterion_id] = \
-                td.value / -max_criterion_value_dict[td.criterion_id]["max_negative"]
+            documents_eval_dict[td.document_es_id][criterion_id] = \
+                td.value / -max_criterion_value_dict[criterion_id]["max_negative"]
     return documents_eval_dict
 
 
@@ -146,7 +139,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling):
     documents_ids_to_filter = []
     if topics:
         s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
-                .filter("terms", **{"topic_id.keyword": topics}) \
+                .filter("terms", **{"topic_id": topics}) \
                 .filter("range", topic_weight={"gte": 0.1}) \
                 .source(("document_es_id",))[:10000000]
         documents_ids_to_filter = list(set([d.document_es_id for d in s.scan()]))

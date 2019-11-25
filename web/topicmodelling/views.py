@@ -47,7 +47,7 @@ class TopicDocumentListView(TemplateView):
                         field="datetime",
                         calendar_interval=granularity) \
             .metric("dynamics_weight", agg_type="sum", field="topic_weight")
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
             .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
         return topic_documents
@@ -152,7 +152,7 @@ class TopicsListView(TemplateView):
         s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{context['topic_modelling']}") \
             .filter("range", topic_weight={"gte": 0.1}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000)\
             .metric("topic_weight", agg_type="sum", field="topic_weight")
         result = s.execute()
         topic_info_dict = dict(
@@ -161,6 +161,7 @@ class TopicsListView(TemplateView):
                 "weight_sum": bucket.topic_weight.value
             }) for bucket in result.aggregations.topics.buckets
         )
+        print(topic_info_dict)
 
         # Get actual topics
         topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
