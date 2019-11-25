@@ -42,6 +42,7 @@ class Command(BaseCommand):
         qs = Document.objects.filter(id__gt=self.from_id)
         if self.to_id:
             qs = qs.filter(id__lte=self.to_id)
+        qs = qs.order_by('id')
         print("Start build")
         for ok, result in parallel_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT,
                                         chunk_size=self.batch_size, raise_on_error=False, thread_count=6):
