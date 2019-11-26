@@ -64,6 +64,8 @@ class CriterionEvalAnalysisView(TemplateView):
         for criterion in context['criterions']:
             # Current topic metrics
             document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
+            if not top_news:
+                continue
             top_news_total.update(top_news)
 
             # Normalize
