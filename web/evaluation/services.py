@@ -2,17 +2,39 @@ import datetime
 
 from elasticsearch_dsl import Search, Q
 
+from mainapp.constants import SEARCH_CUTOFF_CONFIG
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
 
 
-def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter, date_from=None, date_to=None):
+def filter_analytical_query(topic_modelling, criterion_id, action, value):
+    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
+              .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
+              .filter("term", criterion_id=criterion_id) \
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})\
+              .filter("range", value={action: value}) \
+              .source(['document_es_id']).sort('-value')
+    return (d.document_es_id for d in s.scan())
+
+
+def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter,
+                               date_from=None, date_to=None, analytical_query=None):
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
               .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
               .filter("term", criterion_id=criterion.id).sort('-value') \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
               .source(['document_es_id'])
-    if documents_ids_to_filter:
+
+    if analytical_query:
+        documents_ids_to_filter_by_query = set()
+        for q in analytical_query:
+            documents_ids_to_filter_by_query.update(filter_analytical_query(topic_modelling, **q))
+        if documents_ids_to_filter:
+            documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(documents_ids_to_filter_by_query))
+        else:
+            documents_ids_to_filter = list(documents_ids_to_filter_by_query)
+    if documents_ids_to_filter or analytical_query:
+        print("!!!", len(documents_ids_to_filter))
         std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
     if date_from:
         std = std.filter("range", document_datetime={"gte": date_from})
@@ -37,7 +59,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
               .filter("term", criterion_id=criterion.id).sort('value') \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
               .source(['document_es_id'])
-    if documents_ids_to_filter:
+    if documents_ids_to_filter or analytical_query:
         std_min = std_min.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
     if date_from:
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
@@ -49,7 +71,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     return document_evals, top_news
 
 
-def get_criterions_values_for_normalization(criterions, topic_modelling, granularity=None):
+def get_criterions_values_for_normalization(criterions, topic_modelling, granularity=None, analytical_query=None):
     # Get max positive/negative values for criterion
     max_criterion_value_dict = {}
     total_criterion_date_value_dict = {}
@@ -164,9 +186,10 @@ def get_documents_ids_filter(topics, keyword, topic_modelling):
                       'text^2'])
         s = s.query(q)
         s = s.source(tuple())
-        s = s[:500000]
+        search_lvl = "SEARCH_LVL_LIGHT"
+        s = s[:SEARCH_CUTOFF_CONFIG[search_lvl]['ABS_MAX_RESULTS_CUTOFF']]
         r = s.execute()
-        cutoff = get_elscore_cutoff([d.meta.score for d in r], "SEARCH_LVL_LIGHT")
+        cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
         keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
         if topics:
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))

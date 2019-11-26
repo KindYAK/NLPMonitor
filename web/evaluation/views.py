@@ -41,6 +41,18 @@ class CriterionEvalAnalysisView(TemplateView):
         context['group'] = TopicGroup.objects.get(id=self.request.GET['group']) \
                                     if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
                                     else None
+        context['criterion_q'] = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
+        context['action_q'] = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
+        context['value_q'] = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        analytical_query = []
+        if context['criterion_q'] != "-1" and context['action_q'] and context['value_q']:
+            analytical_query = [
+                {
+                    "criterion_id": context['criterion_q'],
+                    "action": context['action_q'],
+                    "value": context['value_q'],
+                }
+            ]
 
         key = make_template_fragment_key('criterion_analysis', [self.request.GET])
         if cache.get(key):
@@ -51,19 +63,21 @@ class CriterionEvalAnalysisView(TemplateView):
             topics_to_filter = [topic.topic_id for topic in context['group'].topics.all()]
 
         is_empty_search, documents_ids_to_filter = get_documents_ids_filter(topics_to_filter, context['keyword'],
-                                                                            context['group'].topic_modelling_name if context['group'] else None)
+                                                                            context['group'].topic_modelling_name if context['group'] else None,)
         if is_empty_search:
             return context
 
         max_criterion_value_dict, total_criterion_date_value_dict = \
             get_criterions_values_for_normalization(context['criterions'], context['topic_modelling'],
-                                                   granularity=context['granularity'] if ((context['keyword'] or context['group'])) else None)
+                                                   granularity=context['granularity'] if ((context['keyword'] or context['group'])) else None,
+                                                    analytical_query=analytical_query)
         context['absolute_value'] = {}
         context['source_weight'] = {}
         top_news_total = set()
         for criterion in context['criterions']:
             # Current topic metrics
-            document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion, context['granularity'], documents_ids_to_filter)
+            document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion, context['granularity'],
+                                                                  documents_ids_to_filter, analytical_query=analytical_query)
             if not top_news:
                 continue
             top_news_total.update(top_news)

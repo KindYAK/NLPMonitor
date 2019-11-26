@@ -1,7 +1,7 @@
 var topic_groups_list = null;
 
 function initialize_groups_select(){
-    var options = "<option selected value='-1'>-----Группа топиков...-----</option>";
+    var options = "<option selected value='-1'>-----Мои группы-----</option>";
     for (group of topic_groups_list.my_groups){
         options += "<option value='" + group.name + "'>" + group.name + "</option>"
     }
