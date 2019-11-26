@@ -277,7 +277,10 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
             topics_to_filter = [topic.topic_id for topic in group.topics.all()]
         criterion_q = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
         action_q = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
-        value_q = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        try:
+            value_q = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        except ValueError:
+            value_q = ""
         analytical_query = []
         if criterion_q != "-1" and action_q and value_q:
             analytical_query = [

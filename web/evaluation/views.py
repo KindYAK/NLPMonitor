@@ -43,7 +43,10 @@ class CriterionEvalAnalysisView(TemplateView):
                                     else None
         context['criterion_q'] = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
         context['action_q'] = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
-        context['value_q'] = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        try:
+            context['value_q'] = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        except ValueError:
+            context['value_q'] = ""
         analytical_query = []
         if context['criterion_q'] != "-1" and context['action_q'] and context['value_q']:
             analytical_query = [
