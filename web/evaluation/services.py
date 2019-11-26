@@ -34,7 +34,6 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         else:
             documents_ids_to_filter = list(documents_ids_to_filter_by_query)
     if documents_ids_to_filter or analytical_query:
-        print("!!!", len(documents_ids_to_filter))
         std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
     if date_from:
         std = std.filter("range", document_datetime={"gte": date_from})

@@ -275,19 +275,32 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         topics_to_filter = None
         if group:
             topics_to_filter = [topic.topic_id for topic in group.topics.all()]
-
+        criterion_q = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
+        action_q = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
+        value_q = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
+        analytical_query = []
+        if criterion_q != "-1" and action_q and value_q:
+            analytical_query = [
+                {
+                    "criterion_id": criterion_q,
+                    "action": action_q,
+                    "value": value_q,
+                }
+            ]
         is_empty_search, documents_ids_to_filter = get_documents_ids_filter(topics_to_filter, keyword,
                                                                             group.topic_modelling_name if group else None)
         if is_empty_search:
             return [], []
 
-        max_criterion_value_dict, _ = get_criterions_values_for_normalization(criterions, topic_modelling)
+        max_criterion_value_dict, _ = get_criterions_values_for_normalization(criterions, topic_modelling,
+                                                                              analytical_query=analytical_query)
         source_weight = {}
         top_news_total = set()
         for criterion in criterions:
             # Current topic metrics
             document_evals, top_news = get_current_document_evals(topic_modelling, criterion, None,
-                                                                  documents_ids_to_filter, date_from, date_to)
+                                                                  documents_ids_to_filter, date_from, date_to,
+                                                                  analytical_query=analytical_query)
             top_news_total.update(top_news)
             source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
                                                             key=lambda x: x.source_value.value,

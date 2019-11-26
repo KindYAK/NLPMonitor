@@ -521,6 +521,9 @@
                         {% endfor %}
                         "&keyword=" + "{{ keyword }}" +
                         "&group=" + "{{ group.id }}" +
+                        "&criterion_q=" + "{{ criterion_q }}" +
+                        "&action_q=" + "{{ action_q }}" +
+                        "&value_q=" + "{{ value_q }}" +
                         "&type=criterions",
                     method: 'GET',
                     success: function (result) {
