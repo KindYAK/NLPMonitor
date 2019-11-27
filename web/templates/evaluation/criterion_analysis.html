@@ -334,7 +334,7 @@
                                 },
                                 yaxis: {
                                     fixedrange: true,
-                                    range: [{{ y_axis_from }}, {{ y_axis_to }}]
+                                    range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
                                 }
                             };
                             Plotly.plot('value_dynamics', data, layout);
