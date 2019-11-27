@@ -205,7 +205,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=topic_modelling) \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
-                  .filter("range", topic_weight={"gte": 0.001}) \
+                  .filter("range", topic_weight={"gte": 0.1}) \
                   .filter("range", datetime={"gte": date_from}) \
                   .filter("range", datetime={"lte": date_to}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
