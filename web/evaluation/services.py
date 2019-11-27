@@ -133,19 +133,17 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     documents = sd.scan()
     documents_dict = dict((d.meta.id, d) for d in documents)
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-            .filter("terms", **{'document_es_id.keyword': list(top_news_total)}) \
             .filter("terms", **{'criterion_id': [c.id for c in criterions]}) \
             .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
-            .source(['document_es_id', 'value', 'criterion_id'])[:1000]
+            .filter("terms", **{'document_es_id.keyword': list(top_news_total)}) \
+            .source(['document_es_id', 'value', 'criterion_id'])[:100000]
     document_evals = std.scan()
 
     # Creating final documents dict
     documents_eval_dict = {}
     seen_id = set()
     for td in document_evals:
-        if len(documents_eval_dict.keys()) >= 200:
-            break
         if td.document_es_id in documents_dict and documents_dict[td.document_es_id].id in seen_id \
                 and td.document_es_id not in documents_eval_dict:
             continue
@@ -159,7 +157,8 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
         else:
             documents_eval_dict[td.document_es_id][td.criterion_id] = \
                 td.value / -max_criterion_value_dict[td.criterion_id]["max_negative"]
-    return documents_eval_dict
+    dict_vals = sorted(documents_eval_dict.items(), key=lambda x: sum(abs(i) for i in x[1].values() if type(i) == float), reverse=True)
+    return dict(dict_vals[:200])
 
 
 def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_threshold):
