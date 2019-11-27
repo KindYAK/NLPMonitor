@@ -17,6 +17,8 @@ services:
   airflow:
     volumes:
       - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg
+    expose:
+      - 8001
   airflow-scheduler:
     volumes:
       - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg

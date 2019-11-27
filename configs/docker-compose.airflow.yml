@@ -110,8 +110,6 @@ services:
       - AIRFLOW__SMTP__SMTP_PORT=${AIRFLOW_SMTP_PORT}
       - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW_SMTP_USER}
       - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
-    expose:
-      - 8001
     volumes:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
