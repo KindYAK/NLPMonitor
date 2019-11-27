@@ -3,6 +3,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 
 from evaluation.models import EvalCriterion
+from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models_user import TopicGroup
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
@@ -56,6 +57,10 @@ class CriterionEvalAnalysisView(TemplateView):
                     "value": context['value_q'],
                 }
             ]
+        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser)
+        context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
+            if 'topic_weight_threshold' in self.request.GET else \
+            context['topic_weight_threshold_options'][0][0]
 
         key = make_template_fragment_key('criterion_analysis', [self.request.GET])
         if cache.get(key):
@@ -66,7 +71,8 @@ class CriterionEvalAnalysisView(TemplateView):
             topics_to_filter = [topic.topic_id for topic in context['group'].topics.all()]
 
         is_empty_search, documents_ids_to_filter = get_documents_ids_filter(topics_to_filter, context['keyword'],
-                                                                            context['group'].topic_modelling_name if context['group'] else None,)
+                                                                            context['group'].topic_modelling_name if context['group'] else None,
+                                                                            context['topic_weight_threshold'])
         if is_empty_search:
             return context
 

@@ -198,6 +198,7 @@ class CriterionEvalViewSet(viewsets.ViewSet):
 class RangeDocumentsViewSet(viewsets.ViewSet):
     def topics_search(self):
         topic_modelling = self.request.GET['topic_modelling']
+        topic_weight_threshold = float(self.request.GET['topic_weight_threshold'])
         topics = json.loads(self.request.GET['topics'])
         date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
         date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
@@ -205,7 +206,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=topic_modelling) \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
-                  .filter("range", topic_weight={"gte": 0.1}) \
+                  .filter("range", topic_weight={"gte": topic_weight_threshold}) \
                   .filter("range", datetime={"gte": date_from}) \
                   .filter("range", datetime={"lte": date_to}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
@@ -275,6 +276,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         topics_to_filter = None
         if group:
             topics_to_filter = [topic.topic_id for topic in group.topics.all()]
+        topic_weight_threshold = float(self.request.GET['topic_weight_threshold']) if 'topic_weight_threshold' in self.request.GET else 0
         criterion_q = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
         action_q = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
         try:
@@ -291,7 +293,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 }
             ]
         is_empty_search, documents_ids_to_filter = get_documents_ids_filter(topics_to_filter, keyword,
-                                                                            group.topic_modelling_name if group else None)
+                                                                            group.topic_modelling_name if group else None,
+                                                                            topic_weight_threshold)
         if is_empty_search:
             return [], []
 

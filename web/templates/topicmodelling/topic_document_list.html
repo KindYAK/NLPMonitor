@@ -50,6 +50,7 @@
 {% block content %}
     {% cache 28800 topic_detail view.kwargs request.GET %}
     {# Управление графиками #}
+    <form method="GET" action="" style="display: contents;">
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -59,12 +60,15 @@
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
-                            <form method="GET" action="" style="display: contents;">
                             <input type="hidden" value="{{ request.GET.topic_name }}" name="topic_name">
                             <input type="hidden" value="{{ request.GET.topics }}" name="topics">
-                            <div class="col-lg-3"></div>
-                            <div class="col-lg-2">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-3">
                                 <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" name="smooth" id="smoothSwitch">
+                                        <label class="custom-control-label" for="smoothSwitch">Сглаживание</label>
+                                    </div>
                                     <label for="granularity">Гранулярность</label>
                                     <select class="custom-select" name="granularity" id="granularity">
                                         <option value="1d">1 День</option>
@@ -77,31 +81,39 @@
                                 <script>
                                     $('#granularity').val('{{ granularity }}');
                                 </script>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" name="smooth" id="smoothSwitch">
-                                        <label class="custom-control-label" for="smoothSwitch">Сглаживание</label>
-                                    </div>
-                                </div>
                                 <script>
                                     $('#smoothSwitch').prop("checked", {% if smooth %}true{% else %}false{% endif %})
                                 </script>
                             </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                        <button type="submit" class="btn btn-default float-right">Применить</button>
+                            <div class="col-md-3">
+                                <div class="form-group stick-bottom-md">
+                                    <label for="topic_weight_threshold">Порог принадлежности к топику</label>
+                                    <select class="custom-select" name="topic_weight_threshold" id="topic_weight_threshold">
+                                        {% for option in topic_weight_threshold_options %}
+                                            <option value="{{ option.0|unlocalize }}">{{ option.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <script>
+                                        $('#topic_weight_threshold').val('{{ topic_weight_threshold|unlocalize }}');
+                                    </script>
                                 </div>
                             </div>
-                            <div class="col-lg-3"></div>
-                            </form>
+                            <div class="col-md-3"></div>
+                        </div>
+                        <div class="row" style="margin-top: 5px;">
+                            <div class="col-md-5"></div>
+                            <div class="col-md-2" style="display: flex; justify-content: center;">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default float-right">Применить</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </form>
 
     {# Графики #}
     <div class="row">
@@ -324,6 +336,8 @@
     <script>
         run_range_plot_management('{{ view.kwargs.topic_modelling }}',
                                    {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
-                                  '{{ csrf_token }}', true);
+                                  '{{ csrf_token }}',
+                                   {{ topic_weight_threshold|unlocalize }},
+                                   true);
     </script>
 {% endblock %}

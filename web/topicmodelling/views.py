@@ -7,18 +7,87 @@ from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
 from evaluation.models import EvalCriterion
-from mainapp.forms import TopicChooseForm
+from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options
 from mainapp.services import apply_fir_filter, unique_ize
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING
+
+
+class TopicsListView(TemplateView):
+    template_name = "topicmodelling/topics_list.html"
+    form_class = TopicChooseForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_superuser:
+            context['criterions'] = EvalCriterion.objects.all()
+        form = self.form_class(data=self.request.GET, is_superuser=self.request.user.is_superuser)
+        if form.is_valid():
+            context['topic_modelling'] = form.cleaned_data['topic_modelling']
+            context['topic_weight_threshold'] = form.cleaned_data['topic_weight_threshold']
+        else:
+            context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
+            context['topic_weight_threshold'] = form.fields['topic_weight_threshold'].choices[0][0]
+
+        key = make_template_fragment_key('topics_list', [self.request.GET])
+        if cache.get(key):
+            return context
+
+        # Get topics aggregation
+        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
+            .filter("term", topic_modelling=context['topic_modelling']) \
+            .filter("range", topic_weight={"gte": context['topic_weight_threshold']}) \
+            .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
+            .metric("topic_weight", agg_type="sum", field="topic_weight")
+        result = s.execute()
+        topic_info_dict = dict(
+            (bucket.key, {
+                "count": bucket.doc_count,
+                "weight_sum": bucket.topic_weight.value
+            }) for bucket in result.aggregations.topics.buckets
+        )
+
+        # Get actual topics
+        topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
+            .filter("term", **{"name": context['topic_modelling']}) \
+            .filter("term", **{"is_ready": True}).execute()[0]['topics']
+        # Fill topic objects with meta data
+        for topic in topics:
+            if topic.id in topic_info_dict:
+                topic.size = topic_info_dict[topic.id]['count']
+                topic.weight = topic_info_dict[topic.id]['weight_sum']
+            else:
+                topic.size, topic.weight = 0, 0
+            if not topic.topic_words:
+                continue
+            max_word_weight = max((word.weight for word in topic.topic_words))
+            for topic_word in topic.topic_words:
+                topic_word.weight /= max_word_weight
+                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:] # Stub - upper case
+            #Stub - topic name upper case
+            topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
+
+        # Normalize topic weights by max
+        max_topic_weight = max((topic.weight for topic in topics))
+        if max_topic_weight != 0:
+            for topic in topics:
+                topic.weight /= max_topic_weight
+
+        # Create context
+        context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
+                                   key=lambda x: x.weight, reverse=True)
+        context['rest_weight'] = sum([t.weight for t in topics[10:]])
+        context['form'] = form
+        return context
 
 
 class TopicDocumentListView(TemplateView):
     template_name = "topicmodelling/topic_document_list.html"
 
-    def get_total_metrics(self, granularity):
+    def get_total_metrics(self, granularity, topic_weight_threshold):
         std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
             .filter("term", topic_modelling=self.topic_modelling) \
-            .filter("range", topic_weight={"gte": 0.1}) \
+            .filter("range", topic_weight={"gte": topic_weight_threshold}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
         std_total.aggs.bucket(name="dynamics",
                               agg_type="date_histogram",
@@ -37,11 +106,11 @@ class TopicDocumentListView(TemplateView):
         )
         return total_metrics_dict
 
-    def get_current_topics_metrics(self, topics, granularity):
+    def get_current_topics_metrics(self, topics, granularity, topic_weight_threshold):
         std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
                   .filter("term", topic_modelling=self.topic_modelling) \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
-                  .filter("range", topic_weight={"gte": 0.1}) \
+                  .filter("range", topic_weight={"gte": topic_weight_threshold}) \
                   .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
         std.aggs.bucket(name="dynamics",
@@ -97,12 +166,16 @@ class TopicDocumentListView(TemplateView):
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser)
+        context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
+                                                if 'topic_weight_threshold' in self.request.GET else \
+                                                context['topic_weight_threshold_options'][0][0]
 
         # Total metrics
-        total_metrics_dict = self.get_total_metrics(context['granularity'])
+        total_metrics_dict = self.get_total_metrics(context['granularity'], context['topic_weight_threshold'])
 
         # Current topic metrics
-        topic_documents = self.get_current_topics_metrics(topics, context['granularity'])
+        topic_documents = self.get_current_topics_metrics(topics, context['granularity'], context['topic_weight_threshold'])
 
         # Get documents, set weights
         documents = self.get_documents_with_weights(topic_documents)
@@ -127,73 +200,7 @@ class TopicDocumentListView(TemplateView):
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power
         context['relative_weight'] = relative_weight
-        context['source_weight'] = topic_documents.aggregations.source.buckets
-        return context
-
-
-class TopicsListView(TemplateView):
-    template_name = "topicmodelling/topics_list.html"
-    form_class = TopicChooseForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.user.is_superuser:
-            context['criterions'] = EvalCriterion.objects.all()
-        form = self.form_class(data=self.request.GET)
-        if form.is_valid():
-            context['topic_modelling'] = form.cleaned_data['topic_modelling']
-        else:
-            context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
-        form.fields['topic_modelling'].initial = context['topic_modelling']
-
-        key = make_template_fragment_key('topics_list', [self.request.GET])
-        if cache.get(key):
-            return context
-
-        # Get topics aggregation
-        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-            .filter("term", topic_modelling=context['topic_modelling']) \
-            .filter("range", topic_weight={"gte": 0.1}) \
-            .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
-            .metric("topic_weight", agg_type="sum", field="topic_weight")
-        result = s.execute()
-        topic_info_dict = dict(
-            (bucket.key, {
-                "count": bucket.doc_count,
-                "weight_sum": bucket.topic_weight.value
-            }) for bucket in result.aggregations.topics.buckets
-        )
-
-        # Get actual topics
-        topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
-            .filter("term", **{"name": context['topic_modelling']}) \
-            .filter("term", **{"is_ready": True}).execute()[0]['topics']
-        # Fill topic objects with meta data
-        for topic in topics:
-            if topic.id in topic_info_dict:
-                topic.size = topic_info_dict[topic.id]['count']
-                topic.weight = topic_info_dict[topic.id]['weight_sum']
-            else:
-                topic.size, topic.weight = 0, 0
-            if not topic.topic_words:
-                continue
-            max_word_weight = max((word.weight for word in topic.topic_words))
-            for topic_word in topic.topic_words:
-                topic_word.weight /= max_word_weight
-                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:] # Stub - upper case
-            #Stub - topic name upper case
-            topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
-
-        # Normalize topic weights by max
-        max_topic_weight = max((topic.weight for topic in topics))
-        if max_topic_weight != 0:
-            for topic in topics:
-                topic.weight /= max_topic_weight
-
-        # Create context
-        context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
-                                   key=lambda x: x.weight, reverse=True)
-        context['rest_weight'] = sum([t.weight for t in topics[10:]])
-        context['form'] = form
+        context['source_weight'] = sorted(topic_documents.aggregations.source.buckets,
+                                                            key=lambda x: x.source_weight.value,
+                                                            reverse=True)
         return context

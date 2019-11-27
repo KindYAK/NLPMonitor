@@ -1,4 +1,4 @@
-function run_range_plot_management(topic_modelling, topics, csrf_token, is_topic, search_request=null) {
+function run_range_plot_management(topic_modelling, topics, csrf_token, topic_weight_threshold, is_topic, search_request=null) {
 
     var main_plot_id = null;
     var plots_ids = null;
@@ -114,6 +114,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, is_topic
                                                "&date_from=" + range_from +
                                                "&date_to=" + range_to +
                                                "&topics=" + topics +
+                                               "&topic_weight_threshold=" + topic_weight_threshold.toString() +
                                                "&type=topics",
                     method: 'GET',
                     success: function (result) {

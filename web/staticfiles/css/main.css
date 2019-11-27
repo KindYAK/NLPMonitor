@@ -5,3 +5,10 @@
 .normalwrap {
     white-space: normal;
 }
+
+@media (min-width: 768px) {
+    .stick-bottom-md {
+        position: absolute;
+        bottom: 0;
+    }
+}
