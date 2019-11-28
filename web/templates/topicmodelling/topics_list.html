@@ -91,6 +91,9 @@
                                                 <div class="col-md-8">{% render_field form.topic_weight_threshold placeholder="topic_weight_threshold" class="form-control" %}</div>
                                             </div>
                                         </div>
+                                        <script>
+                                            $('#id_topic_weight_threshold').val('{{ topic_weight_threshold|unlocalize }}')
+                                        </script>
                                     </div>
                                 </div>
                             </div>

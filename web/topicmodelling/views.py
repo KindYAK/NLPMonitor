@@ -26,7 +26,7 @@ class TopicsListView(TemplateView):
             context['topic_weight_threshold'] = form.cleaned_data['topic_weight_threshold']
         else:
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
-            context['topic_weight_threshold'] = form.fields['topic_weight_threshold'].choices[0][0]
+            context['topic_weight_threshold'] = 0.05  # Initial
 
         key = make_template_fragment_key('topics_list', [self.request.GET])
         if cache.get(key):
@@ -169,7 +169,7 @@ class TopicDocumentListView(TemplateView):
         context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser)
         context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
                                                 if 'topic_weight_threshold' in self.request.GET else \
-                                                context['topic_weight_threshold_options'][0][0]
+                                                0.05 # Initial
 
         # Total metrics
         total_metrics_dict = self.get_total_metrics(context['granularity'], context['topic_weight_threshold'])

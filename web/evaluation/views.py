@@ -62,7 +62,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser)
         context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
             if 'topic_weight_threshold' in self.request.GET else \
-            context['topic_weight_threshold_options'][0][0]
+            0.05
 
         key = make_template_fragment_key('criterion_analysis', [self.request.GET])
         if cache.get(key):
