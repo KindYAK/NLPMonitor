@@ -118,7 +118,7 @@ class TopicDocumentListView(TemplateView):
                         field="datetime",
                         calendar_interval=granularity) \
             .metric("dynamics_weight", agg_type="sum", field="topic_weight")
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword", size=20) \
             .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
         return topic_documents

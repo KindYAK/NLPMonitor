@@ -63,7 +63,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std.aggs['posneg'].bucket(name="source",
                                   agg_type="terms",
                                   field="document_source.keyword",
-                                  size=25)
+                                  size=20)
 
     # Dynamics
     if granularity:
