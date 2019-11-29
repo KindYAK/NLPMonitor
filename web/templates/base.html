@@ -116,49 +116,52 @@
 
             <!-- Sidebar Menu -->
             <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
                     {% if request.user.is_authenticated %}
-                        <li class="nav-item">
-                            <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link">
-                                <i class="nav-icon fas fa-drafting-compass"></i>
-                                <p>
-                                    Аналитика
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'topicmodelling:topics_list' %}" class="nav-link">
-                                <i class="nav-icon fas fa-tags"></i>
-                                <p>
-                                    Темы
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'mainapp:search' %}" class="nav-link">
-                                <i class="nav-icon fas fa-search-plus"></i>
-                                <p>
-                                    Поиск
-                                </p>
-                            </a>
-                        </li>
+                        {% if request.user.is_superuser or request.user.viewer or request.user.expert %}
+                            <li class="nav-item">
+                                <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link">
+                                    <i class="nav-icon fas fa-drafting-compass"></i>
+                                    <p>
+                                        Аналитика
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'topicmodelling:topics_list' %}" class="nav-link">
+                                    <i class="nav-icon fas fa-tags"></i>
+                                    <p>
+                                        Темы
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'mainapp:search' %}" class="nav-link">
+                                    <i class="nav-icon fas fa-search-plus"></i>
+                                    <p>
+                                        Поиск
+                                    </p>
+                                </a>
+                            </li>
+                        {% endif %}
                         {% if request.user.is_superuser %}
-                        <li class="nav-item">
-                            <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
-                                <i class="nav-icon fas fa-chart-line"></i>
-                                <p>
-                                    Теги
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'mainapp:kibana_dashboard' %}" class="nav-link">
-                                <i class="nav-icon fab fa-dashcube"></i>
-                                <p>
-                                    Dashboard (Demo)
-                                </p>
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
+                                    <i class="nav-icon fas fa-chart-line"></i>
+                                    <p>
+                                        Теги
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'mainapp:kibana_dashboard' %}" class="nav-link">
+                                    <i class="nav-icon fab fa-dashcube"></i>
+                                    <p>
+                                        Dashboard (Demo)
+                                    </p>
+                                </a>
+                            </li>
                         {% endif %}
                     {% endif %}
                 </ul>

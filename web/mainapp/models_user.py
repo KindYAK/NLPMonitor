@@ -8,7 +8,7 @@ class ContentLoader(models.Model):
         verbose_name = "Загрузчик контента"
         verbose_name_plural = "Загрузчики контента"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
     supervisor = models.BooleanField(default=False, verbose_name="Супервайзер")
 
@@ -21,7 +21,7 @@ class Expert(models.Model):
         verbose_name = "Эксперт"
         verbose_name_plural = "Эксперты"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
     criterions = models.ManyToManyField('evaluation.EvalCriterion')
 
@@ -34,7 +34,7 @@ class Viewer(models.Model):
         verbose_name = "Пользователь (Viewer)"
         verbose_name_plural = "Пользователь (Viewer)"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
     criterions = models.ManyToManyField('evaluation.EvalCriterion')
 

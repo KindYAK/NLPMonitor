@@ -1,5 +1,7 @@
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
 
@@ -10,6 +12,16 @@ from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
 from .services import apply_fir_filter, unique_ize
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
 from .services_es_documents import execute_search
+
+
+def login_redirect(request):
+    if request.user.is_superuser or hasattr(request.user, "viewer"):
+        return HttpResponseRedirect(reverse_lazy('evaluation:criterion_eval_analysis'))
+    if hasattr(request.user, "expert"):
+        return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
+    if hasattr(request.user, "contentloader"):
+        return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
+    return HttpResponseRedirect(reverse_lazy('mainapp:index'))
 
 
 class KibanaDashboardView(TemplateView):

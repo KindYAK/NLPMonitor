@@ -143,7 +143,7 @@ else:
 WSGI_APPLICATION = 'nlpmonitor.wsgi.application'
 
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/login_redirect/"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

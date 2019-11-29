@@ -23,8 +23,11 @@ urlpatterns = [
     path('', include('mainapp.urls', namespace='mainapp')),
     path('topicmodelling/', include('topicmodelling.urls', namespace='topicmodelling')),
     path('evaluation/', include('evaluation.urls', namespace='evaluation')),
+
     path('jet/', include('jet.urls', namespace='jet')),
+
     path('api/', include('restapp.urls', namespace='api')),
     path('api-auth/', include('rest_framework.urls')),
+
     path('admin/', admin.site.urls, name="admin"),
 ] + static(STATIC_URL, document_root=STATIC_ROOT)
