@@ -2,7 +2,7 @@ import hashlib
 
 from django.db import models
 from topicmodelling.models import Topic, DocumentTopic
-from .models_user import TopicGroup, TopicID
+from .models_user import TopicGroup, TopicID, ContentLoader, Expert
 
 
 class Corpus(models.Model):

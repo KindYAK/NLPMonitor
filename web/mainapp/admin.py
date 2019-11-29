@@ -74,3 +74,19 @@ class TopicIDAdmin(admin.ModelAdmin):
 
 admin.site.register(TopicGroup, TopicGroupAdmin)
 admin.site.register(TopicID, TopicIDAdmin)
+
+
+class ContentLoaderAdmin(admin.ModelAdmin):
+    list_display = ('user', 'corpus', 'supervisor', )
+    list_filter = ('supervisor', 'corpus',)
+    search_fields = ('user__username', )
+
+
+class ExpertAdmin(admin.ModelAdmin):
+    list_display = ('user', )
+    list_filter = ()
+    search_fields = ('user__username', )
+
+
+admin.site.register(ContentLoader, ContentLoaderAdmin)
+admin.site.register(Expert, ExpertAdmin)

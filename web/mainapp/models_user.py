@@ -1,5 +1,32 @@
 from django.contrib.auth.models import User
 from django.db import models
+from picklefield import PickledObjectField
+
+
+class ContentLoader(models.Model):
+    class Meta:
+        verbose_name = "Загрузчик контента"
+        verbose_name_plural = "Загрузчики контента"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
+    supervisor = models.BooleanField(default=False, verbose_name="Супервайзер")
+
+    def __str__(self):
+        return f"Загрузчик {self.user}"
+
+
+class Expert(models.Model):
+    class Meta:
+        verbose_name = "Эксперт"
+        verbose_name_plural = "Эксперты"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
+    criterions = models.ManyToManyField('evaluation.EvalCriterion')
+
+    def __str__(self):
+        return f"Эксперт {self.user}"
 
 
 class TopicGroup(models.Model):
