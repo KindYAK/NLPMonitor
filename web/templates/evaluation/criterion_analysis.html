@@ -351,12 +351,18 @@
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in positive|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
+                                    line: {
+                                        color: '#23964f',
+                                    },
                                 },
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in negative|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
+                                    line: {
+                                        color: '#d3322b',
+                                    },
                                 },
                             ];
                             var layout = {
@@ -439,19 +445,27 @@
                                         y: negatives_by_source_percents,
                                         type: 'bar',
                                         'name': 'Негативные',
+                                        marker: {
+                                            color: '#d3322b',
+                                        },
                                     },
                                     {
                                         x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
                                         y: neutrals_by_source_percents,
                                         type: 'bar',
                                         'name': 'Нейтральные',
-
+                                        marker: {
+                                            color: '#fee42c',
+                                        },
                                     },
                                     {
                                         x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
                                         y: positives_by_source_percents,
                                         type: 'bar',
                                         'name': 'Позитивные',
+                                        marker: {
+                                            color: '#23964f',
+                                        }
                                     }
                                 ];
                             {% endif %}
