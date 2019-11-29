@@ -45,7 +45,7 @@ class CriterionEvalAnalysisView(TemplateView):
             if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
             else None
         context['criterion_q'] = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
-        context['action_q'] = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
+        context['action_q'] = self.request.GET['action_q'] if 'action_q' in self.request.GET else "gte"
         try:
             context['value_q'] = float(self.request.GET['value_q'].replace(",", ".")) if 'value_q' in self.request.GET else ""
         except ValueError:
@@ -92,9 +92,29 @@ class CriterionEvalAnalysisView(TemplateView):
                 context['date_ticks']):
             context['date_ticks'] = [bucket.key_as_string for bucket in document_evals.aggregations.dynamics.buckets]
         context['absolute_value'][criterion.id] = absolute_value
-        context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                        key=lambda x: x.source_value.value,
-                                                        reverse=True)
+        if criterion.value_range_from >= 0:
+            context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
+                                                            key=lambda x: x.source_value.value,
+                                                            reverse=True)
+        if criterion.value_range_from >= 0:
+            context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
+                                                            key=lambda x: x.source_value.value,
+                                                            reverse=True)
+        else:
+            sources_criterion_dict = {}
+            for i, pn in enumerate(document_evals.aggregations.posneg.buckets):
+                for bucket in pn.source.buckets:
+                    if bucket.key not in sources_criterion_dict:
+                        sources_criterion_dict[bucket.key] = {}
+                        sources_criterion_dict[bucket.key]['key'] = bucket.key
+                        sources_criterion_dict[bucket.key]['positive'] = 0
+                        sources_criterion_dict[bucket.key]['neutral'] = 0
+                        sources_criterion_dict[bucket.key]['negative'] = 0
+                    tonality = ["positive", "neutral", "negative"][i]
+                    sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
+            context['source_weight'][criterion.id] = sorted(sources_criterion_dict.values(),
+                                                            key=lambda x: x['positive'] + x['negative'] + x['neutral'],
+                                                            reverse=True)
         context['y_axis_from'] = min(-1,
                                      context['y_axis_from'] if 'y_axis_from' in context else -1,
                                      min(absolute_value)

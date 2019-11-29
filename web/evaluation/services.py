@@ -19,12 +19,14 @@ def filter_analytical_query(topic_modelling, criterion_id, action, value):
 
 def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter,
                                date_from=None, date_to=None, analytical_query=None):
+    # Basic search object
     std = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
               .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
               .filter("term", criterion_id=criterion.id).sort('-value') \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
               .source(['document_es_id'])
 
+    # Analytical querying
     if analytical_query:
         documents_ids_to_filter_by_query = set()
         for q in analytical_query:
@@ -33,24 +35,64 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(documents_ids_to_filter_by_query))
         else:
             documents_ids_to_filter = list(documents_ids_to_filter_by_query)
+
+    # Filter by group and keyword
     if documents_ids_to_filter or analytical_query:
         std = std.filter("terms", **{'document_es_id.keyword': documents_ids_to_filter})
+
+    # Range selection
     if date_from:
         std = std.filter("range", document_datetime={"gte": date_from})
     if date_to:
         std = std.filter("range", document_datetime={"lte": date_to})
-    std = std[:200]
+
+    # Posneg distribution
+    if criterion.value_range_from < 0:
+        neutrality_threshold = 0.1
+        std.aggs.bucket(
+            name="posneg",
+            agg_type="range",
+            field="value",
+            ranges=
+            [
+                {"from": neutrality_threshold, "to": criterion.value_range_to},
+                {"from": -neutrality_threshold, "to": neutrality_threshold},
+                {"from": criterion.value_range_from, "to": neutrality_threshold}
+            ]
+        )
+        std.aggs['posneg'].bucket(name="source",
+                                  agg_type="terms",
+                                  field="document_source.keyword",
+                                  size=25)
+
+    # Dynamics
     if granularity:
+        # Average dynamics
         std.aggs.bucket(name="dynamics",
                         agg_type="date_histogram",
                         field="document_datetime",
                         calendar_interval=granularity) \
                 .metric("dynamics_weight", agg_type="avg", field="value")
+
+        # Positive-negative distribution
+        if criterion.value_range_from < 0:
+            # Positive/negative dynamics
+            std.aggs['posneg'].bucket(name="dynamics",
+                                      agg_type="date_histogram",
+                                      field="document_datetime",
+                                      calendar_interval=granularity) \
+                .metric("dynamics_weight", agg_type="avg", field="value")
+
+
+    # Source distributions
     std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
         .metric("source_value", agg_type="avg", field="value")
+
+    # Execute search
+    std = std[:200]
     document_evals = std.execute()
 
-    # Top_news ids
+    # Top_news ids - get minimum values
     top_news = set()
     top_news.update((d.document_es_id for d in document_evals))
     std_min = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \

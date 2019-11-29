@@ -357,17 +357,77 @@
                     <div id="bar_plot">
                         <div id="source_distribution_{{ criterion.id }}"></div>
                         <script>
-                            var data = [
-                                {
-                                    x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
-                                    y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|safe }}, {% endfor %}],
-                                    type: 'bar'
+                            {% if criterion.value_range_from >= 0 %}
+                                var data = [
+                                    {
+                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|safe }}, {% endfor %}],
+                                        type: 'bar'
+                                    }
+                                ];
+                            {% else %}
+                                var sources = {{ source_weight|get_item:criterion.id|safe }};
+
+                                for (source of sources){
+                                    var total_source = source.negative + source.neutral + source.positive;
+                                    source.negative_percent = (source.negative/total_source * 100).toFixed(2);
+                                    source.neutral_percent = (source.neutral/total_source * 100).toFixed(2);
+                                    source.positive_percent = (source.positive/total_source * 100).toFixed(2);
                                 }
-                            ];
+
+                                sources.sort(function(a, b){
+                                    return b.negative_percent - a.negative_percent;
+                                });
+
+                                var keys = [];
+
+                                var negatives_by_source = [];
+                                var neutrals_by_source = [];
+                                var positives_by_source = [];
+
+                                var negatives_by_source_percents = [];
+                                var neutrals_by_source_percents = [];
+                                var positives_by_source_percents = [];
+
+                                for (source of sources){
+                                    keys.push(source.key);
+                                    negatives_by_source.push(source.negative);
+                                    neutrals_by_source.push(source.neutral);
+                                    positives_by_source.push(source.positive);
+                                    negatives_by_source_percents.push(source.negative_percent);
+                                    neutrals_by_source_percents.push(source.neutral_percent);
+                                    positives_by_source_percents.push(source.positive_percent);
+                                }
+
+                                var data = [
+                                    {
+                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        y: negatives_by_source_percents,
+                                        type: 'bar',
+                                        'name': 'Негативные',
+                                    },
+                                    {
+                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        y: neutrals_by_source_percents,
+                                        type: 'bar',
+                                        'name': 'Нейтральные',
+
+                                    },
+                                    {
+                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        y: positives_by_source_percents,
+                                        type: 'bar',
+                                        'name': 'Позитивные',
+                                    }
+                                ];
+                            {% endif %}
                             var layout = {
                                 title: '{{ criterion.name }}',
                                 showlegend: false,
-                                bargap: 0.025
+                                bargap: 0.025,
+                                {% if criterion.value_range_from < 0 %}
+                                    barmode: 'stack',
+                                {% endif %}
                             };
                             Plotly.newPlot('source_distribution_{{ criterion.id }}', data, layout);
                         </script>
