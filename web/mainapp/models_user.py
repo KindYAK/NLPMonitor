@@ -29,6 +29,19 @@ class Expert(models.Model):
         return f"Эксперт {self.user}"
 
 
+class Viewer(models.Model):
+    class Meta:
+        verbose_name = "Пользователь (Viewer)"
+        verbose_name_plural = "Пользователь (Viewer)"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", unique=True)
+    topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
+    criterions = models.ManyToManyField('evaluation.EvalCriterion')
+
+    def __str__(self):
+        return f"Пользователь {self.user}"
+
+
 class TopicGroup(models.Model):
     class Meta:
         verbose_name = "Группа топиков"

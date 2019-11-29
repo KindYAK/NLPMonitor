@@ -88,5 +88,12 @@ class ExpertAdmin(admin.ModelAdmin):
     search_fields = ('user__username', )
 
 
+class ViewerAdmin(admin.ModelAdmin):
+    list_display = ('user', )
+    list_filter = ()
+    search_fields = ('user__username', )
+
+
 admin.site.register(ContentLoader, ContentLoaderAdmin)
 admin.site.register(Expert, ExpertAdmin)
+admin.site.register(Viewer, ViewerAdmin)
