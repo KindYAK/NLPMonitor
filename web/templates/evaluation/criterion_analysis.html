@@ -340,6 +340,40 @@
                             Plotly.plot('value_dynamics', data, layout);
                         </script>
                     </div>
+                    {% for criterion in criterions %}
+                        {% if criterion.value_range_from < 0 %}
+                        {# Позитив-негатив #}
+                        <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
+                        <script>
+                            var data = [
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    name: '{{ criterion.name }}',
+                                },
+                                {
+                                    mode: 'lines',
+                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    name: '{{ criterion.name }}',
+                                },
+                            ];
+                            var layout = {
+                                title: 'Объём позитива и негатива по критерию',
+                                xaxis: {
+                                    rangeselector: selectorOptions,
+                                    rangeslider: {},
+                                    fixedrange: true
+                                },
+                                yaxis: {
+                                    fixedrange: true,
+                                }
+                            };
+                            Plotly.plot('value_dynamics_posneg_{{ criterion.id }}', data, layout);
+                        </script>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

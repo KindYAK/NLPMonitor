@@ -87,11 +87,13 @@ class CriterionEvalAnalysisView(TemplateView):
         self.analytical_query = analytical_query
         return max_criterion_value_dict
 
-    def criterion_eval_update_context(self, context, criterion, document_evals, absolute_value):
+    def criterion_eval_update_context(self, context, criterion, document_evals, absolute_value, positive, negative):
         if not 'date_ticks' in context or len(document_evals.aggregations.dynamics.buckets) > len(
                 context['date_ticks']):
             context['date_ticks'] = [bucket.key_as_string for bucket in document_evals.aggregations.dynamics.buckets]
         context['absolute_value'][criterion.id] = absolute_value
+        context['positive'][criterion.id] = positive
+        context['negative'][criterion.id] = negative
         if criterion.value_range_from >= 0:
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
                                                             key=lambda x: x.source_value.value,
@@ -139,13 +141,20 @@ class CriterionEvalAnalysisView(TemplateView):
 
         # Separate signals
         absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]
+        positive = []
+        negative = []
+        if criterion.value_range_from < 0:
+            positive = [bucket.doc_count for bucket in document_evals.aggregations.posneg.buckets[0].dynamics.buckets]
+            negative = [bucket.doc_count for bucket in document_evals.aggregations.posneg.buckets[-1].dynamics.buckets]
 
         # Smooth
         if context['smooth']:
             absolute_value = apply_fir_filter(absolute_value, granularity=context['granularity'], allow_negatives=True)
+            positive = apply_fir_filter(positive, granularity=context['granularity'], allow_negatives=True)
+            negative = apply_fir_filter(negative, granularity=context['granularity'], allow_negatives=True)
 
         # Create context
-        self.criterion_eval_update_context(context, criterion, document_evals, absolute_value)
+        self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -160,6 +169,8 @@ class CriterionEvalAnalysisView(TemplateView):
             return context
 
         context['absolute_value'] = {}
+        context['positive'] = {}
+        context['negative'] = {}
         context['source_weight'] = {}
         top_news_total = set()
         for criterion in context['criterions']:
