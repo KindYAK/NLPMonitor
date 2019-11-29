@@ -48,7 +48,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 topic_detail view.kwargs request.GET %}
     {# Управление графиками #}
     <form method="GET" action="" style="display: contents;">
     <div class="row">
@@ -115,6 +114,7 @@
     </div>
     </form>
 
+    {% cache 28800 topic_detail view.kwargs request.GET %}
     {# Графики #}
     <div class="row">
         <div class="col-12">

@@ -34,11 +34,7 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        key = make_template_fragment_key('search_page', [self.request.GET])
-        if cache.get(key):
-            return context
         form = self.form_class(data=self.request.GET)
-        search_request = {}
         if form.is_valid():
             search_request = form.cleaned_data
 
@@ -46,6 +42,11 @@ class SearchView(TemplateView):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
 
+        key = make_template_fragment_key('search_page', [self.request.GET])
+        if cache.get(key):
+            return context
+
+        search_request = {}
         # Total metrics
         sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
         sd_total.aggs.bucket(name="dynamics",

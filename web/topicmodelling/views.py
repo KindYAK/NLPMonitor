@@ -152,9 +152,6 @@ class TopicDocumentListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
-        if cache.get(key):
-            return context
 
         self.topic_modelling = kwargs['topic_modelling']
         if 'topic_name' in kwargs:
@@ -170,6 +167,10 @@ class TopicDocumentListView(TemplateView):
         context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
                                                 if 'topic_weight_threshold' in self.request.GET else \
                                                 0.05 # Initial
+
+        key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
+        if cache.get(key):
+            return context
 
         # Total metrics
         total_metrics_dict = self.get_total_metrics(context['granularity'], context['topic_weight_threshold'])

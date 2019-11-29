@@ -51,7 +51,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 criterion_analysis request.GET %}
     <form method="GET" action="" style="display: contents;">
     {# Основная форма #}
     <div class="row">
@@ -276,6 +275,7 @@
     </div>
     </form>
 
+    {% cache 28800 criterion_analysis request.GET %}
     {# Графики #}
     <div class="row">
         <div class="col-12">

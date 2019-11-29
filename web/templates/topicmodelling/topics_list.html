@@ -64,7 +64,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 topics_list request.GET %}
     {# TM select #}
     <div class="row">
         <div class="col-12">
@@ -108,6 +107,7 @@
         </div>
     </div>
 
+    {% cache 28800 topics_list request.GET %}
     {# Pie plot #}
     <div class="row">
         <div class="col-12">

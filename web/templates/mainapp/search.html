@@ -43,7 +43,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 search_page request.GET %}
     {# Поиск #}
     <div class="row">
         <div class="col-12">
@@ -173,6 +172,7 @@
     </div>
     </form>
 
+    {% cache 28800 search_page request.GET %}
     {# Графики #}
     <div class="row">
         <div class="col-12">
