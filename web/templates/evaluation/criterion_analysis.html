@@ -326,7 +326,7 @@
                                 {% endfor %}
                             ];
                             var layout = {
-                                title: 'Значение критериев',
+                                title: 'Среднее значение',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {},
@@ -350,7 +350,7 @@
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in positive|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
-                                    name: '{{ criterion.name }}',
+                                    name: '{{ criterion.name }} - позитив',
                                     line: {
                                         color: '#23964f',
                                     },
@@ -359,7 +359,7 @@
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in negative|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
-                                    name: '{{ criterion.name }}',
+                                    name: '{{ criterion.name }} - негатив',
                                     line: {
                                         color: '#d3322b',
                                     },

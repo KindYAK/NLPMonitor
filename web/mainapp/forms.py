@@ -1,11 +1,10 @@
 import django.forms as forms
 from django.db.models import Count
 from django.forms.utils import ErrorList
-
-from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
-from mainapp.models import *
-
 from elasticsearch_dsl import Search
+
+from mainapp.models import *
+from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
 
 
 def get_topic_weight_threshold_options(is_superuser):
@@ -88,3 +87,20 @@ class DashboardFilterForm(forms.Form):
 
     datetime_from = forms.DateField(label="Дата - Начало периода", input_formats=['%d-%m-%Y'], required=False)
     datetime_to = forms.DateField(label="Дата - Конец периода", input_formats=['%d-%m-%Y'], required=False)
+
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['source', 'title', 'text', 'url', 'datetime']
+
+    def clean(self):
+        try:
+            title = self.cleaned_data['title']
+            source = self.cleaned_data['source']
+            datetime = self.cleaned_data['datetime']
+            if Document.objects.filter(title=title, source=source, datetime=datetime).exists():
+                raise forms.ValidationError("Такая новость уже существует")
+        except KeyError:
+            pass
+        return super().clean()

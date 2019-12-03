@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load l10n %}
+
+{% block title %}Создание публикации{% endblock %}
+{% block heading %}Создание публикации{% endblock %}
+
+{% block head %}
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <style>
+        .row {
+            margin-bottom: 15px;
+        }
+        .form-group-intervals .row {
+            margin-bottom: 0;
+        }
+        .form-group {
+            margin-bottom: 0;
+        }
+        .select2-container {
+            height: 38px;
+        }
+        .select2-selection {
+            height: 100% !important;
+        }
+    </style>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Создание публикации</li>
+{% endblock %}
+
+{% block content %}
+    {# Поиск #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <form action="" method="POST">
+                {% csrf_token %}
+                <div class="card-header">
+                </div>
+                <div class="card-body" style="padding-bottom: 0;">
+                    <div id="search-form">
+                        {{ form.non_field_errors }}
+                        {% for field in form %}
+                        {{ field.errors }}
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                {% if field.name in "source" %}
+                                                    <div class="col-md-4">
+                                                        {{ field.label_tag }}
+                                                        <i class="fas fa-question-circle" data-toggle="tooltip" title="Если вы не нашли нужный источник, пожалуйста напишите на nlpmonitor.kz@gmail.com"></i>
+                                                    </div>
+                                                    <div class="col-md-8">{% render_field field class="form-control select2" %}</div>
+                                                {% elif field.name == "datetime" %}
+                                                    <div class="col-md-4">{{ field.label_tag }}</div>
+                                                    <div class="col-md-8 input-group date">
+                                                        {% render_field field class="form-control datetimepicker-input" id="datetimepicker1" data-toggle="datetimepicker" data-target="#datetimepicker1" %}
+                                                    </div>
+                                                {% else %}
+                                                    <div class="col-md-4">{{ field.label_tag }}</div>
+                                                    <div class="col-md-8">{% render_field field class="form-control" %}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-block btn-info" type="submit">Сохранить</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block foot %}
+    <!-- Select2 -->
+    <script src="{% static 'adminlte/plugins/select2/js/select2.full.min.js' %}"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script>
+        $('.select2').select2();
+        $('#datetimepicker1').datetimepicker({
+            format: 'L',
+            locale: 'ru',
+        });
+    </script>
+{% endblock %}

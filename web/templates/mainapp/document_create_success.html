@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load l10n %}
+
+{% block title %}Создание публикации - успех{% endblock %}
+{% block heading %}Создание публикации - успех{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Создание публикации</li>
+{% endblock %}
+
+{% block content %}
+    {# Поиск #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body" style="padding-bottom: 0;">
+                    <div id="search-form">
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h2 style="text-align: center;">
+                                            Новость успешно добавлена
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'mainapp:document_create' %}"><button class="btn-block btn-info">Добавить ещё одну новость</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block foot %}
+{% endblock %}

@@ -1,5 +1,6 @@
 import hashlib
 
+from django.contrib.auth.models import User
 from django.db import models
 from topicmodelling.models import Topic, DocumentTopic
 from .models_user import TopicGroup, TopicID, ContentLoader, Expert, Viewer
@@ -102,6 +103,8 @@ class Document(models.Model):
     topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic', verbose_name="Топики", blank=True)
 
     unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность source, datetime, title")
+
+    author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()

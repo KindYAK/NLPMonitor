@@ -2,13 +2,14 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
 from elasticsearch_dsl import Search
 
+from mainapp.models import Document
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 from .dashboard_types import *
-from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm
+from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize
 from .services_es_dashboard import get_dashboard, get_kibana_dashboards
 from .services_es_documents import execute_search
@@ -20,7 +21,7 @@ def login_redirect(request):
     if hasattr(request.user, "expert"):
         return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
     if hasattr(request.user, "contentloader"):
-        return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
+        return HttpResponseRedirect(reverse_lazy('mainapp:document_create'))
     return HttpResponseRedirect(reverse_lazy('mainapp:index'))
 
 
@@ -170,3 +171,10 @@ class DocumentDetailView(TemplateView):
         context['document'] = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
                 .filter("term", **{"id": kwargs['document_id']}).execute()[0]
         return context
+
+
+class DocumentCreateView(CreateView):
+    template_name = "mainapp/document_create.html"
+    form_class = DocumentForm
+    model = Document
+    success_url = reverse_lazy('mainapp:document_create_success')

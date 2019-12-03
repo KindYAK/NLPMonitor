@@ -163,6 +163,16 @@
                                 </a>
                             </li>
                         {% endif %}
+                        {% if request.user.contentloader %}
+                            <li class="nav-item">
+                                <a href="{% url 'mainapp:document_create' %}" class="nav-link">
+                                    <i class="nav-icon fas fa-file-import"></i>
+                                    <p>
+                                        Добавить публикацию
+                                    </p>
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </nav>
