@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, ListView
 from elasticsearch_dsl import Search
 
 from mainapp.models import Document
@@ -178,3 +178,17 @@ class DocumentCreateView(CreateView):
     form_class = DocumentForm
     model = Document
     success_url = reverse_lazy('mainapp:document_create_success')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.author_loader = self.request.user
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class DocumentListView(ListView):
+    template_name = "mainapp/document_list.html"
+    model = Document
+
+    def get_queryset(self):
+        return self.model.objects.filter(author_loader=self.request.user).order_by('-datetime_created')[:1000]

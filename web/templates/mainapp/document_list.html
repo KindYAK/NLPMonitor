@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load cache %}
+{% load request_get_list %}
+{% load l10n %}
+
+{% block title %}Мои публикации{% endblock %}
+{% block heading %}Мои публикации{% endblock %}
+
+{% block head %}
+    <!-- data tables -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+    <style>
+        .row {
+            margin-bottom: 15px;
+        }
+        .form-group-intervals .row {
+            margin-bottom: 0;
+        }
+        .col-lg-2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-group {
+            margin-bottom: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Мои публикации</li>
+{% endblock %}
+
+{% block content %}
+    {% cache 28800 search_page request.GET %}
+    {# Таблица публикаций #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Количество публикаций - {{ object_list.count }}</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        <table id="search-results-table" class="table table-bordered table-hover">
+                            <thead>
+                            <tr role="row">
+                                <th>Дата добавления</th>
+                                <th>Дата публикации</th>
+                                <th>Заголовок</th>
+                                <th>Источник</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for document in object_list %}
+                                <tr>
+                                    <td>{{ document.datetime_created }}</td>
+                                    <td>{{ document.datetime }}</td>
+                                    <td>{{ document.title }}</td>
+                                    <td>{{ document.source }}</td>
+                                    <td>
+                                        <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
+                                            <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
+                                            data-toggle="tooltip" data-placement="top" title="Просмотреть новость"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endcache %}
+{% endblock %}
+
+{% block foot %}
+    <!-- DataTables -->
+    <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
+
+    <script>
+        $('#search-results-table').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "order": [],
+            "info": true,
+            "autoWidth": true,
+            "pageLength": 50,
+        });
+    </script>
+
+{% endblock %}

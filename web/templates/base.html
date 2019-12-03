@@ -165,6 +165,14 @@
                         {% endif %}
                         {% if request.user.contentloader %}
                             <li class="nav-item">
+                                <a href="{% url 'mainapp:document_list' %}" class="nav-link">
+                                    <i class="nav-icon far fa-list-alt"></i>
+                                    <p>
+                                        Мои публикации
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{% url 'mainapp:document_create' %}" class="nav-link">
                                     <i class="nav-icon fas fa-file-import"></i>
                                     <p>
