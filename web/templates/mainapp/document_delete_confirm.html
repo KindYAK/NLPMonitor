@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
 {% load staticfiles %}
-{% load cache %}
 {% load request_get_list %}
 {% load l10n %}
 
@@ -33,8 +32,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 search_page request.GET %}
-    {# Таблица публикаций #}
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -55,7 +52,6 @@
             </div>
         </div>
     </div>
-    {% endcache %}
 {% endblock %}
 
 {% block foot %}
