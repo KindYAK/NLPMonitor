@@ -20,4 +20,5 @@ urlpatterns = [
     path('document_create/', DocumentCreateView.as_view(), name='document_create'),
     path('document_create_success/', TemplateView.as_view(template_name="mainapp/document_create_success.html"), name='document_create_success'),
     path('document_list/', DocumentListView.as_view(), name='document_list'),
+    path('document_delete/<pk>/', DocumentDeleteView.as_view(), name='document_delete'),
 ]

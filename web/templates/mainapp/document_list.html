@@ -67,6 +67,10 @@
                                             <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
                                             data-toggle="tooltip" data-placement="top" title="Просмотреть новость"></i>
                                         </a>
+                                        <a href="{% url 'mainapp:document_delete' document.id %}" class="nav-link" style="margin-left: 7px;">
+                                            <i class="nav-icon fas fa-times nowrap" style="font-size: 36px;"
+                                            data-toggle="tooltip" data-placement="top" title="Удалить документ"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             {% endfor %}

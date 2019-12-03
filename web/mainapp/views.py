@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, CreateView, ListView
+from django.views.generic import TemplateView, CreateView, ListView, DeleteView
 from elasticsearch_dsl import Search
 
 from mainapp.models import Document
@@ -192,3 +192,12 @@ class DocumentListView(ListView):
 
     def get_queryset(self):
         return self.model.objects.filter(author_loader=self.request.user).order_by('-datetime_created')[:1000]
+
+
+class DocumentDeleteView(DeleteView):
+    model = Document
+    success_url = reverse_lazy('mainapp:document_list')
+    template_name = "mainapp/document_delete_confirm.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(author_loader=self.request.user)

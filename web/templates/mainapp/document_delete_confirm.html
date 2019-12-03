@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load cache %}
+{% load request_get_list %}
+{% load l10n %}
+
+{% block title %}Удаление публикации{% endblock %}
+{% block heading %}Удаление публикации{% endblock %}
+
+{% block head %}
+    <style>
+        .row {
+            margin-bottom: 15px;
+        }
+        .form-group-intervals .row {
+            margin-bottom: 0;
+        }
+        .col-lg-2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-group {
+            margin-bottom: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item active">Удаление публикации</li>
+{% endblock %}
+
+{% block content %}
+    {% cache 28800 search_page request.GET %}
+    {# Таблица публикаций #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <div class="alert alert-danger"
+                                     role="alert">Вы уверены что хотите удалить этот документ?</div>
+                                <input class="btn btn-default" type="submit" value="Подтвердить"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endcache %}
+{% endblock %}
+
+{% block foot %}
+{% endblock %}
