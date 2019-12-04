@@ -1,3 +1,4 @@
+from elasticsearch_dsl.response.aggs import FieldBucket
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
@@ -88,9 +89,6 @@ class CriterionEvalAnalysisView(TemplateView):
         return max_criterion_value_dict
 
     def criterion_eval_update_context(self, context, criterion, document_evals, absolute_value, positive, negative):
-        if not 'date_ticks' in context or len(document_evals.aggregations.dynamics.buckets) > len(
-                context['date_ticks']):
-            context['date_ticks'] = [bucket.key_as_string for bucket in document_evals.aggregations.dynamics.buckets]
         context['absolute_value'][criterion.id] = absolute_value
         context['positive'][criterion.id] = positive
         context['negative'][criterion.id] = negative
@@ -119,11 +117,11 @@ class CriterionEvalAnalysisView(TemplateView):
                                                             reverse=True)
         context['y_axis_from'] = min(-1,
                                      context['y_axis_from'] if 'y_axis_from' in context else -1,
-                                     min(absolute_value)
+                                     min([bucket.dynamics_weight.value for bucket in absolute_value])
                                      )
         context['y_axis_to'] = max(1,
                                    context['y_axis_to'] if 'y_axis_to' in context else 1,
-                                   max(absolute_value)
+                                   max([bucket.dynamics_weight.value for bucket in absolute_value])
                                    )
 
     def get_criterion_evals(self, context, top_news_total, criterion):
@@ -139,19 +137,46 @@ class CriterionEvalAnalysisView(TemplateView):
         # Normalize
         normalize_documents_eval_dynamics(document_evals, self.total_criterion_date_value_dict[criterion.id])
 
-        # Separate signals
-        absolute_value = [bucket.dynamics_weight.value for bucket in document_evals.aggregations.dynamics.buckets]
+        absolute_value = document_evals.aggregations.dynamics.buckets
         positive = []
         negative = []
         if criterion.value_range_from < 0:
-            positive = [bucket.doc_count for bucket in document_evals.aggregations.posneg.buckets[0].dynamics.buckets]
-            negative = [bucket.doc_count for bucket in document_evals.aggregations.posneg.buckets[-1].dynamics.buckets]
+            positive = list(document_evals.aggregations.posneg.buckets[0].dynamics.buckets)
+            negative = list(document_evals.aggregations.posneg.buckets[-1].dynamics.buckets)
+            # Equalize periods
+            positive_ticks = set([bucket.key_as_string for bucket in positive])
+            negative_ticks = set([bucket.key_as_string for bucket in negative])
+            class Bucket(object):
+                pass
+            for tick in positive_ticks - negative_ticks:
+                bucket = Bucket()
+                setattr(bucket, "key_as_string", tick)
+                setattr(bucket, "doc_count", 0)
+                negative.append(bucket)
+            for tick in negative_ticks - positive_ticks:
+                bucket = Bucket()
+                setattr(bucket, "key_as_string", tick)
+                setattr(bucket, "doc_count", 0)
+                positive.append(bucket)
+            positive = sorted(positive, key=lambda x: x.key_as_string)
+            negative = sorted(negative, key=lambda x: x.key_as_string)
 
         # Smooth
+        def smooth_buckets(buckets, is_posneg):
+            if is_posneg:
+                smoothed = apply_fir_filter([bucket.doc_count for bucket in buckets], granularity=context['granularity'], allow_negatives=True)
+            else:
+                smoothed = apply_fir_filter([bucket.dynamics_weight.value for bucket in buckets], granularity=context['granularity'], allow_negatives=True)
+            for bucket, val in zip(buckets, smoothed):
+                if is_posneg:
+                    bucket.doc_count = val
+                else:
+                    bucket.dynamics_weight.value = val
+
         if context['smooth']:
-            absolute_value = apply_fir_filter(absolute_value, granularity=context['granularity'], allow_negatives=True)
-            positive = apply_fir_filter(positive, granularity=context['granularity'], allow_negatives=True)
-            negative = apply_fir_filter(negative, granularity=context['granularity'], allow_negatives=True)
+            smooth_buckets(absolute_value, False)
+            smooth_buckets(positive, True)
+            smooth_buckets(negative, True)
 
         # Create context
         self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)

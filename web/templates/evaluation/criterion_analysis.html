@@ -318,8 +318,8 @@
                                 {% for criterion in criterions %}
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
                                     fill: 'tozeroy',
                                 },
@@ -348,8 +348,8 @@
                             var data = [
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in positive|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - позитив',
                                     line: {
                                         color: '#23964f',
@@ -357,8 +357,8 @@
                                 },
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in negative|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - негатив',
                                     line: {
                                         color: '#d3322b',
