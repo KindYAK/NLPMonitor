@@ -21,6 +21,7 @@ class TopicsListView(TemplateView):
         if self.request.user.is_superuser:
             context['criterions'] = EvalCriterion.objects.all()
         form = self.form_class(data=self.request.GET, is_superuser=self.request.user.is_superuser)
+        context['form'] = form
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
             context['topic_weight_threshold'] = form.cleaned_data['topic_weight_threshold']
@@ -77,7 +78,6 @@ class TopicsListView(TemplateView):
         context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
-        context['form'] = form
         return context
 
 
