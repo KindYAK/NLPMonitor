@@ -95,7 +95,7 @@ class TopicGroupViewSet(viewsets.ViewSet):
             group = TopicGroup.objects.create(name=request.POST['name'],
                                       topic_modelling_name=request.POST['topic_modelling'],
                                       owner=request.user,
-                                      is_public=request.user.is_superuser
+                                      is_public=request.user.is_superuser or request.user.expert
                                       )
         except IntegrityError:
             return Response(
