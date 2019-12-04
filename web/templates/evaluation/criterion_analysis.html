@@ -550,7 +550,8 @@
     <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
     <script>
         $('.select2').select2();
-        run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold }},
-            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}');
+        run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
+            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
+            ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}', {% endfor %}]);
     </script>
 {% endblock %}

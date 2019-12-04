@@ -1,5 +1,17 @@
 function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword,
-                                    group_id, criterion_q, action_q, value_q) {
+                                    group_id, criterion_q, action_q, value_q, plot_ids) {
+    var main_plot_id = "value_dynamics";
+
+    function rerender_new_range(range_from, range_to, id_to_skip) {
+        for (var plot_id of plot_ids) {
+            if (id_to_skip && plot_id !== id_to_skip) {
+                Plotly.relayout(plot_id, 'xaxis.range', [range_from, range_to]);
+            }
+        }
+        last_range_from = range_from;
+        last_range_to = range_to;
+    }
+
     function init_table() {
         return $('#search-results-table').DataTable({
             "paging": true,
@@ -115,12 +127,23 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
     }
 
     var table = init_table();
+    var last_range_from = null;
+    var last_range_to = null;
     var last_req_range_from = null;
     var last_req_range_to = null;
     var n_redraw_plot = 0;
 
     setInterval(function () {
-        var main_plot = document.getElementById("value_dynamics");
+        var main_plot = document.getElementById(main_plot_id);
+        var range_from = main_plot.layout.xaxis.range[0];
+        var range_to = main_plot.layout.xaxis.range[1];
+        if (last_range_to && last_range_from && (last_range_from !== range_from || last_range_to !== range_to)) {
+            rerender_new_range(range_from, range_to, main_plot_id);
+        }
+    }, 3333);
+
+    setInterval(function () {
+        var main_plot = document.getElementById(main_plot_id);
         var range_from = main_plot.layout.xaxis.range[0];
         var range_to = main_plot.layout.xaxis.range[1];
         if (last_req_range_from && last_req_range_to && (last_req_range_from !== range_from || last_req_range_to !== range_to)) {
@@ -135,6 +158,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             var range_to = target.xaxis.range[1];
 
             n_redraw_plot += 1;
+            if (n_redraw_plot !== 0 && n_redraw_plot % 3 === 0) {
+                rerender_new_range(range_from, range_to, e.target.id);
+            }
             if (n_redraw_plot === 1 || n_redraw_plot % 33 === 0) {
                 request_documents(range_from, range_to);
             }
