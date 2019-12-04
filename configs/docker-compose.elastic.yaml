@@ -1,0 +1,52 @@
+version: '3'
+services:
+  master1:
+    image: "elasticsearch:${VERSION}"
+    env_file:
+      - elastic_configs/jack/es-jack1.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - ${ELASTIC_EXTERNAL_PORT}:9200
+      - 9300:9300
+    networks:
+      - esnet
+      - network
+  master2:
+    image: "elasticsearch:${VERSION}"
+    env_file:
+      - elastic_configs/jack/es-jack2.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - esnet
+      - network
+  master3:
+    image: "elasticsearch:${VERSION}"
+    env_file:
+      - elastic_configs/jack/es-jack3.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - esnet
+  kibana_cluster:
+    image: 'kibana:${VERSION}'
+    environment:
+      SERVER_NAME: kibana_cluster.local
+      ELASTICSEARCH_HOSTS: http://master1:9200
+    ports:
+      - '${KIBANA_EXTERNAL_PORT}:5601'
+    depends_on:
+      - master1
+    networks:
+      - esnet
+      - network
+
+networks:
+  esnet:
