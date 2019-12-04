@@ -43,11 +43,11 @@
 {% endblock %}
 
 {% block content %}
+<form action="" method="GET">
     {# Поиск #}
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <form action="" method="GET">
                 <div class="card-header">
                     <h3>Поиск и фильтры</h3>
                 </div>
@@ -129,7 +129,6 @@
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
-                            <form method="GET" action="" style="display: contents;">
                             <div class="col-lg-3"></div>
                             <div class="col-lg-2">
                                 <div class="form-group">
@@ -163,15 +162,13 @@
                                 </div>
                             </div>
                             <div class="col-lg-3"></div>
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </form>
-
+</form>
     {% cache 28800 search_page request.GET %}
     {# Графики #}
     <div class="row">
