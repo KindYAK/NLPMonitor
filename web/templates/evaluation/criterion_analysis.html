@@ -319,7 +319,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in absolute_value|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|safe }}, {% endfor %}],
+                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
                                     fill: 'tozeroy',
                                 },
@@ -349,7 +349,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in positive|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - позитив',
                                     line: {
                                         color: '#23964f',
@@ -358,7 +358,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in negative|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - негатив',
                                     line: {
                                         color: '#d3322b',
@@ -401,7 +401,7 @@
                                 var data = [
                                     {
                                         x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
-                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|safe }}, {% endfor %}],
+                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|round_fl:3|safe }}, {% endfor %}],
                                         type: 'bar'
                                     }
                                 ];

@@ -3,6 +3,7 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 {% load l10n %}
+{% load serializers %}
 
 {% block title %}
     {% if request.GET.topic_name %}
@@ -157,7 +158,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_power %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in absolute_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Абсолютная мощность топика',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -187,7 +188,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_power %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Относительная мощность топика',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -217,7 +218,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_weight %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_weight %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Удельный вес топика',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -259,7 +260,7 @@
                             var data = [
                                 {
                                     x: [{% for source in source_weight %}'{{ source.key }}', {% endfor %}],
-                                    y: [{% for source in source_weight %}{{ source.source_weight.value|safe }}, {% endfor %}],
+                                    y: [{% for source in source_weight %}{{ source.source_weight.value|round_fl:3|safe }}, {% endfor %}],
                                     type: 'bar'
                                 }
                             ];
