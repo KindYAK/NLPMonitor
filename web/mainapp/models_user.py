@@ -50,7 +50,7 @@ class TopicGroup(models.Model):
         verbose_name_plural = "Группы топиков"
         unique_together = (('name', 'owner', 'topic_modelling_name'), )
 
-    name = models.CharField(max_length=50, verbose_name="Название группы")
+    name = models.CharField(max_length=100, verbose_name="Название группы")
     topic_modelling_name = models.CharField(max_length=100, verbose_name="Название ТМ")
     topics = models.ManyToManyField('TopicID')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
