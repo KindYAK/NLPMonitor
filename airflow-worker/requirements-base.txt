@@ -1,4 +1,4 @@
-django==2.2.4
+django==2.2.8
 django-annoying==0.10.4
 django-debug-toolbar==1.11
 django-extensions==2.1.9
@@ -29,3 +29,7 @@ bs4==0.0.1
 dateparser>=0.7.1
 
 pandas==0.24.2
+stop_words==2018.7.23
+numba==0.46.0
+djangorestframework==3.9.4
+transliterate==1.10.2
