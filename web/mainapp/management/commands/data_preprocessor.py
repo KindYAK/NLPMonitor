@@ -13,7 +13,7 @@ class Command(BaseCommand):
         batch_size = 10000
 
         def is_kazakh(text):
-            return sum([c in "ӘәҒғҚқҢңӨөҰұҮүІі" for c in text]) > 0.04
+            return sum([c in "ӘәҒғҚқҢңӨөҰұҮүІі" for c in text]) > 0.07
 
         qs = Document.objects.filter(id__gt=0)
         number_of_documents = qs.count()

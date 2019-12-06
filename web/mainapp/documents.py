@@ -202,6 +202,8 @@ class TopicModellingIndex(es.Document):
 
     topics = es.Nested(Topic)
 
+    is_actualizable = es.Boolean()
+
     class Index:
         name = ES_INDEX_TOPIC_MODELLING
         using = ES_CLIENT
