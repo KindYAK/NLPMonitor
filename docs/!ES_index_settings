@@ -25,7 +25,7 @@ docker-compose exec elasticsearch bash
 curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'
 {
     "persistent" : {
-        "search.max_buckets": 500000
+        "search.max_buckets": 5000000
     }
 }
 '
