@@ -97,6 +97,9 @@ function run_group_list_management(topic_modelling, csrf_token){
                             return;
                         }
                         alert("Topic group not found!");
+                    },
+                    error: function(result){
+                        alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                     }
                 }
             );
@@ -127,6 +130,9 @@ function run_group_list_management(topic_modelling, csrf_token){
                                 return value.id !== result.group_id;
                             });
                             $('#topicGroupModal').modal('hide');
+                        },
+                        error: function (result) {
+                            alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                         }
                     }
                 );
@@ -170,6 +176,9 @@ function run_group_list_management(topic_modelling, csrf_token){
                     });
                     initialize_groups_select();
                     manage_topics_onclick($('#addGroup').attr('topic_id'));
+                },
+                error: function (result) {
+                    alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                 }
             }
         );

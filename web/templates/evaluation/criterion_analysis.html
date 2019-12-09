@@ -318,8 +318,8 @@
                                 {% for criterion in criterions %}
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }}',
                                     fill: 'tozeroy',
                                 },
@@ -348,8 +348,8 @@
                             var data = [
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in positive|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - позитив',
                                     line: {
                                         color: '#23964f',
@@ -357,8 +357,8 @@
                                 },
                                 {
                                     mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick|safe }}, {% endfor %}],
+                                    x: [{% for tick in negative|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|round_fl:3|safe }}, {% endfor %}],
                                     name: '{{ criterion.name }} - негатив',
                                     line: {
                                         color: '#d3322b',
@@ -401,7 +401,7 @@
                                 var data = [
                                     {
                                         x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
-                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|safe }}, {% endfor %}],
+                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|round_fl:3|safe }}, {% endfor %}],
                                         type: 'bar'
                                     }
                                 ];
@@ -550,7 +550,8 @@
     <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
     <script>
         $('.select2').select2();
-        run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold }},
-            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}');
+        run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
+            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
+            ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}', {% endfor %}]);
     </script>
 {% endblock %}

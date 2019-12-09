@@ -4,6 +4,7 @@
 {% load cache %}
 {% load request_get_list %}
 {% load l10n %}
+{% load serializers %}
 
 {% block title %}Поиск{% endblock %}
 {% block heading %}Поиск{% endblock %}
@@ -43,11 +44,11 @@
 {% endblock %}
 
 {% block content %}
+<form action="" method="GET">
     {# Поиск #}
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <form action="" method="GET">
                 <div class="card-header">
                     <h3>Поиск и фильтры</h3>
                 </div>
@@ -129,7 +130,6 @@
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
-                            <form method="GET" action="" style="display: contents;">
                             <div class="col-lg-3"></div>
                             <div class="col-lg-2">
                                 <div class="form-group">
@@ -163,15 +163,13 @@
                                 </div>
                             </div>
                             <div class="col-lg-3"></div>
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </form>
-
+</form>
     {% cache 28800 search_page request.GET %}
     {# Графики #}
     <div class="row">
@@ -215,7 +213,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_power %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in absolute_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Абсолютная мощность выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -245,7 +243,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_power %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Относительная мощность выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -275,7 +273,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_weight %}{{ tick|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_weight %}{{ tick|round_fl:3|safe }}, {% endfor %}],
                                     name: 'Удельный вес выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}

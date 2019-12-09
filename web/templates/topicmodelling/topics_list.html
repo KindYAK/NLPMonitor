@@ -198,7 +198,7 @@
                                             <i class="nav-icon fas fa-folder-plus manage-topic-groups" id="manageTopics_{{ topic.id }}"
                                                style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Добавить в группу"></i>
                                         </a>
-                                        {% if request.user.is_superuser %}
+                                        {% if request.user.is_superuser or request.user.expert %}
                                             <a href="" class="nav-link nowrap set-topic-eval-wrapper" style="padding: 0; display: none;">
                                                 <i class="nav-icon fas fa-sliders-h set-topic-eval" id="evalTopic_{{ topic.id }}"
                                                    style="font-size: 36px; padding: .5rem 1rem;" data-toggle="tooltip" data-placement="top" title="Оценка по критерию"></i>
@@ -247,7 +247,7 @@
         </div>
     </div>
 
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
     {# Topic eval modal #}
     <div class="modal fade" id="topicEvalModal" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -299,7 +299,7 @@
         run_group_list_management('{{ topic_modelling }}', '{{ csrf_token }}');
     </script>
 
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
         <script src="{% static 'js/topic_evaluation.js' %} "></script>
         <script>
             $('.set-topic-eval-wrapper').show();

@@ -18,9 +18,10 @@ class TopicsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_superuser:
+        if self.request.user.is_superuser or self.request.user.expert:
             context['criterions'] = EvalCriterion.objects.all()
-        form = self.form_class(data=self.request.GET, is_superuser=self.request.user.is_superuser)
+        form = self.form_class(data=self.request.GET, is_superuser=self.request.user.is_superuser or self.request.user.expert)
+        context['form'] = form
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
             context['topic_weight_threshold'] = form.cleaned_data['topic_weight_threshold']
@@ -77,7 +78,6 @@ class TopicsListView(TemplateView):
         context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
-        context['form'] = form
         return context
 
 
@@ -163,7 +163,7 @@ class TopicDocumentListView(TemplateView):
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
-        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser)
+        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser or self.request.user.expert)
         context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
                                                 if 'topic_weight_threshold' in self.request.GET else \
                                                 0.05 # Initial

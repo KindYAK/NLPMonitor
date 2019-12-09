@@ -22,8 +22,9 @@ class Expert(models.Model):
         verbose_name_plural = "Эксперты"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
-    criterions = models.ManyToManyField('evaluation.EvalCriterion')
+    corpus = models.ForeignKey('mainapp.Corpus', null=True, on_delete=models.CASCADE, verbose_name="Корпус")
+    topic_modelling_names = PickledObjectField(null=True, blank=True, verbose_name="Название тематических моделирований")
+    criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
 
     def __str__(self):
         return f"Эксперт {self.user}"
@@ -35,8 +36,9 @@ class Viewer(models.Model):
         verbose_name_plural = "Пользователь (Viewer)"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    topic_modelling_names = PickledObjectField(null=True, verbose_name="Название тематических моделирований")
-    criterions = models.ManyToManyField('evaluation.EvalCriterion')
+    corpus = models.ForeignKey('mainapp.Corpus', null=True, on_delete=models.CASCADE, verbose_name="Корпус")
+    topic_modelling_names = PickledObjectField(null=True, blank=True, verbose_name="Название тематических моделирований")
+    criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
 
     def __str__(self):
         return f"Пользователь {self.user}"
@@ -48,7 +50,7 @@ class TopicGroup(models.Model):
         verbose_name_plural = "Группы топиков"
         unique_together = (('name', 'owner', 'topic_modelling_name'), )
 
-    name = models.CharField(max_length=50, verbose_name="Название группы")
+    name = models.CharField(max_length=100, verbose_name="Название группы")
     topic_modelling_name = models.CharField(max_length=100, verbose_name="Название ТМ")
     topics = models.ManyToManyField('TopicID')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")

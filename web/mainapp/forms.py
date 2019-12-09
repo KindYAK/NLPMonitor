@@ -92,7 +92,7 @@ class DashboardFilterForm(forms.Form):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['source', 'title', 'text', 'url', 'datetime']
+        fields = ['source', 'title', 'text', 'url', 'datetime', 'sentiment_loader', ]
 
     def clean(self):
         try:

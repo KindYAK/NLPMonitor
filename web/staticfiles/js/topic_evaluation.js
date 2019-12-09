@@ -118,10 +118,10 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                     "criterion_id": $('#criterionSelect').val(),
                     "value": $('#evalValue').val(),
                 },
-                beforeSend: function (request) {
+                beforeSend: function(request) {
                     request.setRequestHeader("X-CSRFToken", csrf_token);
                 },
-                success: function (result) {
+                success: function(result) {
                     if (result.status === 500) {
                         alert(result.error);
                         return;
@@ -135,6 +135,9 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                         evaluations_dict[parseInt(result.criterion_id)] = {};
                     }
                     evaluations_dict[parseInt(result.criterion_id)][result.topic_id] = result.value;
+                },
+                error: function(result){
+                    alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                 }
             }
         );

@@ -48,6 +48,7 @@ class SearchView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = self.form_class(data=self.request.GET)
+        context['form'] = form
         if form.is_valid():
             search_request = form.cleaned_data
 
@@ -84,7 +85,7 @@ class SearchView(TemplateView):
                       calendar_interval=context['granularity']) \
             .metric("dynamics_weight", agg_type="sum", script="_score")
         results = s.execute()
-        if search_request['text']:
+        if 'text' in search_request and search_request['text']:
             relevant_count = get_elscore_cutoff([d.meta.score for d in results], "SEARCH_LVL_LIGHT")
         else:
             relevant_count = s.count().value
@@ -123,7 +124,6 @@ class SearchView(TemplateView):
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power
         context['relative_weight'] = relative_weight
-        context['form'] = form
         return context
 
 

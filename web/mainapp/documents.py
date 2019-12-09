@@ -77,7 +77,7 @@ class Document(es.Document):
     class Index:
         name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
-    
+
     class Meta:
         dynamic_templates = MetaField(DYNAMIC_TEMPLATES)
 
@@ -144,7 +144,6 @@ class Topic(es.InnerDoc):
 
 
 class TopicDocument(es.Document):
-    topic_modelling = es.Keyword()
     topic_id = es.Keyword()
     topic_weight = es.Float()
     document_es_id = es.Keyword()
@@ -152,13 +151,36 @@ class TopicDocument(es.Document):
     document_source = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_DOCUMENT
+        name = ES_INDEX_TOPIC_DOCUMENT # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
         using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 8,
+            "number_of_replicas": 0,
+            "max_result_window": 5000000,
+        }
+        mappings = {
+            "properties": {
+                "datetime": {
+                    "type": "date"
+                },
+                "document_es_id": {
+                    "type": "keyword",
+                },
+                "document_source": {
+                    "type": "keyword",
+                },
+                "topic_id": {
+                    "type": "keyword",
+                },
+                "topic_weight": {
+                    "type": "float"
+                }
+            }
+        }
 
 
 class DocumentEval(es.Document):
-    topic_modelling = es.Keyword()
-    criterion_id = es.Keyword()
     criterion_name = es.Keyword()
     value = es.Float()
     document_es_id = es.Keyword()
@@ -166,8 +188,33 @@ class DocumentEval(es.Document):
     document_source = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL
+        name = ES_INDEX_DOCUMENT_EVAL # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
         using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 8,
+            "number_of_replicas": 0,
+            "max_result_window": 5000000,
+        }
+        mappings = {
+            "properties": {
+                "criterion_name": {
+                    "type": "keyword"
+                },
+                "document_datetime": {
+                    "type": "date"
+                },
+                "document_es_id": {
+                    "type": "keyword"
+                },
+                "document_source": {
+                    "type": "keyword"
+                },
+                "value": {
+                    "type": "float"
+                }
+            }
+        }
 
 
 # List of all TMs in the storage
@@ -201,6 +248,8 @@ class TopicModellingIndex(es.Document):
     tau_coherence_phi = es.Float()
 
     topics = es.Nested(Topic)
+
+    is_actualizable = es.Boolean()
 
     class Index:
         name = ES_INDEX_TOPIC_MODELLING

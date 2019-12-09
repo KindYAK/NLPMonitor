@@ -67,6 +67,19 @@
                                                     <div class="col-md-8 input-group date">
                                                         {% render_field field class="form-control datetimepicker-input" id="datetimepicker1" data-toggle="datetimepicker" data-target="#datetimepicker1" %}
                                                     </div>
+                                                {% elif field.name == "sentiment_loader" %}
+                                                    <div class="col-md-4">{{ field.label_tag }}</div>
+                                                    <div class="col-md-8">
+                                                        {% render_field field class="custom-range" type="range" min="-1" max="1" step="0.1" value="0" %}
+                                                        <div style="text-align: center;">
+                                                            <span id='evalTooltip' class="badge badge-primary">0</span>
+                                                        </div>
+                                                    </div>
+                                                    <script>
+                                                        var searchInput = document.querySelector('#id_sentiment_loader');
+                                                        searchInput.addEventListener('input', function() {$('#evalTooltip').html($('#id_sentiment_loader').val());});
+                                                        $('#evalTooltip').html($('#id_sentiment_loader').val());
+                                                    </script>
                                                 {% else %}
                                                     <div class="col-md-4">{{ field.label_tag }}</div>
                                                     <div class="col-md-8">{% render_field field class="form-control" %}</div>

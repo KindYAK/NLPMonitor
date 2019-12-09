@@ -24,14 +24,14 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
     }
 
     function rerender_new_range(range_from, range_to, id_to_skip) {
-            for (var plot_id of plot_ids) {
-                if (id_to_skip && plot_id !== id_to_skip) {
-                    Plotly.relayout(plot_id, 'xaxis.range', [range_from, range_to]);
-                }
+        for (var plot_id of plot_ids) {
+            if (id_to_skip && plot_id !== id_to_skip) {
+                Plotly.relayout(plot_id, 'xaxis.range', [range_from, range_to]);
             }
-            last_range_from = range_from;
-            last_range_to = range_to;
         }
+        last_range_from = range_from;
+        last_range_to = range_to;
+    }
 
     function rerender_table_plot(result, type) {
         // Redraw documents table
