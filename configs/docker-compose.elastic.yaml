@@ -47,6 +47,12 @@ services:
     networks:
       - esnet
       - network
+  hq:
+    image: 'elastichq/elasticsearch-hq'
+    ports:
+      - '5603:5000'
+    networks:
+      - esnet
 
 networks:
   esnet:
