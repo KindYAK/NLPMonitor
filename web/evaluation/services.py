@@ -8,9 +8,7 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_C
 
 
 def filter_analytical_query(topic_modelling, criterion_id, action, value):
-    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_EVAL) \
-              .filter("term", **{'topic_modelling.keyword': topic_modelling}) \
-              .filter("term", criterion_id=criterion_id) \
+    s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion_id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})\
               .filter("range", value={action: value}) \
               .source(['document_es_id']).sort('-value')
@@ -60,7 +58,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         )
         std.aggs['posneg'].bucket(name="source",
                                   agg_type="terms",
-                                  field="document_source.keyword",
+                                  field="document_source",
                                   size=20)
 
     # Dynamics
@@ -188,8 +186,8 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id][criterion_id] = \
                 td.value / max_criterion_value_dict[criterion_id]["max_positive"]
         else:
-            documents_eval_dict[td.document_es_id][td.criterion_id] = \
-                td.value / -max_criterion_value_dict[td.criterion_id]["max_negative"]
+            documents_eval_dict[td.document_es_id][criterion_id] = \
+                td.value / -max_criterion_value_dict[criterion_id]["max_negative"]
     dict_vals = sorted(documents_eval_dict.items(), key=lambda x: sum(abs(i) for i in x[1].values() if type(i) == float), reverse=True)
     return dict(dict_vals[:200])
 
