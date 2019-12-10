@@ -156,7 +156,7 @@ class TopicDocument(es.Document):
 
         settings = {
             "number_of_shards": 8,
-            "number_of_replicas": 0,
+            "number_of_replicas": 1,
             "max_result_window": 5000000,
         }
         mappings = {
@@ -193,7 +193,7 @@ class DocumentEval(es.Document):
 
         settings = {
             "number_of_shards": 8,
-            "number_of_replicas": 0,
+            "number_of_replicas": 1,
             "max_result_window": 5000000,
         }
         mappings = {
