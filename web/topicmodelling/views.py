@@ -37,7 +37,7 @@ class TopicsListView(TemplateView):
         s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{context['topic_modelling']}") \
             .filter("range", topic_weight={"gte": context['topic_weight_threshold']}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000)\
             .metric("topic_weight", agg_type="sum", field="topic_weight")
         result = s.execute()
         topic_info_dict = dict(
