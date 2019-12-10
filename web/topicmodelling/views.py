@@ -34,8 +34,7 @@ class TopicsListView(TemplateView):
             return context
 
         # Get topics aggregation
-        s = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-            .filter("term", topic_modelling=context['topic_modelling']) \
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{context['topic_modelling']}") \
             .filter("range", topic_weight={"gte": context['topic_weight_threshold']}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
         s.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=10000)\
@@ -85,8 +84,7 @@ class TopicDocumentListView(TemplateView):
     template_name = "topicmodelling/topic_document_list.html"
 
     def get_total_metrics(self, granularity, topic_weight_threshold):
-        std_total = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-            .filter("term", topic_modelling=self.topic_modelling) \
+        std_total = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{self.topic_modelling}") \
             .filter("range", topic_weight={"gte": topic_weight_threshold}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
         std_total.aggs.bucket(name="dynamics",
@@ -107,8 +105,7 @@ class TopicDocumentListView(TemplateView):
         return total_metrics_dict
 
     def get_current_topics_metrics(self, topics, granularity, topic_weight_threshold):
-        std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-                  .filter("term", topic_modelling=self.topic_modelling) \
+        std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{self.topic_modelling}") \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
                   .filter("range", topic_weight={"gte": topic_weight_threshold}) \
                   .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
@@ -118,7 +115,7 @@ class TopicDocumentListView(TemplateView):
                         field="datetime",
                         calendar_interval=granularity) \
             .metric("dynamics_weight", agg_type="sum", field="topic_weight")
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword", size=20) \
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
             .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
         return topic_documents

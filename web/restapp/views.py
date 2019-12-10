@@ -203,8 +203,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
         date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
 
-        std = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_DOCUMENT) \
-                  .filter("term", topic_modelling=topic_modelling) \
+        std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
                   .filter("range", topic_weight={"gte": topic_weight_threshold}) \
                   .filter("range", datetime={"gte": date_from}) \

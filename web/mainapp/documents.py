@@ -77,7 +77,7 @@ class Document(es.Document):
     class Index:
         name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
-
+    
     class Meta:
         dynamic_templates = MetaField(DYNAMIC_TEMPLATES)
 
