@@ -3,7 +3,7 @@ import hashlib
 from django.contrib.auth.models import User
 from django.db import models
 from topicmodelling.models import Topic, DocumentTopic
-from .models_user import TopicGroup, TopicID, ContentLoader, Expert, Viewer
+from .models_user import TopicGroup, TopicID, ContentLoader, Expert, Viewer, UserGroup
 
 
 class Corpus(models.Model):

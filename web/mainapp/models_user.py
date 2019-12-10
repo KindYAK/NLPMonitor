@@ -1,6 +1,16 @@
 from django.contrib.auth.models import User
 from django.db import models
-from picklefield import PickledObjectField
+
+
+class UserGroup(models.Model):
+    class Meta:
+        verbose_name = "Группа пользователей"
+        verbose_name_plural = "Группы пользователей"
+
+    name = models.CharField(max_length=50, unique=True)
+    corpuses = models.ManyToManyField('mainapp.Corpus', blank=True, verbose_name="Корпусы")
+    topic_modelling_names = models.TextField(null=True, blank=True, verbose_name="Названия тематических моделирований (через запятую без пробелов)")
+    criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
 
 
 class ContentLoader(models.Model):
@@ -9,7 +19,7 @@ class ContentLoader(models.Model):
         verbose_name_plural = "Загрузчики контента"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
+    group = models.ForeignKey('UserGroup', on_delete=models.CASCADE, null=True)
     supervisor = models.BooleanField(default=False, verbose_name="Супервайзер")
 
     def __str__(self):
@@ -22,9 +32,7 @@ class Expert(models.Model):
         verbose_name_plural = "Эксперты"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    corpus = models.ForeignKey('mainapp.Corpus', null=True, on_delete=models.CASCADE, verbose_name="Корпус")
-    topic_modelling_names = PickledObjectField(null=True, blank=True, verbose_name="Название тематических моделирований")
-    criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
+    group = models.ForeignKey('UserGroup', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"Эксперт {self.user}"
@@ -36,9 +44,7 @@ class Viewer(models.Model):
         verbose_name_plural = "Пользователь (Viewer)"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    corpus = models.ForeignKey('mainapp.Corpus', null=True, on_delete=models.CASCADE, verbose_name="Корпус")
-    topic_modelling_names = PickledObjectField(null=True, blank=True, verbose_name="Название тематических моделирований")
-    criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
+    group = models.ForeignKey('UserGroup', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"Пользователь {self.user}"

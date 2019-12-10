@@ -76,9 +76,15 @@ admin.site.register(TopicGroup, TopicGroupAdmin)
 admin.site.register(TopicID, TopicIDAdmin)
 
 
+class UserGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', )
+    list_filter = ('corpuses', 'criterions', )
+    search_fields = ('name', 'topic_modelling_names', )
+
+
 class ContentLoaderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'corpus', 'supervisor', )
-    list_filter = ('supervisor', 'corpus',)
+    list_display = ('user', 'supervisor', )
+    list_filter = ('supervisor', )
     search_fields = ('user__username', )
 
 
@@ -94,6 +100,7 @@ class ViewerAdmin(admin.ModelAdmin):
     search_fields = ('user__username', )
 
 
+admin.site.register(UserGroup, UserGroupAdmin)
 admin.site.register(ContentLoader, ContentLoaderAdmin)
 admin.site.register(Expert, ExpertAdmin)
 admin.site.register(Viewer, ViewerAdmin)
