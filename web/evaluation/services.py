@@ -51,9 +51,9 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
             field="value",
             ranges=
             [
-                {"from": neutrality_threshold, "to": criterion.value_range_to},
+                {"from": criterion.value_range_from, "to": -neutrality_threshold},
                 {"from": -neutrality_threshold, "to": neutrality_threshold},
-                {"from": criterion.value_range_from, "to": -neutrality_threshold}
+                {"from": neutrality_threshold, "to": criterion.value_range_to},
             ]
         )
         std.aggs['posneg'].bucket(name="source",

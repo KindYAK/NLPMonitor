@@ -106,7 +106,7 @@ class CriterionEvalAnalysisView(TemplateView):
                         sources_criterion_dict[bucket.key]['positive'] = 0
                         sources_criterion_dict[bucket.key]['neutral'] = 0
                         sources_criterion_dict[bucket.key]['negative'] = 0
-                    tonality = ["positive", "neutral", "negative"][i]
+                    tonality = ["negative", "neutral", "positive"][i]
                     sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
             context['source_weight'][criterion.id] = sorted(sources_criterion_dict.values(),
                                                             key=lambda x: x['positive'] + x['negative'] + x['neutral'],
@@ -137,8 +137,8 @@ class CriterionEvalAnalysisView(TemplateView):
         positive = []
         negative = []
         if criterion.value_range_from < 0:
-            positive = list(document_evals.aggregations.posneg.buckets[0].dynamics.buckets)
-            negative = list(document_evals.aggregations.posneg.buckets[-1].dynamics.buckets)
+            negative = list(document_evals.aggregations.posneg.buckets[0].dynamics.buckets)
+            positive = list(document_evals.aggregations.posneg.buckets[-1].dynamics.buckets)
             # Equalize periods
             positive_ticks = set([bucket.key_as_string for bucket in positive])
             negative_ticks = set([bucket.key_as_string for bucket in negative])
