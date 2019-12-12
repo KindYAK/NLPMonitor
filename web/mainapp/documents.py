@@ -181,7 +181,6 @@ class TopicDocument(es.Document):
 
 
 class DocumentEval(es.Document):
-    criterion_name = es.Keyword()
     value = es.Float()
     document_es_id = es.Keyword()
     document_datetime = es.Date()
@@ -198,9 +197,6 @@ class DocumentEval(es.Document):
         }
         mappings = {
             "properties": {
-                "criterion_name": {
-                    "type": "keyword"
-                },
                 "document_datetime": {
                     "type": "date"
                 },
