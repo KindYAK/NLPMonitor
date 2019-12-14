@@ -19,5 +19,8 @@ services:
 
 volumes:
   esjack1:
+    driver: local
   esjack2:
+    driver: local
   esjack3:
+    driver: local

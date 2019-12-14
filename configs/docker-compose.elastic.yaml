@@ -8,12 +8,13 @@ services:
       memlock:
         soft: -1
         hard: -1
-    ports:
-      - ${ELASTIC_EXTERNAL_PORT}:9200
-      - 9300:9300
+    expose:
+      - 9200
+      - 9300
     networks:
       - esnet
       - network
+
   master2:
     image: "elasticsearch:${VERSION}"
     env_file:
@@ -22,9 +23,13 @@ services:
       memlock:
         soft: -1
         hard: -1
+    expose:
+      - 9200
+      - 9300
     networks:
       - esnet
       - network
+
   master3:
     image: "elasticsearch:${VERSION}"
     env_file:
@@ -33,8 +38,12 @@ services:
       memlock:
         soft: -1
         hard: -1
+    expose:
+      - 9200
+      - 9300
     networks:
       - esnet
+
   kibana_cluster:
     image: 'kibana:${VERSION}'
     environment:
@@ -47,6 +56,7 @@ services:
     networks:
       - esnet
       - network
+
   hq:
     image: 'elastichq/elasticsearch-hq'
     ports:
@@ -56,3 +66,4 @@ services:
 
 networks:
   esnet:
+    driver: bridge

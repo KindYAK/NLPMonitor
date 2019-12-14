@@ -5,11 +5,13 @@ services:
       - elastic_configs/jvm.master.prod.env
     volumes:
       - /_DATA/elastic/esjack1/:/usr/share/elasticsearch/data
+
   master2:
     env_file:
       - elastic_configs/jvm.master.prod.env
     volumes:
-      - /_DATA/elastic/esjack2/:/usr/share/elasticsearch/data
+      - /_FLASH/elastic/esjack2/:/usr/share/elasticsearch/data
+
   master3:
     env_file:
       - elastic_configs/jvm.master.prod.env
