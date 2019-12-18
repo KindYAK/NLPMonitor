@@ -20,8 +20,6 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
-    <!-- Select2 -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
     <style>
@@ -65,7 +63,7 @@
                             <div class="col-lg-5">
                                 <div class="form-group">
                                     <label for="granularity">Тематическое моделирование</label>
-                                    <select class="custom-select form-control" name="topic_modelling" id="topic_modelling">
+                                    <select class="custom-select form-control select2" name="topic_modelling" id="topic_modelling">
                                         {% for topic_modelling_opt in topic_modellings %}
                                             <option value="{{ topic_modelling_opt.0 }}">{{ topic_modelling_opt.1 }}</option>
                                         {% endfor %}
@@ -538,8 +536,6 @@
     <!-- DataTables -->
     <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
-    <!-- Select2 -->
-    <script src="{% static 'adminlte/plugins/select2/js/select2.full.min.js' %}"></script>
     <!-- InputMask -->
     <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
     <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
@@ -549,7 +545,6 @@
     {# Custom script #}
     <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
     <script>
-        $('.select2').select2();
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
             '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
             ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}', {% endfor %}]);
