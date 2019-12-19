@@ -71,7 +71,6 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
         table = init_table();
 
         // Redraw source distribution plot
-        // TODO Separate function
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for(criterion of criterions){
@@ -99,7 +98,8 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     bargap: 0.025
                 };
             } else {
-                for (source of result.source_weights[criterion_id]){
+                var sources = result.source_weights[criterion_id];
+                for (source of sources){
                     var total_source = source.negative + source.neutral + source.positive;
                     source.negative_percent = (source.negative/total_source * 100).toFixed(2);
                     source.neutral_percent = (source.neutral/total_source * 100).toFixed(2);
@@ -165,6 +165,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     barmode: 'stack',
                 };
             }
+            console.log(data);
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
         }
     }
