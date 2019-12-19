@@ -89,7 +89,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 showlegend: false,
                 bargap: 0.025
             };
-            Plotly.plot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
+            Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
         }
     }
 
