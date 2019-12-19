@@ -251,6 +251,36 @@
 <script>
     $('i').tooltip();
 </script>
+<script>
+    var lastWidth = $(window).width();
+
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function () {
+            var context = this, args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+
+    var debounced_select_redraw = debounce(function () {
+        $('.select2').select2();
+    }, 100);
+
+    $(window).resize(function () {
+        if ($(window).width() !== lastWidth) {
+            debounced_select_redraw();
+            console.log("Это хуй зубастый твой");
+            lastWidth = $(window).width();
+        }
+    });
+</script>
 {% block foot %}{% endblock %}
 </body>
 </html>
