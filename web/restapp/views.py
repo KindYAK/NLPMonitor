@@ -200,8 +200,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         topic_modelling = self.request.GET['topic_modelling']
         topic_weight_threshold = float(self.request.GET['topic_weight_threshold'])
         topics = json.loads(self.request.GET['topics'])
-        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
-        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
+        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d").date()
+        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d").date()
 
         std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
                   .filter("terms", topic_id=topics).sort("-topic_weight") \
@@ -229,11 +229,11 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         return documents, topic_documents.aggregations.source.buckets
 
     def search_search(self):
-        datetime_from = datetime.datetime.strptime(self.request.GET['datetime_from'][:10], "%Y-%m-%d")
-        datetime_to = datetime.datetime.strptime(self.request.GET['datetime_to'][:10], "%Y-%m-%d")
+        date_from = datetime.datetime.strptime(self.request.GET['datetime_from'][:10], "%Y-%m-%d").date()
+        date_to = datetime.datetime.strptime(self.request.GET['datetime_to'][:10], "%Y-%m-%d").date()
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).source(('id', 'datetime', 'title', 'source', ))
-        s = s.filter('range', datetime={"gte": datetime_from})
-        s = s.filter('range', datetime={"lte": datetime_to})
+        s = s.filter('range', datetime={"gte": date_from})
+        s = s.filter('range', datetime={"lte": date_to})
         if self.request.GET['corpuses'] and self.request.GET['corpuses'] != "None":
             corpus_ids = json.loads(self.request.GET['corpuses'].replace("'", '"'))
             cs = Corpus.objects.filter(id__in=corpus_ids)
@@ -264,8 +264,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         return documents, documents.aggregations.source.buckets
 
     def search_criterions(self):
-        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d")
-        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d")
+        date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d").date()
+        date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d").date()
         topic_modelling = self.request.GET['topic_modelling']
         criterions = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions'))
         keyword = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
