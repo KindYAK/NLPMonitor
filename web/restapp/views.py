@@ -209,7 +209,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                   .filter("range", datetime={"gte": date_from}) \
                   .filter("range", datetime={"lte": date_to}) \
                   .source(['document_es_id', 'topic_weight'])[:100]
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source.keyword") \
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
             .metric("source_weight", agg_type="sum", field="topic_weight")
         topic_documents = std.execute()
 
