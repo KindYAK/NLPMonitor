@@ -9,7 +9,8 @@ function initialize_groups_select(){
     for (group of topic_groups_list.public_groups){
         options += "<option value='" + group.name + "'>" + group.name + "</option>"
     }
-    $('#topicFilterInput').html(options);
+    $('#topicFilterInput').html(options).select2();
+
 }
 
 function run_group_list_management(topic_modelling, csrf_token){
