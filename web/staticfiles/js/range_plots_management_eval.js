@@ -165,7 +165,6 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     barmode: 'stack',
                 };
             }
-            console.log(data);
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
         }
     }
