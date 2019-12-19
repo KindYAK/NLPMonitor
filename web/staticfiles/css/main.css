@@ -6,6 +6,10 @@
     white-space: normal;
 }
 
+.select2-container--default .select2-results > .select2-results__options {
+    max-height: 80% !important;
+}
+
 @media (min-width: 768px) {
     .stick-bottom-md {
         position: absolute;
