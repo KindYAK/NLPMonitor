@@ -439,7 +439,7 @@
 
                                 var data = [
                                     {
-                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        x: keys,
                                         y: negatives_by_source_percents,
                                         type: 'bar',
                                         'name': 'Негативные',
@@ -448,7 +448,7 @@
                                         },
                                     },
                                     {
-                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        x: keys,
                                         y: neutrals_by_source_percents,
                                         type: 'bar',
                                         'name': 'Нейтральные',
@@ -457,7 +457,7 @@
                                         },
                                     },
                                     {
-                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                        x: keys,
                                         y: positives_by_source_percents,
                                         type: 'bar',
                                         'name': 'Позитивные',

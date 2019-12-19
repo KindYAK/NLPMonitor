@@ -307,9 +307,12 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                                                                   documents_ids_to_filter, date_from, date_to,
                                                                   analytical_query=analytical_query)
             top_news_total.update(top_news)
-            source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                            key=lambda x: x.source_value.value,
-                                                            reverse=True)
+            if criterion.value_range_from < 0:
+                source_weight[criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)
+            else:
+                source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
+                                                     key=lambda x: x.source_value.value,
+                                                     reverse=True)
 
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict,
@@ -358,14 +361,14 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
             ]
         else:
             source_weights = dict(
-                (source_id,
+                ((source_id,
                     [
                         {
                             "source": bucket.key,
                             "weight": bucket.source_value.value,
                         } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
                     ]
-                ) for source_id, buckets in source_buckets.items()
+                ) if not type(buckets) == list else (source_id, buckets)) for source_id, buckets in source_buckets.items()
             )
             for document in documents:
                 document["document"] = {

@@ -97,20 +97,8 @@ class CriterionEvalAnalysisView(TemplateView):
                                                             key=lambda x: x.source_value.value,
                                                             reverse=True)
         else:
-            sources_criterion_dict = {}
-            for i, pn in enumerate(document_evals.aggregations.posneg.buckets):
-                for bucket in pn.source.buckets:
-                    if bucket.key not in sources_criterion_dict:
-                        sources_criterion_dict[bucket.key] = {}
-                        sources_criterion_dict[bucket.key]['key'] = bucket.key
-                        sources_criterion_dict[bucket.key]['positive'] = 0
-                        sources_criterion_dict[bucket.key]['neutral'] = 0
-                        sources_criterion_dict[bucket.key]['negative'] = 0
-                    tonality = ["negative", "neutral", "positive"][i]
-                    sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
-            context['source_weight'][criterion.id] = sorted(sources_criterion_dict.values(),
-                                                            key=lambda x: x['positive'] + x['negative'] + x['neutral'],
-                                                            reverse=True)
+            context['source_weight'][criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)
+
         context['y_axis_from'] = min(-1,
                                      context['y_axis_from'] if 'y_axis_from' in context else -1,
                                      min([bucket.dynamics_weight.value for bucket in absolute_value])

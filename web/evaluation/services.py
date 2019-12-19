@@ -60,6 +60,10 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                                   agg_type="terms",
                                   field="document_source",
                                   size=20)
+    else:
+        # Source distributions
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
+            .metric("source_value", agg_type="avg", field="value")
 
     # Dynamics
     if granularity:
@@ -77,10 +81,6 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                                       field="document_datetime",
                                       calendar_interval=granularity) \
                 .metric("dynamics_weight", agg_type="avg", field="value")
-
-    # Source distributions
-    std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
-        .metric("source_value", agg_type="avg", field="value")
 
     # Execute search
     std = std[:200]
@@ -226,3 +226,21 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
         if not documents_ids_to_filter:
             is_empty_search = True
     return is_empty_search, documents_ids_to_filter
+
+
+def divide_posneg_source_buckets(buckets):
+    sources_criterion_dict = {}
+    for i, pn in enumerate(buckets):
+        for bucket in pn.source.buckets:
+            if bucket.key not in sources_criterion_dict:
+                sources_criterion_dict[bucket.key] = {}
+                sources_criterion_dict[bucket.key]['key'] = bucket.key
+                sources_criterion_dict[bucket.key]['positive'] = 0
+                sources_criterion_dict[bucket.key]['neutral'] = 0
+                sources_criterion_dict[bucket.key]['negative'] = 0
+            tonality = ["negative", "neutral", "positive"][i]
+            sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
+    sources_criterion_dict = sorted(sources_criterion_dict.values(),
+                                    key=lambda x: x['positive'] + x['negative'] + x['neutral'],
+                                    reverse=True)
+    return sources_criterion_dict
