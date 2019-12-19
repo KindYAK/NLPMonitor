@@ -211,7 +211,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
+                                    y: [{% for tick in absolute_power %}{{ tick|round_fl:0|safe }}, {% endfor %}],
                                     name: 'Абсолютная мощность выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -241,7 +241,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_power %}{{ tick|round_fl:3|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_power %}{{ tick|round_fl:5|safe }}, {% endfor %}],
                                     name: 'Относительная мощность выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
@@ -271,7 +271,7 @@
                                 {
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_weight %}{{ tick|round_fl:3|safe }}, {% endfor %}],
+                                    y: [{% for tick in relative_weight %}{{ tick|round_fl:5|safe }}, {% endfor %}],
                                     name: 'Удельный вес выборки',
                                     fill: 'tozeroy',
 {#                                    {% if smooth %}#}
