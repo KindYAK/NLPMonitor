@@ -28,7 +28,7 @@
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
-    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+    <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <style>
         .col-lg-2 {
             display: flex;
@@ -176,7 +176,7 @@
                                     fixedrange: true
                                 }
                             };
-                            Plotly.plot('topic_dynamics', data, layout);
+                            Plotly.plot('topic_dynamics', data, layout, {responsive: true});
                         </script>
 
                         {# Относительная мощность #}
@@ -206,7 +206,7 @@
                                     fixedrange: true
                                 }
                             };
-                            Plotly.plot('topic_dynamics_normal', data, layout);
+                            Plotly.plot('topic_dynamics_normal', data, layout, {responsive: true});
                         </script>
 
                         {# Относительный удельный вес #}
@@ -236,7 +236,7 @@
                                     fixedrange: true
                                 }
                             };
-                            Plotly.plot('topic_dynamics_weight', data, layout);
+                            Plotly.plot('topic_dynamics_weight', data, layout, {responsive: true});
                         </script>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
                                 showlegend: false,
                                 bargap: 0.025
                             };
-                            Plotly.newPlot('source_distribution', data, layout);
+                            Plotly.plot('source_distribution', data, layout, {responsive: true});
                         </script>
                     </div>
                 </div>

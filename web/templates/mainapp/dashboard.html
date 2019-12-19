@@ -11,7 +11,7 @@
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
-    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+    <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
 {% endblock %}
 
 {% block bc %}
@@ -171,7 +171,7 @@
                     fixedrange: true
                 }
             };
-            Plotly.plot('{{ plot.id }}', data_{{ plot.id }}, layout_{{ plot.id }});
+            Plotly.plot('{{ plot.id }}', data_{{ plot.id }}, layout_{{ plot.id }}, {responsive: true});
         {% endfor %}
     </script>
 {% endblock %}

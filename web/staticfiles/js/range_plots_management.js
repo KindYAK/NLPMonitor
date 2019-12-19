@@ -102,7 +102,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
                 showlegend: false,
                 bargap: 0.025
             };
-            Plotly.newPlot('source_distribution', data, layout);
+            Plotly.plot('source_distribution', data, layout, {responsive: true});
         }
     }
 

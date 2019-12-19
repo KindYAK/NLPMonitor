@@ -21,7 +21,7 @@
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
-    <script src="{% static 'js/plotly-1.48.3.min.js' %}"></script>
+    <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <style>
         .col-lg-2 {
             display: flex;
@@ -335,7 +335,7 @@
                                     range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
                                 }
                             };
-                            Plotly.plot('value_dynamics', data, layout);
+                            Plotly.plot('value_dynamics', data, layout, {responsive: true});
                         </script>
                     </div>
                     {% for criterion in criterions %}
@@ -374,7 +374,7 @@
                                     fixedrange: true,
                                 }
                             };
-                            Plotly.plot('value_dynamics_posneg_{{ criterion.id }}', data, layout);
+                            Plotly.plot('value_dynamics_posneg_{{ criterion.id }}', data, layout, {responsive: true});
                         </script>
                         {% endif %}
                     {% endfor %}
@@ -475,7 +475,7 @@
                                     barmode: 'stack',
                                 {% endif %}
                             };
-                            Plotly.newPlot('source_distribution_{{ criterion.id }}', data, layout);
+                            Plotly.plot('source_distribution_{{ criterion.id }}', data, layout, {responsive: true});
                         </script>
                     </div>
                 </div>
