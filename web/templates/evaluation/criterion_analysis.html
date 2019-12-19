@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
+    {# Custom script #}
+    <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
     <style>
         .col-lg-2 {
             display: flex;
@@ -404,68 +406,7 @@
                                     }
                                 ];
                             {% else %}
-                                var sources = {{ source_weight|get_item:criterion.id|safe }};
-
-                                for (source of sources){
-                                    var total_source = source.negative + source.neutral + source.positive;
-                                    source.negative_percent = (source.negative/total_source * 100).toFixed(2);
-                                    source.neutral_percent = (source.neutral/total_source * 100).toFixed(2);
-                                    source.positive_percent = (source.positive/total_source * 100).toFixed(2);
-                                }
-
-                                sources.sort(function(a, b){
-                                    return b.negative_percent - a.negative_percent;
-                                });
-
-                                var keys = [];
-
-                                var negatives_by_source = [];
-                                var neutrals_by_source = [];
-                                var positives_by_source = [];
-
-                                var negatives_by_source_percents = [];
-                                var neutrals_by_source_percents = [];
-                                var positives_by_source_percents = [];
-
-                                for (source of sources){
-                                    keys.push(source.key);
-                                    negatives_by_source.push(source.negative);
-                                    neutrals_by_source.push(source.neutral);
-                                    positives_by_source.push(source.positive);
-                                    negatives_by_source_percents.push(source.negative_percent);
-                                    neutrals_by_source_percents.push(source.neutral_percent);
-                                    positives_by_source_percents.push(source.positive_percent);
-                                }
-
-                                var data = [
-                                    {
-                                        x: keys,
-                                        y: negatives_by_source_percents,
-                                        type: 'bar',
-                                        'name': 'Негативные',
-                                        marker: {
-                                            color: '#d3322b',
-                                        },
-                                    },
-                                    {
-                                        x: keys,
-                                        y: neutrals_by_source_percents,
-                                        type: 'bar',
-                                        'name': 'Нейтральные',
-                                        marker: {
-                                            color: '#fee42c',
-                                        },
-                                    },
-                                    {
-                                        x: keys,
-                                        y: positives_by_source_percents,
-                                        type: 'bar',
-                                        'name': 'Позитивные',
-                                        marker: {
-                                            color: '#23964f',
-                                        }
-                                    }
-                                ];
+                                var data = generate_plot_data_for_posneg_sources({{ source_weight|get_item:criterion.id|safe }});
                             {% endif %}
                             var layout = {
                                 title: '{{ criterion.name }}',
@@ -543,7 +484,6 @@
     <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
 
     {# Custom script #}
-    <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
     <script>
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
             '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',

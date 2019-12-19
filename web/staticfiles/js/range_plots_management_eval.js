@@ -1,3 +1,68 @@
+function generate_plot_data_for_posneg_sources(sources){
+    for (source of sources) {
+        var total_source = source.negative + source.neutral + source.positive;
+        source.negative_percent = (source.negative / total_source * 100).toFixed(2);
+        source.neutral_percent = (source.neutral / total_source * 100).toFixed(2);
+        source.positive_percent = (source.positive / total_source * 100).toFixed(2);
+    }
+
+    sources.sort(function (a, b) {
+        return b.negative_percent - a.negative_percent;
+    });
+
+    var keys = [];
+
+    var negatives_by_source = [];
+    var neutrals_by_source = [];
+    var positives_by_source = [];
+
+    var negatives_by_source_percents = [];
+    var neutrals_by_source_percents = [];
+    var positives_by_source_percents = [];
+
+    for (source of sources) {
+        keys.push(source.key);
+        negatives_by_source.push(source.negative);
+        neutrals_by_source.push(source.neutral);
+        positives_by_source.push(source.positive);
+        negatives_by_source_percents.push(source.negative_percent);
+        neutrals_by_source_percents.push(source.neutral_percent);
+        positives_by_source_percents.push(source.positive_percent);
+    }
+
+    var data = [
+        {
+            x: keys,
+            y: negatives_by_source_percents,
+            type: 'bar',
+            'name': 'Негативные',
+            marker: {
+                color: '#d3322b',
+            },
+        },
+        {
+            x: keys,
+            y: neutrals_by_source_percents,
+            type: 'bar',
+            'name': 'Нейтральные',
+            marker: {
+                color: '#fee42c',
+            },
+        },
+        {
+            x: keys,
+            y: positives_by_source_percents,
+            type: 'bar',
+            'name': 'Позитивные',
+            marker: {
+                color: '#23964f',
+            }
+        }
+    ];
+    return data;
+}
+
+
 function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword,
                                     group_id, criterion_q, action_q, value_q, plot_ids) {
     var main_plot_id = "value_dynamics";
@@ -98,72 +163,12 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     bargap: 0.025
                 };
             } else {
-                var sources = result.source_weights[criterion_id];
-                for (source of sources){
-                    var total_source = source.negative + source.neutral + source.positive;
-                    source.negative_percent = (source.negative/total_source * 100).toFixed(2);
-                    source.neutral_percent = (source.neutral/total_source * 100).toFixed(2);
-                    source.positive_percent = (source.positive/total_source * 100).toFixed(2);
-                }
-
-                sources.sort(function(a, b){
-                    return b.negative_percent - a.negative_percent;
-                });
-
-                var keys = [];
-
-                var negatives_by_source = [];
-                var neutrals_by_source = [];
-                var positives_by_source = [];
-
-                var negatives_by_source_percents = [];
-                var neutrals_by_source_percents = [];
-                var positives_by_source_percents = [];
-
-                for (source of sources){
-                    keys.push(source.key);
-                    negatives_by_source.push(source.negative);
-                    neutrals_by_source.push(source.neutral);
-                    positives_by_source.push(source.positive);
-                    negatives_by_source_percents.push(source.negative_percent);
-                    neutrals_by_source_percents.push(source.neutral_percent);
-                    positives_by_source_percents.push(source.positive_percent);
-                }
-
-                var data = [
-                    {
-                        x: keys,
-                        y: negatives_by_source_percents,
-                        type: 'bar',
-                        'name': 'Негативные',
-                        marker: {
-                            color: '#d3322b',
-                        },
-                    },
-                    {
-                        x: keys,
-                        y: neutrals_by_source_percents,
-                        type: 'bar',
-                        'name': 'Нейтральные',
-                        marker: {
-                            color: '#fee42c',
-                        },
-                    },
-                    {
-                        x: keys,
-                        y: positives_by_source_percents,
-                        type: 'bar',
-                        'name': 'Позитивные',
-                        marker: {
-                            color: '#23964f',
-                        }
-                    }
-                ];
                 var layout = {
                     showlegend: false,
                     bargap: 0.025,
                     barmode: 'stack',
                 };
+                var data = generate_plot_data_for_posneg_sources(result.source_weights[criterion_id]);
             }
             console.log(data);
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
