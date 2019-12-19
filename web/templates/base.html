@@ -275,8 +275,7 @@
 
     $(window).resize(function () {
         if ($(window).width() !== lastWidth) {
-            debounced_select_redraw();
-            console.log("Это хуй зубастый твой");
+            debounced_select_redraw();;
             lastWidth = $(window).width();
         }
     });
