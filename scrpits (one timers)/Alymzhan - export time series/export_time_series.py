@@ -6,8 +6,8 @@ from elasticsearch_dsl import Search
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT
 
-topic_modelling = "bigartm_test"
-topic_weight_threshold = 0.0
+topic_modelling = "bigartm_two_years"
+topic_weight_threshold = 0.05
 granularity = "1w"
 smooth = False
 
