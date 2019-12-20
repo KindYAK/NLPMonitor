@@ -140,7 +140,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             var value_range_from = null;
             for(criterion of criterions){
                 if(criterion.pk == criterion_id){
-                    value_range_from = criterion.value_range_from;
+                    value_range_from = criterion.fields.value_range_from;
                     break;
                 }
             }
@@ -171,6 +171,37 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 var data = generate_plot_data_for_posneg_sources(result.source_weights[criterion_id]);
             }
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
+        }
+
+        // Redraw posneg plot
+        for (criterion_id in result.source_weights) {
+            var value_range_from = null;
+            for (criterion of criterions) {
+                if (criterion.pk == criterion_id) {
+                    value_range_from = criterion.fields.value_range_from;
+                    criterion_name = criterion.fields.name;
+                    break;
+                }
+            }
+            if(value_range_from >= 0){
+                continue;
+            }
+            var data = [
+                {
+                    x: ["Негатив", "Нейтральные", "Позитив"],
+                    y: result.posneg_distribution[criterion_id],
+                    marker: {
+                        color: ['#d3322b', '#fee42c', '#23964f']
+                    },
+                    type: 'bar'
+                }
+            ];
+            var layout = {
+                title: criterion_name,
+                showlegend: false,
+                bargap: 0.025,
+            };
+            Plotly.newPlot('posneg_distribution_' + criterion_id, data, layout, {responsive: true});
         }
     }
 
