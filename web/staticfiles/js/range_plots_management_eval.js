@@ -170,7 +170,6 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 };
                 var data = generate_plot_data_for_posneg_sources(result.source_weights[criterion_id]);
             }
-            console.log(data);
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
         }
     }

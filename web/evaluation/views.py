@@ -92,10 +92,6 @@ class CriterionEvalAnalysisView(TemplateView):
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
                                                             key=lambda x: x.source_value.value,
                                                             reverse=True)
-        if criterion.value_range_from >= 0:
-            context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                            key=lambda x: x.source_value.value,
-                                                            reverse=True)
         else:
             context['source_weight'][criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)
 
@@ -107,6 +103,8 @@ class CriterionEvalAnalysisView(TemplateView):
                                    context['y_axis_to'] if 'y_axis_to' in context else 1,
                                    max([bucket.dynamics_weight.value for bucket in absolute_value])
                                    )
+        if criterion.value_range_from < 0:
+            context['posneg_distribution'][criterion.id] = document_evals.aggregations.posneg
 
     def get_criterion_evals(self, context, top_news_total, criterion):
         # Current topic metrics
@@ -181,6 +179,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['positive'] = {}
         context['negative'] = {}
         context['source_weight'] = {}
+        context['posneg_distribution'] = {}
         top_news_total = set()
         for criterion in context['criterions']:
             self.get_criterion_evals(context, top_news_total, criterion)
