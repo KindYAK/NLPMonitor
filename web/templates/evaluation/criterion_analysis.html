@@ -465,6 +465,57 @@
     </div>
     {% endif %}
 
+    {# Главные топики #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Ключевые топики</h3>
+                </div>
+                <div class="card-body">
+                    <div id="search-results">
+                        {% for criterion in criterions %}
+                            <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
+                            <table id="main-topics-table" class="table table-bordered table-hover">
+                                <thead>
+                                <tr role="row">
+                                    <th>Топик</th>
+                                    <th>Вес</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for topic in posneg_top_topics|get_item:criterion.id %}
+                                      <tr>
+                                        <td>{{ topic.name }}</td>
+                                        <td>{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
+                            <table id="main-topics-table" class="table table-bordered table-hover">
+                                <thead>
+                                <tr role="row">
+                                    <th>Топик</th>
+                                    <th>Вес</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for topic in posneg_bottom_topics|get_item:criterion.id %}
+                                      <tr>
+                                        <td>{{ topic.name }}</td>
+                                        <td>{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {# Главные новости топика #}
     <div class="row">
         <div class="col-12">

@@ -4,7 +4,8 @@ from elasticsearch_dsl import Search, Q
 
 from mainapp.constants import SEARCH_CUTOFF_CONFIG
 from mainapp.services_es import get_elscore_cutoff
-from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
+from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, \
+    ES_INDEX_TOPIC_MODELLING
 
 
 def filter_analytical_query(topic_modelling, criterion_id, action, value):
@@ -43,19 +44,28 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std = std.filter("range", document_datetime={"lte": date_to})
 
     # Posneg distribution
+    range_center = (criterion.value_range_from + criterion.value_range_to) / 2
+    neutrality_threshold = 0.1
+    std.aggs.bucket(
+        name="posneg",
+        agg_type="range",
+        field="value",
+        ranges=
+        [
+            {"from": criterion.value_range_from, "to": range_center-neutrality_threshold},
+            {"from": range_center - neutrality_threshold, "to": range_center + neutrality_threshold},
+            {"from": range_center + neutrality_threshold, "to": criterion.value_range_to},
+        ]
+    )
+    std.aggs['posneg'].bucket(name="top_topics",
+                              agg_type="terms",
+                              field="topic_ids_top",
+                              size=10)
+    std.aggs['posneg'].bucket(name="bottom_topics",
+                              agg_type="terms",
+                              field="topic_ids_bottom",
+                              size=10)
     if criterion.value_range_from < 0:
-        neutrality_threshold = 0.1
-        std.aggs.bucket(
-            name="posneg",
-            agg_type="range",
-            field="value",
-            ranges=
-            [
-                {"from": criterion.value_range_from, "to": -neutrality_threshold},
-                {"from": -neutrality_threshold, "to": neutrality_threshold},
-                {"from": neutrality_threshold, "to": criterion.value_range_to},
-            ]
-        )
         std.aggs['posneg'].bucket(name="source",
                                   agg_type="terms",
                                   field="document_source",
@@ -244,3 +254,23 @@ def divide_posneg_source_buckets(buckets):
                                     key=lambda x: x['positive'] + x['negative'] + x['neutral'],
                                     reverse=True)
     return sources_criterion_dict
+
+
+def get_topic_dict(topic_modelling):
+    topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
+        .filter("term", **{"name": topic_modelling}) \
+        .filter("term", **{"is_ready": True}).execute()[0]['topics']
+
+    # Fill topic objects with meta data
+    topic_info_dict = {}
+    for topic in topics:
+        topic_info_dict[topic['id']] = topic['name']
+    return topic_info_dict
+
+
+def normalize_buckets_main_topics(buckets, topics_dict):
+    max_count = max((bucket.doc_count for bucket in buckets))
+    for bucket in buckets:
+        bucket.weight = bucket.doc_count / max_count
+        bucket.name = topics_dict[bucket.key]
+    return buckets

@@ -106,6 +106,11 @@ class CriterionEvalAnalysisView(TemplateView):
         if criterion.value_range_from < 0:
             context['posneg_distribution'][criterion.id] = document_evals.aggregations.posneg
 
+        context['posneg_top_topics'][criterion.id] = \
+            normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[-1].top_topics.buckets, self.topics_dict)
+        context['posneg_bottom_topics'][criterion.id] = \
+            normalize_buckets_main_topics(document_evals.aggregations.posneg[0].bottom_topics.buckets, self.topics_dict)
+
     def get_criterion_evals(self, context, top_news_total, criterion):
         # Current topic metrics
         document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion,
@@ -160,6 +165,9 @@ class CriterionEvalAnalysisView(TemplateView):
             smooth_buckets(positive, True)
             smooth_buckets(negative, True)
 
+        # Get topic dict
+        self.topics_dict = get_topic_dict(context['topic_modelling'])
+
         # Create context
         self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)
 
@@ -175,11 +183,10 @@ class CriterionEvalAnalysisView(TemplateView):
         except (CacheHit, EmptySearchException):
             return context
 
-        context['absolute_value'] = {}
-        context['positive'] = {}
-        context['negative'] = {}
-        context['source_weight'] = {}
-        context['posneg_distribution'] = {}
+        dicts_to_init = ['absolute_value', 'positive', 'negative', 'source_weight',
+                         'posneg_distribution', 'posneg_top_topics', 'posneg_bottom_topics']
+        for key in dicts_to_init:
+            context[key] = {}
         top_news_total = set()
         for criterion in context['criterions']:
             self.get_criterion_evals(context, top_news_total, criterion)
