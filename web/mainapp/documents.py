@@ -185,6 +185,8 @@ class DocumentEval(es.Document):
     document_es_id = es.Keyword()
     document_datetime = es.Date()
     document_source = es.Keyword()
+    topic_ids_top = es.Keyword()
+    topic_ids_bottom = es.Keyword()
 
     class Index:
         name = ES_INDEX_DOCUMENT_EVAL # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
@@ -208,7 +210,13 @@ class DocumentEval(es.Document):
                 },
                 "value": {
                     "type": "float"
-                }
+                },
+                "topic_ids_top": {
+                    "type": "keyword"
+                },
+                "topic_ids_bottom": {
+                    "type": "keyword"
+                },
             }
         }
 
