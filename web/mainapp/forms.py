@@ -40,7 +40,7 @@ class TopicChooseForm(forms.Form):
                            ])[:100]
         topic_modellings = s.execute()
         topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
-        topic_modellings = ((tm.name, f"{tm.name.replace('bigartm', 'tm')} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
+        topic_modellings = ((tm.name.lower(), f"{tm.name.replace('bigartm', 'tm')} - {tm.number_of_topics} топиков - {tm.number_of_documents} текстов - " +
                                                    (f"{tm.source} - " if hasattr(tm, 'source') and tm.source else f"Все СМИ ") +
                                                    (f"С {tm.datetime_from[:10]} - " if hasattr(tm, 'datetime_from') and tm.datetime_from else f"") +
                                                    (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
