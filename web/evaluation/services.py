@@ -269,6 +269,8 @@ def get_topic_dict(topic_modelling):
 
 
 def normalize_buckets_main_topics(buckets, topics_dict):
+    if not buckets:
+        return buckets
     max_count = max((bucket.doc_count for bucket in buckets))
     for bucket in buckets:
         bucket.weight = bucket.doc_count / max_count

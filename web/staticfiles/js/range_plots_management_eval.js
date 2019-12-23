@@ -203,6 +203,47 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             };
             Plotly.newPlot('posneg_distribution_' + criterion_id, data, layout, {responsive: true});
         }
+
+        // Redraw main topics
+        var table_html = "<div id=\"main-topics\">\n";
+        for (criterion of criterions) {
+            table_html += "<h4>" + criterion.fields.name + " - главные топики по положительному влиянию</h4>" +
+                "           <table id=\"main-topics-table\" class=\"table table-bordered table-hover\">\n" +
+                "                   <thead>\n" +
+                "                      <tr role=\"row\">\n" +
+                "                          <th>Топик</th>\n" +
+                "                          <th>Вес</th>\n" +
+                "                      </tr>\n" +
+                "                    </thead>\n" +
+                "                <tbody>";
+            for (topic of result.posneg_top_topics[criterion.pk]) {
+                table_html += "<tr>";
+                table_html += "<td>" + topic.name + "</td>";
+                table_html += "<td>" + topic.weight + "</td>";
+                table_html += "</tr>";
+            }
+            table_html += "</tbody>\n" +
+                "     </table>";
+
+            table_html += "<h4>" + criterion.fields.name + " - главные топики по отрицательному влиянию</h4>" +
+                "           <table id=\"main-topics-table\" class=\"table table-bordered table-hover\">\n" +
+                "                   <thead>\n" +
+                "                      <tr role=\"row\">\n" +
+                "                          <th>Топик</th>\n" +
+                "                          <th>Вес</th>\n" +
+                "                      </tr>\n" +
+                "                    </thead>\n" +
+                "                <tbody>";
+            for (topic of result.posneg_bottom_topics[criterion.pk]) {
+                table_html += "<tr>";
+                table_html += "<td>" + topic.name + "</td>";
+                table_html += "<td>" + topic.weight + "</td>";
+                table_html += "</tr>";
+            }
+            table_html += "</tbody>\n" +
+                "     </table>";
+        }
+        $('#main-topics').html(table_html);
     }
 
     function request_documents(range_from, range_to) {

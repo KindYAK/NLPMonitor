@@ -301,6 +301,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                                                                               analytical_query=analytical_query)
         source_weight = {}
         posneg_distribution = {}
+        posneg_top_topics = {}
+        posneg_bottom_topics = {}
         top_news_total = set()
         for criterion in criterions:
             # Current topic metrics
@@ -316,20 +318,31 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                                                      key=lambda x: x.source_value.value,
                                                      reverse=True)
 
+            # Main topics
+            topics_dict = get_topic_dict(topic_modelling)
+            posneg_top_topics[criterion.id] = normalize_buckets_main_topics(
+                document_evals.aggregations.posneg.buckets[-1].top_topics.buckets, topics_dict)
+            posneg_bottom_topics[criterion.id] = normalize_buckets_main_topics(
+                document_evals.aggregations.posneg.buckets[0].bottom_topics.buckets, topics_dict)
+
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict,
                                                         date_from, date_to).values()
-        return documents_eval_dict, source_weight, posneg_distribution
+
+        return documents_eval_dict, source_weight, posneg_distribution, posneg_top_topics, posneg_bottom_topics
 
     def list(self, request):
         filter_type = request.GET['type']
         posneg_distribution = {}
+        posneg_top_topics = {}
+        posneg_bottom_topics = {}
         if filter_type == "topics":
             documents, source_buckets = self.topics_search()
         elif filter_type == "search":
             documents, source_buckets = self.search_search()
         elif filter_type == "criterions":
-            documents, source_buckets, posneg_distribution = self.search_criterions()
+            documents, source_buckets, posneg_distribution, \
+                posneg_top_topics, posneg_bottom_topics = self.search_criterions()
         else:
             return Response(
                 {
@@ -367,6 +380,14 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 (key, [b.doc_count for b in bucket])
                 for key, bucket in posneg_distribution.items()
             )
+            posneg_top_topics = dict(
+                (criterion_id, [bucket.to_dict() for bucket in buckets])
+                    for criterion_id, buckets in posneg_top_topics.items()
+            )
+            posneg_bottom_topics = dict(
+                (criterion_id, [bucket.to_dict() for bucket in buckets])
+                    for criterion_id, buckets in posneg_bottom_topics.items()
+            )
             source_weights = dict(
                 ((source_id,
                     [
@@ -390,6 +411,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 "status": 200,
                 "documents": documents,
                 "source_weights": source_weights,
-                "posneg_distribution": posneg_distribution
+                "posneg_distribution": posneg_distribution,
+                "posneg_top_topics": posneg_top_topics,
+                "posneg_bottom_topics": posneg_bottom_topics,
             }
         )
