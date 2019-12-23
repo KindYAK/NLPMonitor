@@ -230,6 +230,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                         return;
                     }
                     rerender_table_plot(result);
+                },
+                error: function (result) {
+                    alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                 }
             }
         );

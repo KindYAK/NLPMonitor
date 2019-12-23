@@ -25,6 +25,9 @@ function run_group_list_management(topic_modelling, csrf_token){
                 }
                 topic_groups_list = result;
                 initialize_groups_select();
+            },
+            error: function (result) {
+                alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
             }
         }
     );

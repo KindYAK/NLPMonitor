@@ -13,6 +13,9 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
                 }
                 evaluations_dict = result.criterions;
                 color_evaluated_buttons();
+            },
+            error: function (result) {
+                alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
             }
         }
     );

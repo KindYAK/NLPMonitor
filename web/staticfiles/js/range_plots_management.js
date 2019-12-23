@@ -123,6 +123,9 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
                             return;
                         }
                         rerender_table_plot(result, "topics");
+                    },
+                    error: function (result) {
+                        alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                     }
                 }
             );
@@ -144,6 +147,9 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
                             return;
                         }
                         rerender_table_plot(result, "search");
+                    },
+                    error: function (result) {
+                        alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
                     }
                 }
             );
