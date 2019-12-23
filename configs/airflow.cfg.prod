@@ -26,11 +26,11 @@ sql_alchemy_max_overflow=50
 sql_alchemy_pool_recycle=1800
 sql_alchemy_reconnect_timeout=300
 sql_alchemy_schema=
-parallelism=15
+parallelism=22
 dag_concurrency=15
 non_pooled_task_slot_count=0
 dags_are_paused_at_creation=True
-max_active_runs_per_dag=8
+max_active_runs_per_dag=3
 load_examples=False
 plugins_folder=/opt/bitnami/airflow/plugins
 fernet_key=LD2nT24yYyLD2okKJgbIJmiv-IsxkSkj0Rt7BO92mj4=
@@ -50,7 +50,7 @@ dag_discovery_safe_mode=True
 
 [cli]
 api_client=airflow.api.client.local_client
-endpoint_url=http://airflow:8001/airflow
+endpoint_url=http://{hostname}:8001/airflow
 
 [api]
 auth_backend=airflow.api.auth.backend.default
@@ -76,7 +76,7 @@ default_gpus=0
 default_hive_mapred_queue=
 
 [webserver]
-base_url=http://airflow:8001/airflow
+base_url=http://{hostname}:8001/airflow
 web_server_host=0.0.0.0
 web_server_port=8001
 web_server_ssl_cert=
