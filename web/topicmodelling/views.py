@@ -9,7 +9,9 @@ from elasticsearch_dsl import Search
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options
 from mainapp.services import apply_fir_filter, unique_ize
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
+from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
+    get_total_metrics
 
 
 class TopicsListView(TemplateView):
@@ -83,74 +85,9 @@ class TopicsListView(TemplateView):
 class TopicDocumentListView(TemplateView):
     template_name = "topicmodelling/topic_document_list.html"
 
-    def get_total_metrics(self, granularity, topic_weight_threshold):
-        std_total = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{self.topic_modelling}") \
-            .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-            .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
-        std_total.aggs.bucket(name="dynamics",
-                              agg_type="date_histogram",
-                              field="datetime",
-                              calendar_interval=granularity) \
-                      .metric("dynamics_weight", agg_type="sum", field="topic_weight")
-        topic_documents_total = std_total.execute()
-        total_metrics_dict = dict(
-            (
-                t.key_as_string,
-                {
-                    "size": t.doc_count,
-                    "weight": t.dynamics_weight.value
-                }
-            ) for t in topic_documents_total.aggregations.dynamics.buckets
-        )
-        return total_metrics_dict
-
-    def get_current_topics_metrics(self, topics, granularity, topic_weight_threshold):
-        std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{self.topic_modelling}") \
-                  .filter("terms", topic_id=topics).sort("-topic_weight") \
-                  .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-                  .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
-                  .source(['document_es_id', 'topic_weight'])[:100]
-        std.aggs.bucket(name="dynamics",
-                        agg_type="date_histogram",
-                        field="datetime",
-                        calendar_interval=granularity) \
-            .metric("dynamics_weight", agg_type="sum", field="topic_weight")
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
-            .metric("source_weight", agg_type="sum", field="topic_weight")
-        topic_documents = std.execute()
-        return topic_documents
-
-    def get_documents_with_weights(self, topic_documents):
-        sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
-                 .filter('terms', _id=[d.document_es_id for d in topic_documents]) \
-                 .source(('id', 'title', 'source', 'datetime',))[:100]
-        documents = sd.execute()
-        weight_dict = {}
-        for td in topic_documents:
-            if td.document_es_id not in weight_dict:
-                weight_dict[td.document_es_id] = td.topic_weight
-            else:
-                weight_dict[td.document_es_id] += td.topic_weight
-        for document in documents:
-            document.weight = weight_dict[document.meta.id]
-        documents = sorted(documents, key=lambda x: x.weight, reverse=True)
-        return documents
-
-    def normalize_topic_documnets(self, topic_documents, total_metrics_dict):
-        for bucket in topic_documents.aggregations.dynamics.buckets:
-            total_weight = total_metrics_dict[bucket.key_as_string]['weight']
-            total_size = total_metrics_dict[bucket.key_as_string]['size']
-            if total_weight != 0:
-                bucket.dynamics_weight.value /= total_weight
-            if total_size != 0:
-                bucket.doc_count_normal = bucket.doc_count / total_size
-            else:
-                bucket.doc_count_normal = 0
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        self.topic_modelling = kwargs['topic_modelling']
         if 'topic_name' in kwargs:
             topics = [kwargs['topic_name']]
         else:
@@ -170,16 +107,16 @@ class TopicDocumentListView(TemplateView):
             return context
 
         # Total metrics
-        total_metrics_dict = self.get_total_metrics(context['granularity'], context['topic_weight_threshold'])
+        total_metrics_dict = get_total_metrics(kwargs['topic_modelling'], context['granularity'], context['topic_weight_threshold'])
 
         # Current topic metrics
-        topic_documents = self.get_current_topics_metrics(topics, context['granularity'], context['topic_weight_threshold'])
+        topic_documents = get_current_topics_metrics(kwargs['topic_modelling'], topics, context['granularity'], context['topic_weight_threshold'])
 
         # Get documents, set weights
-        documents = self.get_documents_with_weights(topic_documents)
+        documents = get_documents_with_weights(topic_documents)
 
         # Normalize
-        self.normalize_topic_documnets(topic_documents, total_metrics_dict)
+        normalize_topic_documnets(topic_documents, total_metrics_dict)
 
         # Separate signals
         absolute_power = [bucket.doc_count for bucket in topic_documents.aggregations.dynamics.buckets]
