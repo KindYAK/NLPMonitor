@@ -48,7 +48,7 @@ class CriterionEvalAnalysisView(TemplateView):
         except ValueError:
             context['value_q'] = ""
         analytical_query = []
-        if context['criterion_q'] != "-1" and context['action_q'] and context['value_q']:
+        if context['criterion_q'] != "-1" and context['action_q'] != "" and context['value_q'] != "":
             analytical_query = [
                 {
                     "criterion_id": context['criterion_q'],
