@@ -499,7 +499,7 @@
                                         <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
                                         <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.resonance_score %}
-                                                Score: {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                {{ topic.resonance_score|floatformat:3|unlocalize }}
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -511,8 +511,7 @@
                                         {% endif %}
                                         <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score:
-                                                {{ topic.period_score|floatformat:3|unlocalize }})
+                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -522,7 +521,16 @@
                                                 $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
                                             </script>
                                         {% endif %}
-                                        <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.trend_score|floatformat:3|unlocalize }}</td>
+                                        <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
+                                            {% if topic.trend_score %}
+                                                {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                {% if topic.trend_score > 0 %}
+                                                    <i class="fas fa-arrow-up"></i>
+                                                {% else %}
+                                                    <i class="fas fa-arrow-down"></i>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
                                         {% if topic.resonance_score %}
                                             <script>
                                                 $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
@@ -557,7 +565,7 @@
                                         <td id="name_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
                                         <td id="resonance_neg_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.resonance_score %}
-                                                Score: {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                {{ topic.resonance_score|floatformat:3|unlocalize }}
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -569,8 +577,7 @@
                                         {% endif %}
                                         <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score:
-                                                {{ topic.period_score|floatformat:3|unlocalize }})
+                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -580,7 +587,16 @@
                                                 $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
                                             </script>
                                         {% endif %}
-                                        <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.trend_score|floatformat:3|unlocalize }}</td>
+                                        <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                            {% if topic.trend_score %}
+                                                {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                {% if topic.trend_score > 0 %}
+                                                    <i class="fas fa-arrow-up"></i>
+                                                {% else %}
+                                                    <i class="fas fa-arrow-down"></i>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
                                         {% if topic.resonance_score %}
                                             <script>
                                                 $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
