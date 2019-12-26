@@ -275,7 +275,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         topics_to_filter = None
         if group:
             topics_to_filter = [topic.topic_id for topic in group.topics.all()]
-        topic_weight_threshold = float(self.request.GET['topic_weight_threshold']) if 'topic_weight_threshold' in self.request.GET else 0
+        topic_weight_threshold = float(self.request.GET['topic_weight_threshold']) if 'topic_weight_threshold' in self.request.GET else 0.05
         criterion_q = self.request.GET['criterion_q'] if 'criterion_q' in self.request.GET else "-1"
         action_q = self.request.GET['action_q'] if 'action_q' in self.request.GET else ""
         try:
@@ -319,11 +319,13 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                                                      reverse=True)
 
             # Main topics
-            topics_dict = get_topic_dict(topic_modelling)
-            posneg_top_topics[criterion.id] = normalize_buckets_main_topics(
-                document_evals.aggregations.posneg.buckets[-1].top_topics.buckets, topics_dict)
-            posneg_bottom_topics[criterion.id] = normalize_buckets_main_topics(
-                document_evals.aggregations.posneg.buckets[0].bottom_topics.buckets, topics_dict)
+            topics_dict, tm_dict = get_topic_dict(topic_modelling)
+            posneg_top_topics[criterion.id] = \
+                normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[-1].top_topics.buckets,
+                                            topics_dict, tm_dict, topic_weight_threshold, date_to)
+            posneg_bottom_topics[criterion.id] = \
+                normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[0].bottom_topics.buckets,
+                                              topics_dict, tm_dict, topic_weight_threshold, date_to)
 
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict,

@@ -6,6 +6,7 @@ from mainapp.constants import SEARCH_CUTOFF_CONFIG
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, \
     ES_INDEX_TOPIC_MODELLING
+from topicmodelling.services import get_total_metrics
 
 
 def filter_analytical_query(topic_modelling, criterion_id, action, value):
@@ -257,22 +258,54 @@ def divide_posneg_source_buckets(buckets):
 
 
 def get_topic_dict(topic_modelling):
-    topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
+    tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
         .filter("term", **{"name": topic_modelling}) \
-        .filter("term", **{"is_ready": True}).execute()[0]['topics']
+        .filter("term", **{"is_ready": True}).execute()[0]
+    tm_info_dict = tm.to_dict()
 
     # Fill topic objects with meta data
     topic_info_dict = {}
-    for topic in topics:
-        topic_info_dict[topic['id']] = topic['name']
-    return topic_info_dict
+    topic_info_dict = dict(
+        (topic.id, topic.to_dict()) for topic in tm['topics']
+    )
+    del tm_info_dict['topics']
+    return topic_info_dict, tm_info_dict
 
 
-def normalize_buckets_main_topics(buckets, topics_dict):
+def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_threshold, last_date):
     if not buckets:
         return buckets
     max_count = max((bucket.doc_count for bucket in buckets))
+
+    total_metrics_dict = get_total_metrics(tm_dict['name'], "1d", topic_weight_threshold, [topic['id'] for topic in topics_dict.values()])
     for bucket in buckets:
         bucket.weight = bucket.doc_count / max_count
-        bucket.name = topics_dict[bucket.key]
+        bucket.info = topics_dict[bucket.key]
+
+        # Dynamic danger analysis
+        if 'period_maxes_mean' in bucket.info:
+            bucket.resonance_score = (bucket.info['period_maxes_mean'] - tm_dict['period_maxes_mean_median']) / tm_dict['period_maxes_mean_std']
+            bucket.period_score = (bucket.info['period_mean'] - tm_dict['period_median']) / tm_dict['period_std']
+            bucket.period_days = bucket.info['period_mean']
+
+            s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
+                    .filter("term", **{"topic_id": bucket.info.id}) \
+                    .filter("range", topic_weight={"gte": topic_weight_threshold}) \
+                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=50)}) \
+                    .filter("range", datetime={"lte": last_date}) \
+                    .source([])[:0]
+            s.aggs.bucket(name="dynamics",
+                          agg_type="date_histogram",
+                          field="datetime",
+                          calendar_interval="1d") \
+                  .metric("dynamics_weight", agg_type="sum", field="topic_weight")
+            r = s.execute()
+            bs = r.aggregations.dynamics.buckets
+            if len(bs) >= 2:
+                total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
+                total_weight_before_last = total_metrics_dict[bs[0].key_as_string]['weight']
+                y_delta = bs[-1].dynamics_weight.value / total_weight_last - bs[0].dynamics_weight.value / total_weight_before_last
+                bucket.trend_score = y_delta / bucket.info['weight_std']
+            else:
+                bucket.trend_score = None
     return buckets

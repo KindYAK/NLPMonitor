@@ -106,10 +106,13 @@ class CriterionEvalAnalysisView(TemplateView):
         if criterion.value_range_from < 0:
             context['posneg_distribution'][criterion.id] = document_evals.aggregations.posneg
 
+        last_date = datetime.datetime.strptime(absolute_value[-1].key_as_string[:10], "%Y-%m-%d").date()
         context['posneg_top_topics'][criterion.id] = \
-            normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[-1].top_topics.buckets, self.topics_dict)
+            normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[-1].top_topics.buckets,
+                                          self.topics_dict, self.tm_dict, context['topic_weight_threshold'], last_date)
         context['posneg_bottom_topics'][criterion.id] = \
-            normalize_buckets_main_topics(document_evals.aggregations.posneg[0].bottom_topics.buckets, self.topics_dict)
+            normalize_buckets_main_topics(document_evals.aggregations.posneg[0].bottom_topics.buckets,
+                                          self.topics_dict, self.tm_dict, context['topic_weight_threshold'], last_date)
 
     def get_criterion_evals(self, context, top_news_total, criterion):
         # Current topic metrics
@@ -166,7 +169,7 @@ class CriterionEvalAnalysisView(TemplateView):
             smooth_buckets(negative, True)
 
         # Get topic dict
-        self.topics_dict = get_topic_dict(context['topic_modelling'])
+        self.topics_dict, self.tm_dict = get_topic_dict(context['topic_modelling'])
 
         # Create context
         self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)
