@@ -292,7 +292,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
                     .filter("term", **{"topic_id": bucket.info.id}) \
                     .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=7)}) \
+                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=90)}) \
                     .filter("range", datetime={"lte": last_date}) \
                     .source([])[:0]
             s.aggs.bucket(name="dynamics",
