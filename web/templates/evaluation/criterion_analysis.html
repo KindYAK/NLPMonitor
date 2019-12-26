@@ -477,7 +477,8 @@
                 <div class="card-body">
                     <div id="main-topics">
                         <script>
-                            var colorScale = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
+                            var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
+                            var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
                         </script>
                         {% for criterion in criterions %}
                             <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
@@ -510,7 +511,7 @@
                                         {% endif %}
                                         <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days }} дней (Score:
+                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score:
                                                 {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
@@ -563,12 +564,12 @@
                                         </td>
                                         {% if topic.resonance_score %}
                                             <script>
-                                                $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                                                $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
                                             </script>
                                         {% endif %}
                                         <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days }} дней (Score:
+                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score:
                                                 {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
@@ -576,13 +577,13 @@
                                         </td>
                                         {% if topic.resonance_score %}
                                             <script>
-                                                $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
+                                                $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
                                             </script>
                                         {% endif %}
                                         <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.trend_score|floatformat:3|unlocalize }}</td>
                                         {% if topic.resonance_score %}
                                             <script>
-                                                $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
+                                                $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
                                             </script>
                                         {% endif %}
                                         <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
