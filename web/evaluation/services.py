@@ -3,6 +3,7 @@ import datetime
 from elasticsearch_dsl import Search, Q
 
 from mainapp.constants import SEARCH_CUTOFF_CONFIG
+from mainapp.services import apply_fir_filter
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, \
     ES_INDEX_TOPIC_MODELLING
@@ -291,7 +292,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
                     .filter("term", **{"topic_id": bucket.info.id}) \
                     .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=50)}) \
+                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=7)}) \
                     .filter("range", datetime={"lte": last_date}) \
                     .source([])[:0]
             s.aggs.bucket(name="dynamics",
@@ -301,10 +302,12 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
                   .metric("dynamics_weight", agg_type="sum", field="topic_weight")
             r = s.execute()
             bs = r.aggregations.dynamics.buckets
+            bs_signal = [b.dynamics_weight.value for b in bs]
+            bs_signal = apply_fir_filter(bs_signal, granularity="1d")
             if len(bs) >= 2:
                 total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
-                total_weight_before_last = total_metrics_dict[bs[0].key_as_string]['weight']
-                y_delta = bs[-1].dynamics_weight.value / total_weight_last - bs[0].dynamics_weight.value / total_weight_before_last
+                total_weight_before_last = total_metrics_dict[bs[-2].key_as_string]['weight']
+                y_delta = bs_signal[-1] / total_weight_last - bs_signal[-2] / total_weight_before_last
                 bucket.trend_score = y_delta / bucket.info['weight_std']
             else:
                 bucket.trend_score = None
