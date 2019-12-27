@@ -278,7 +278,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
         return buckets
     max_count = max((bucket.doc_count for bucket in buckets))
 
-    total_metrics_dict = get_total_metrics(tm_dict['name'], "1d", topic_weight_threshold, [topic['id'] for topic in topics_dict.values()])
+    total_metrics_dict = get_total_metrics(tm_dict['name'], "1w", topic_weight_threshold, [topic['id'] for topic in topics_dict.values()])
     for bucket in buckets:
         bucket.weight = bucket.doc_count / max_count
         bucket.info = topics_dict[bucket.key]
@@ -292,18 +292,18 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
                     .filter("term", **{"topic_id": bucket.info.id}) \
                     .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=90)}) \
+                    .filter("range", datetime={"gte": last_date - datetime.timedelta(days=365)}) \
                     .filter("range", datetime={"lte": last_date}) \
                     .source([])[:0]
             s.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="datetime",
-                          calendar_interval="1d") \
+                          calendar_interval="1w") \
                   .metric("dynamics_weight", agg_type="sum", field="topic_weight")
             r = s.execute()
             bs = r.aggregations.dynamics.buckets
             bs_signal = [b.dynamics_weight.value for b in bs]
-            bs_signal = apply_fir_filter(bs_signal, granularity="1d")
+            bs_signal = apply_fir_filter(bs_signal, granularity="1w")
             if len(bs) >= 2:
                 total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
                 total_weight_before_last = total_metrics_dict[bs[-2].key_as_string]['weight']
