@@ -511,7 +511,7 @@
                                         {% endif %}
                                         <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
+                                                {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -525,9 +525,13 @@
                                             {% if topic.trend_score %}
                                                 {{ topic.trend_score|floatformat:3|unlocalize }}
                                                 {% if topic.trend_score > 0 %}
-                                                    <i class="fas fa-arrow-up"></i>
+                                                    <div style="text-align: center;">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </div>
                                                 {% else %}
-                                                    <i class="fas fa-arrow-down"></i>
+                                                    <div style="text-align: center;">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </div>
                                                 {% endif %}
                                             {% endif %}
                                         </td>
@@ -539,9 +543,9 @@
                                         <td id="weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
                                         <td>
                                             <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                            <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                            data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                        </a>
+                                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -577,7 +581,7 @@
                                         {% endif %}
                                         <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
                                             {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:3|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
+                                                {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
                                             {% else %}
                                                 Фоновый топик
                                             {% endif %}
@@ -591,9 +595,13 @@
                                             {% if topic.trend_score %}
                                                 {{ topic.trend_score|floatformat:3|unlocalize }}
                                                 {% if topic.trend_score > 0 %}
-                                                    <i class="fas fa-arrow-up"></i>
+                                                    <div style="text-align: center;">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </div>
                                                 {% else %}
-                                                    <i class="fas fa-arrow-down"></i>
+                                                    <div style="text-align: center;">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </div>
                                                 {% endif %}
                                             {% endif %}
                                         </td>
@@ -604,11 +612,9 @@
                                         {% endif %}
                                         <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
                                         <td>
-                                            <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
-                                               class="nav-link nowrap">
+                                            <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
                                                 <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                   data-toggle="tooltip" data-placement="top"
-                                                   title="Анализ по тематике"></i>
+                                                data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
                                             </a>
                                         </td>
                                     </tr>
