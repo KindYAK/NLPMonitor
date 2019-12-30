@@ -308,7 +308,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
                 total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
                 total_weight_before_last = total_metrics_dict[bs[-2].key_as_string]['weight']
                 y_delta = bs_signal[-1] / total_weight_last - bs_signal[-2] / total_weight_before_last
-                bucket.trend_score = (y_delta - bucket.info['weight_change_median']) / bucket.info['weight_change_std']
+                bucket.trend_score = (1 if y_delta > 0 else -1) * (abs(y_delta) - bucket.info['weight_change_median']) / bucket.info['weight_change_std']
             else:
                 bucket.trend_score = None
     return buckets
