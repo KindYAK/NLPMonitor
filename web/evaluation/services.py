@@ -278,7 +278,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
         return buckets
     max_count = max((bucket.doc_count for bucket in buckets))
 
-    total_metrics_dict = get_total_metrics(tm_dict['name'], "1d", topic_weight_threshold)
+    total_metrics_dict = get_total_metrics(tm_dict['name'], "1w", topic_weight_threshold)
     for bucket in buckets:
         bucket.weight = bucket.doc_count / max_count
         bucket.info = topics_dict[bucket.key]
@@ -298,17 +298,18 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             s.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="datetime",
-                          calendar_interval="1d") \
+                          calendar_interval="1w") \
                   .metric("dynamics_weight", agg_type="sum", field="topic_weight")
             r = s.execute()
             bs = r.aggregations.dynamics.buckets
             bs_signal = [b.dynamics_weight.value for b in bs]
-            bs_signal = apply_fir_filter(bs_signal, granularity="1d")
+            bs_signal = apply_fir_filter(bs_signal, granularity="1w")
             if len(bs) >= 2:
                 total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
                 total_weight_before_last = total_metrics_dict[bs[-2].key_as_string]['weight']
                 y_delta = bs_signal[-1] / total_weight_last - bs_signal[-2] / total_weight_before_last
-                bucket.trend_score = y_delta / bucket.info['weight_change_std']
+                print(bucket.info.id, bs_signal[-1] / total_weight_last, bs_signal[-2] / total_weight_before_last)
+                bucket.trend_score = y_delta / (bucket.info['weight_change_std'] * 7)
             else:
                 bucket.trend_score = None
     return buckets
