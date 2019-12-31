@@ -304,12 +304,11 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             bs = r.aggregations.dynamics.buckets
             bs_signal = [b.dynamics_weight.value for b in bs]
             bs_signal = apply_fir_filter(bs_signal, granularity="1w")
-            if len(bs) >= 2:
-                total_weight_last = total_metrics_dict[bs[-1].key_as_string]['weight']
-                total_weight_before_last = total_metrics_dict[bs[-2].key_as_string]['weight']
-                y_delta = bs_signal[-1] / total_weight_last - bs_signal[-2] / total_weight_before_last
-                print(bucket.info.id, bs_signal[-1] / total_weight_last, bs_signal[-2] / total_weight_before_last)
-                bucket.trend_score = y_delta / (bucket.info['weight_change_std'] * 7)
+            if len(bs) >= 4:
+                total_weight_last = total_metrics_dict[bs[-2].key_as_string]['weight']
+                total_weight_before_last = total_metrics_dict[bs[-4].key_as_string]['weight']
+                y_delta = bs_signal[-2] / total_weight_last - bs_signal[-4] / total_weight_before_last
+                bucket.trend_score = y_delta / (bucket.info['weight_change_std'] * 14)
             else:
                 bucket.trend_score = None
     return buckets
