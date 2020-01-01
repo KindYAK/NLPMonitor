@@ -336,7 +336,6 @@
                                         },
                                         yaxis: {
                                             fixedrange: true,
-                                            range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
                                         }
                                     };
                                     Plotly.plot('total_dynamics_plot_{{ group.id }}', data, layout, {responsive: true});
