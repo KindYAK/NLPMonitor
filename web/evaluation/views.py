@@ -22,16 +22,17 @@ class CriterionEvalAnalysisView(TemplateView):
     template_name = "evaluation/criterion_analysis.html"
 
     def form_creation(self, context):
-        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_*").keys()
+        tm_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_*").keys()
         context['criterions_list'] = EvalCriterion.objects.all()
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
-        context['topic_modellings'] = list(set([("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in self.eval_indices]))
+        context['topic_modellings'] = list(set([("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices]))
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
         context['topic_modelling'] = self.request.GET['topic_modelling'] if 'topic_modelling' in self.request.GET else context['topic_modellings'][0][0]
+        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}").keys()
         context['criterions_list'] = context['criterions_list'].filter(id__in=[index.split("_")[-1] for index in self.eval_indices])
         context['public_groups'] = context['public_groups'].filter(topic_modelling_name=context['topic_modelling'])
         context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
