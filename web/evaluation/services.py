@@ -194,7 +194,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id]['document'] = documents_dict[td.document_es_id]
             seen_id.add(documents_dict[td.document_es_id].id)
         criterion_id = int(td.meta.index.split("_")[-1])
-        if td.value > 0:
+        if td.value >= 0:
             documents_eval_dict[td.document_es_id][criterion_id] = \
                 td.value / max_criterion_value_dict[criterion_id]["max_positive"]
         else:
