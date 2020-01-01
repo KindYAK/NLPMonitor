@@ -13,6 +13,18 @@ class EvalCriterion(models.Model):
     value_range_to = models.SmallIntegerField(default=1)
     is_integer = models.BooleanField(default=False)
     is_categorical = models.BooleanField(default=False)
+    group = models.ForeignKey('EvalCriterionGroup', null=True, blank=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class EvalCriterionGroup(models.Model):
+    class Meta:
+        verbose_name = "Группа критериев оценки"
+        verbose_name_plural = "Группы критериев оценки"
+
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name

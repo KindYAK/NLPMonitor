@@ -3,8 +3,14 @@ from .models import *
 
 
 class EvalCriterionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_categorical', 'is_integer', )
-    list_filter = ('is_categorical', 'is_integer', )
+    list_display = ('name', 'group', 'is_categorical', 'is_integer', )
+    list_filter = ('group', 'is_categorical', 'is_integer', )
+    search_fields = ('name', )
+
+
+class EvalCriterionGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', )
+    list_filter = ()
     search_fields = ('name', )
 
 
@@ -27,6 +33,7 @@ class TopicIDEvalAdmin(admin.ModelAdmin):
 
 
 admin.site.register(EvalCriterion, EvalCriterionAdmin)
+admin.site.register(EvalCriterionGroup, EvalCriterionGroupAdmin)
 admin.site.register(CategoricalCriterionValue, CategoricalCriterionValueAdmin)
 admin.site.register(TopicsEval, TopicsEvalAdmin)
 admin.site.register(TopicIDEval, TopicIDEvalAdmin)
