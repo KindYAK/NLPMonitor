@@ -5519,7 +5519,7 @@ var DateProfileGenerator = /** @class */ (function () {
     ------------------------------------------------------------------------------------------------------------------*/
     // Initializes internal variables related to calculating hidden days-of-week
     DateProfileGenerator.prototype.initHiddenDays = function () {
-        var hiddenDays = this.options.hiddenDays || []; // array of day-of-week eval_indices that are hidden
+        var hiddenDays = this.options.hiddenDays || []; // array of day-of-week indices that are hidden
         var isHiddenDayHash = []; // is the day-of-week hidden? (hash with day-of-week-index -> bool)
         var dayCnt = 0;
         var i;
@@ -8280,7 +8280,7 @@ var DaySeries = /** @class */ (function () {
         var dayIndex = -1;
         while (date < end) { // loop each day from start to end
             if (dateProfileGenerator.isHiddenDay(date)) {
-                indices.push(dayIndex + 0.5); // mark that it's between eval_indices
+                indices.push(dayIndex + 0.5); // mark that it's between indices
             }
             else {
                 dayIndex++;
@@ -8298,7 +8298,7 @@ var DaySeries = /** @class */ (function () {
         var lastIndex = this.getDateDayIndex(addDays(range.end, -1)); // inclusive last index
         var clippedFirstIndex = Math.max(0, firstIndex);
         var clippedLastIndex = Math.min(this.cnt - 1, lastIndex);
-        // deal with in-between eval_indices
+        // deal with in-between indices
         clippedFirstIndex = Math.ceil(clippedFirstIndex); // in-between starts round to next cell
         clippedLastIndex = Math.floor(clippedLastIndex); // in-between ends round to prev cell
         if (clippedFirstIndex <= clippedLastIndex) {

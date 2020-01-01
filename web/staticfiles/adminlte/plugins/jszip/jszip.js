@@ -9808,7 +9808,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
    symbol does not occur in this code.
 
    The codes are sorted by computing a count of codes for each length,
-   creating from that a table of starting eval_indices for each length in the
+   creating from that a table of starting indices for each length in the
    sorted table, and then entering the symbols in order in the sorted
    table.  The sorted table is work[], with that space being provided by
    the caller.
@@ -9969,7 +9969,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
       here_val = 0;
     }
 
-    /* replicate for those eval_indices with low len bits equal to huff */
+    /* replicate for those indices with low len bits equal to huff */
     incr = 1 << (len - drop);
     fill = 1 << curr;
     min = fill;                 /* save offset to next table */
