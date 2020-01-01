@@ -314,8 +314,10 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
     return buckets
 
 
-def get_total_group_dynamics(topic_modelling, criterions, granularity):
-    std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}" for criterion in criterions]) \
+def get_total_group_dynamics(topic_modelling, criterions, granularity, eval_indices):
+    std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}"
+                                         for criterion in criterions
+                                         if f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}" in eval_indices]) \
         .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
         .source([])[:0]
     std.aggs.bucket(name="dynamics",
