@@ -13,7 +13,7 @@ class EvalCriterion(models.Model):
     value_range_to = models.SmallIntegerField(default=1)
     is_integer = models.BooleanField(default=False)
     is_categorical = models.BooleanField(default=False)
-    group = models.ForeignKey('EvalCriterionGroup', null=True, blank=True, on_delete=models.CASCADE)
+    group = models.ForeignKey('EvalCriterionGroup', null=True, blank=True, on_delete=models.CASCADE, related_name="criterions")
 
     def __str__(self):
         return self.name

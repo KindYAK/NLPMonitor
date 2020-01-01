@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 
-from evaluation.models import EvalCriterion
+from evaluation.models import EvalCriterion, EvalCriterionGroup
 from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models_user import TopicGroup
 from mainapp.services import apply_fir_filter
@@ -174,6 +174,9 @@ class CriterionEvalAnalysisView(TemplateView):
         # Create context
         self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)
 
+    def get_group_evals(self, context, group):
+        context['group_total_dynamics'][group['id']] = get_total_group_dynamics(context['topic_modelling'], group['criterions'], context['granularity'])
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -187,12 +190,26 @@ class CriterionEvalAnalysisView(TemplateView):
             return context
 
         dicts_to_init = ['absolute_value', 'positive', 'negative', 'source_weight',
-                         'posneg_distribution', 'posneg_top_topics', 'posneg_bottom_topics']
+                         'posneg_distribution', 'posneg_top_topics', 'posneg_bottom_topics',
+                         'group_total_dynamics']
         for key in dicts_to_init:
             context[key] = {}
+
+        # Info by criterion
         top_news_total = set()
         for criterion in context['criterions']:
             self.get_criterion_evals(context, top_news_total, criterion)
+
+        # Info by group
+        context['groups'] = [
+            {
+                "id": group.id,
+                "name": group.name,
+                "criterions": group.criterions.all(),
+            }
+            for group in EvalCriterionGroup.objects.filter(criterions__in=context['criterions']).distinct()]
+        for group in context['groups']:
+            self.get_group_evals(context, group)
 
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)

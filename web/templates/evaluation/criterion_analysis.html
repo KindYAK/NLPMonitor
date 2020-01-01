@@ -278,7 +278,78 @@
     </form>
 
     {% cache 28800 criterion_analysis request.GET %}
-    {# Графики #}
+    {# Графики динамика группы #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Динамика общая</h3>
+                </div>
+                {% for group in groups %}
+                    {% if group_total_dynamics|get_item:group.id %}
+                        <div class="card-body">
+                            <div id="total_dynamics_plot_{{ group.id }}">
+                                {# Абсолютные значения #}
+                                <div class="dynamics-plot" id="value_dynamics"></div>
+                                <script>
+                                    var selectorOptions = {
+                                        buttons: [{
+                                            step: 'month',
+                                            stepmode: 'backward',
+                                            count: 1,
+                                            label: '1m'
+                                        }, {
+                                            step: 'month',
+                                            stepmode: 'backward',
+                                            count: 6,
+                                            label: '6m'
+                                        }, {
+                                            step: 'year',
+                                            stepmode: 'todate',
+                                            count: 1,
+                                            label: 'YTD'
+                                        }, {
+                                            step: 'year',
+                                            stepmode: 'backward',
+                                            count: 1,
+                                            label: '1y'
+                                        }, {
+                                            step: 'all',
+                                        }],
+                                    };
+
+                                    var data = [
+                                        {
+                                            mode: 'lines',
+                                            x: [{% for tick in group_total_dynamics|get_item:group.id|get_item:'ticks' %}new Date('{{ tick }}'), {% endfor %}],
+                                            y: [{% for tick in group_total_dynamics|get_item:group.id|get_item:'dynamics' %}{{ tick|round_fl:5|safe }}, {% endfor %}],
+                                            name: '{{ criterion.name }}',
+                                            fill: 'tozeroy',
+                                        },
+                                    ];
+                                    var layout = {
+                                        title: 'Среднее значение группы критериев {{ group.name }}',
+                                        xaxis: {
+                                            rangeselector: selectorOptions,
+                                            rangeslider: {},
+                                            fixedrange: true
+                                        },
+                                        yaxis: {
+                                            fixedrange: true,
+                                            range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
+                                        }
+                                    };
+                                    Plotly.plot('total_dynamics_plot_{{ group.id }}', data, layout, {responsive: true});
+                                </script>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# Графики динамика критериев #}
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -370,7 +441,7 @@
                                 },
                             ];
                             var layout = {
-                                title: 'Объём позитива и негатива по критерию',
+                                title: 'Объём позитива и негатива по критерию {{ criterion.name }}',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {},
