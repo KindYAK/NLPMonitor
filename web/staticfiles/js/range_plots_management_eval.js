@@ -242,7 +242,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "</td>";
 
                 table_html += "<td id='trend_" + criterion.id + "_" + topic.info.id + "'>";
-                if('trend_score' in topic){
+                if('trend_score' in topic && topic.trend_score !== 0){
                     table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
                     if(topic.trend_score > 0){
                         table_html += '<div style="text-align: center;">' +
@@ -305,7 +305,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "</td>";
 
                 table_html += "<td id='trend_" + criterion.id + "_" + topic.info.id + "'>";
-                if('trend_score' in topic){
+                if('trend_score' in topic && topic.trend_score !== 0){
                     table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
                     if(topic.trend_score > 0){
                         table_html += '<div style="text-align: center;">' +
@@ -341,7 +341,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 $('#resonance_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.resonance_score));
                 $('#period_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.period_score));
-                $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.trend_score));
+                if(topic.trend_score && topic.trend_score !== 0) {
+                    $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.trend_score));
+                }
             }
         }
         for (criterion of criterions) {
@@ -351,7 +353,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 $('#resonance_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.resonance_score));
                 $('#period_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.period_score));
-                $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.trend_score));
+                if(topic.trend_score && topic.trend_score !== 0) {
+                    $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.trend_score));
+                }
             }
         }
     }

@@ -288,9 +288,9 @@
                 {% for group in groups %}
                     {% if group_total_dynamics|get_item:group.id %}
                         <div class="card-body">
-                            <div id="total_dynamics_plot_{{ group.id }}">
+                            <div>
                                 {# Абсолютные значения #}
-                                <div class="dynamics-plot" id="value_dynamics"></div>
+                                <div class="dynamics-plot" id="total_dynamics_plot_{{ group.id }}"></div>
                                 <script>
                                     var selectorOptions = {
                                         buttons: [{
@@ -595,7 +595,7 @@
                                             </script>
                                         {% endif %}
                                         <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.trend_score %}
+                                            {% if topic.trend_score and topic_trend_score != 0 %}
                                                 {{ topic.trend_score|floatformat:3|unlocalize }}
                                                 {% if topic.trend_score > 0 %}
                                                     <div style="text-align: center;">
@@ -608,7 +608,7 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
-                                        {% if topic.resonance_score %}
+                                        {% if topic.trend_score and topic_trend_score != 0 %}
                                             <script>
                                                 $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
                                             </script>
@@ -665,7 +665,7 @@
                                             </script>
                                         {% endif %}
                                         <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.trend_score %}
+                                            {% if topic.trend_score and topic_trend_score != 0 %}
                                                 {{ topic.trend_score|floatformat:3|unlocalize }}
                                                 {% if topic.trend_score > 0 %}
                                                     <div style="text-align: center;">
@@ -678,7 +678,7 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
-                                        {% if topic.resonance_score %}
+                                        {% if topic.trend_score and topic_trend_score != 0 %}
                                             <script>
                                                 $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
                                             </script>
@@ -763,6 +763,6 @@
     <script>
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
             '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
-            ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}', {% endfor %}]);
+            ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}'].concat([{% endfor %}{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
     </script>
 {% endblock %}

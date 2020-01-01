@@ -310,7 +310,7 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
                 y_delta = bs_signal[-2] / total_weight_last - bs_signal[-4] / total_weight_before_last
                 bucket.trend_score = y_delta / (bucket.info['weight_change_std'] * 14)
             else:
-                bucket.trend_score = None
+                bucket.trend_score = 0
     return buckets
 
 
