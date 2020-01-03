@@ -727,7 +727,13 @@
                             {% for key, document in documents.items %}
                                   <tr>
                                     {% for criterion in criterions %}
-                                        <td>{{ document|get_item:criterion.id|floatformat:3|unlocalize }}</td>
+                                        <td>
+                                            {% if document|get_item:criterion.id %}
+                                                {{ document|get_item:criterion.id|floatformat:3|unlocalize }}
+                                            {% else %}
+                                                0.000
+                                            {% endif %}
+                                        </td>
                                     {% endfor %}
                                     <td>{{ document|get_item:'document'|get_item:'datetime' }}</td>
                                     <td>{{ document|get_item:'document'|get_item:'title' }}</td>
