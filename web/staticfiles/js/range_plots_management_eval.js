@@ -67,6 +67,8 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                                     group_id, criterion_q, action_q, value_q, plot_ids) {
     var main_plot_id = "value_dynamics";
 
+    console.log(plot_ids);
+
     function rerender_new_range(range_from, range_to, id_to_skip) {
         for (var plot_id of plot_ids) {
             if (id_to_skip && plot_id !== id_to_skip) {
@@ -427,10 +429,10 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             var range_to = target.xaxis.range[1];
 
             n_redraw_plot += 1;
-            if (n_redraw_plot !== 0 && n_redraw_plot % 33 === 0) {
+            if (n_redraw_plot !== 0 && n_redraw_plot % plot_ids.length === 0) {
                 rerender_new_range(range_from, range_to, e.target.id);
             }
-            if (n_redraw_plot === 1 || n_redraw_plot % 99 === 0) {
+            if (n_redraw_plot === 1 || n_redraw_plot % (plot_ids.length*25) === 0) {
                 request_documents(range_from, range_to);
             }
         }

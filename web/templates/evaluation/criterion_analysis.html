@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
-    <!-- Plotyly.js -->
+    <!-- Plotly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <!-- Chroma.js -->
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
@@ -731,7 +731,7 @@
                                             {% if document|get_item:criterion.id %}
                                                 {{ document|get_item:criterion.id|floatformat:3|unlocalize }}
                                             {% else %}
-                                                0.000
+                                                0,000
                                             {% endif %}
                                         </td>
                                     {% endfor %}
