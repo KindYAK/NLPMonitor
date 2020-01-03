@@ -288,9 +288,9 @@
                 {% for group in groups %}
                     {% if group_total_dynamics|get_item:group.id %}
                         <div class="card-body">
-                            <div>
+                            <div id="dynamic_plots">
                                 {# Абсолютные значения #}
-                                <div class="dynamics-plot" id="total_dynamics_plot_{{ group.id }}"></div>
+                                <div class="dynamics-plot"  id="total_dynamics_plot_{{ group.id }}"></div>
                                 <script>
                                     var selectorOptions = {
                                         buttons: [{
