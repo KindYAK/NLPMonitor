@@ -54,7 +54,7 @@ def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weigh
 def get_total_metrics(topic_modelling, granularity, topic_weight_threshold):
     std_total = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
         .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-        .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()})
+        .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
     std_total.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="datetime",
