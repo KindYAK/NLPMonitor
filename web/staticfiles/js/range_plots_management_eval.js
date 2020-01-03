@@ -427,10 +427,10 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             var range_to = target.xaxis.range[1];
 
             n_redraw_plot += 1;
-            if (n_redraw_plot !== 0 && n_redraw_plot % 3 === 0) {
+            if (n_redraw_plot !== 0 && n_redraw_plot % 33 === 0) {
                 rerender_new_range(range_from, range_to, e.target.id);
             }
-            if (n_redraw_plot === 1 || n_redraw_plot % 33 === 0) {
+            if (n_redraw_plot === 1 || n_redraw_plot % 99 === 0) {
                 request_documents(range_from, range_to);
             }
         }
