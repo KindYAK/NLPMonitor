@@ -415,7 +415,7 @@
                         </script>
                     </div>
                     {% for criterion in criterions %}
-                        {% if criterion.value_range_from < 0 %}
+                        {% if criterion.c %}
                         {# Позитив-негатив #}
                         <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
                         <script>
@@ -770,6 +770,6 @@
     <script>
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
             '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
-            ["value_dynamics", {% for criterion in criterions %}'value_dynamics_posneg_{{ criterion.id }}', {% endfor %}].concat([{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
+            ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
     </script>
 {% endblock %}
