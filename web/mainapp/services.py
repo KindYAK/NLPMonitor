@@ -38,6 +38,7 @@ def filter_coefficients(f1, f2, fs, N):
 def apply_fir_filter(time_series, granularity, allow_negatives=False):
     if not time_series:
         return time_series
+    time_series = [x if x else 0 for x in time_series]
     year_length = 365.259
     if granularity == "1d":
         fs = year_length / 365
