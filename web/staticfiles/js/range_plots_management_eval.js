@@ -67,8 +67,6 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                                     group_id, criterion_q, action_q, value_q, plot_ids) {
     var main_plot_id = "value_dynamics";
 
-    console.log(plot_ids);
-
     function rerender_new_range(range_from, range_to, id_to_skip) {
         for (var plot_id of plot_ids) {
             if (id_to_skip && plot_id !== id_to_skip) {
@@ -114,11 +112,12 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             "                            <tbody>";
         for (doc of result.documents) {
             table_html += "<tr>";
-            for (k in doc) {
-                if(k === "document"){
-                    continue;
+            for(criterion of criterions){
+                if(criterion.pk in doc) {
+                    table_html += "<td>" + doc[criterion.pk].toFixed(3).toString().replace(".", ",") + "</td>";
+                } else{
+                    table_html += "<td>" + "0,000" + "</td>";
                 }
-                table_html += "<td>" + doc[k].toFixed(3).toString().replace(".", ",") + "</td>";
             }
             table_html += "<td>" + doc.document.datetime + "</td>";
             table_html += "<td>" + doc.document.title + "</td>";
@@ -224,9 +223,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 "                <tbody>";
             for (topic of result.posneg_top_topics[criterion.pk]) {
                 table_html += "<tr>";
-                table_html += "<td id='name_" + criterion.id + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
+                table_html += "<td id='name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
 
-                table_html += "<td id='resonance_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='resonance_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('resonance_score' in topic){
                     table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
                 } else {
@@ -234,7 +233,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='period_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='period_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('period_days' in topic){
                     table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
                     table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
@@ -243,7 +242,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='trend_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='trend_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('trend_score' in topic && topic.trend_score !== 0){
                     table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
                     if(topic.trend_score > 0){
@@ -258,7 +257,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='weight_" + criterion.id + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+                table_html += "<td id='weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
 
                 table_html += "<td>\n" +
                     "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id +"?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
@@ -287,9 +286,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 "                <tbody>";
             for (topic of result.posneg_bottom_topics[criterion.pk]) {
                 table_html += "<tr>";
-                table_html += "<td id='name_" + criterion.id + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
+                table_html += "<td id='name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
 
-                table_html += "<td id='resonance_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='resonance_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('resonance_score' in topic){
                     table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
                 } else {
@@ -297,7 +296,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='period_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='period_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('period_days' in topic){
                     table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
                     table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
@@ -306,7 +305,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='trend_" + criterion.id + "_" + topic.info.id + "'>";
+                table_html += "<td id='trend_" + criterion.pk + "_" + topic.info.id + "'>";
                 if('trend_score' in topic && topic.trend_score !== 0){
                     table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
                     if(topic.trend_score > 0){
@@ -321,7 +320,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 }
                 table_html += "</td>";
 
-                table_html += "<td id='weight_" + criterion.id + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+                table_html += "<td id='weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
 
                 table_html += "<td>\n" +
                     "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id +"?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
@@ -341,10 +340,10 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 if(!('resonance_score' in topic)){
                     continue;
                 }
-                $('#resonance_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.resonance_score));
-                $('#period_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.period_score));
+                $('#resonance_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScale(topic.resonance_score));
+                $('#period_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScale(topic.period_score));
                 if(topic.trend_score && topic.trend_score !== 0) {
-                    $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScale(topic.trend_score));
+                    $('#trend_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScale(topic.trend_score));
                 }
             }
         }
@@ -353,10 +352,10 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 if(!('resonance_score' in topic)){
                     continue;
                 }
-                $('#resonance_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.resonance_score));
-                $('#period_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.period_score));
+                $('#resonance_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.resonance_score));
+                $('#period_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.period_score));
                 if(topic.trend_score && topic.trend_score !== 0) {
-                    $('#trend_' + criterion.id + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.trend_score));
+                    $('#trend_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScaleNeg(topic.trend_score));
                 }
             }
         }

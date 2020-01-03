@@ -415,7 +415,7 @@
                         </script>
                     </div>
                     {% for criterion in criterions %}
-                        {% if criterion.c %}
+                        {% if criterion.value_range_from < 0 %}
                         {# Позитив-негатив #}
                         <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
                         <script>
