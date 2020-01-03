@@ -386,10 +386,10 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 (criterion_id, [bucket.to_dict() for bucket in buckets])
                     for criterion_id, buckets in posneg_top_topics.items()
             )
-            posneg_bottom_topics = dict(
-                (criterion_id, [bucket.to_dict() for bucket in buckets])
-                    for criterion_id, buckets in posneg_bottom_topics.items()
-            )
+            # posneg_bottom_topics = dict(
+            #     (criterion_id, [bucket.to_dict() for bucket in buckets])
+            #         for criterion_id, buckets in posneg_bottom_topics.items()
+            # )
             source_weights = dict(
                 ((source_id,
                     [
