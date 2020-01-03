@@ -271,68 +271,70 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             table_html += "</tbody>\n" +
                 "     </table>";
 
-            table_html += "<h4>" + criterion.fields.name + " - главные топики по отрицательному влиянию</h4>" +
-                "           <table id=\"main-topics-table\" class=\"table table-bordered table-hover\">\n" +
-                "                   <thead>\n" +
-                "                      <tr role=\"row\">\n" +
-                "                          <th>Топик</th>\n" +
-                "                          <th>Прогнозируемая резонансность</th>\n" +
-                "                          <th>Прогнозируемая продолжительность</th>\n" +
-                "                          <th>Тренд</th>\n" +
-                "                          <th>Вес</th>\n" +
-                "                          <th></th>" +
-                "                      </tr>\n" +
-                "                    </thead>\n" +
-                "                <tbody>";
-            for (topic of result.posneg_bottom_topics[criterion.pk]) {
-                table_html += "<tr>";
-                table_html += "<td id='name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
+            if (criterion.fields.value_range_from < 0) {
+                table_html += "<h4>" + criterion.fields.name + " - главные топики по отрицательному влиянию</h4>" +
+                    "           <table id=\"main-topics-table\" class=\"table table-bordered table-hover\">\n" +
+                    "                   <thead>\n" +
+                    "                      <tr role=\"row\">\n" +
+                    "                          <th>Топик</th>\n" +
+                    "                          <th>Прогнозируемая резонансность</th>\n" +
+                    "                          <th>Прогнозируемая продолжительность</th>\n" +
+                    "                          <th>Тренд</th>\n" +
+                    "                          <th>Вес</th>\n" +
+                    "                          <th></th>" +
+                    "                      </tr>\n" +
+                    "                    </thead>\n" +
+                    "                <tbody>";
+                for (topic of result.posneg_bottom_topics[criterion.pk]) {
+                    table_html += "<tr>";
+                    table_html += "<td id='name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
 
-                table_html += "<td id='resonance_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('resonance_score' in topic){
-                    table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
-                } else {
-                    table_html += "Фоновый топик";
-                }
-                table_html += "</td>";
-
-                table_html += "<td id='period_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('period_days' in topic){
-                    table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
-                    table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
-                } else {
-                    table_html += "Фоновый топик";
-                }
-                table_html += "</td>";
-
-                table_html += "<td id='trend_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('trend_score' in topic && topic.trend_score !== 0){
-                    table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
-                    if(topic.trend_score > 0){
-                        table_html += '<div style="text-align: center;">' +
-                            '               <i class="fas fa-arrow-up"></i>' +
-                            '          </div>';
+                    table_html += "<td id='resonance_" + criterion.pk + "_" + topic.info.id + "'>";
+                    if ('resonance_score' in topic) {
+                        table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
                     } else {
-                        table_html += '<div style="text-align: center;">' +
-                            '               <i class="fas fa-arrow-down"></i>' +
-                            '          </div>';
+                        table_html += "Фоновый топик";
                     }
+                    table_html += "</td>";
+
+                    table_html += "<td id='period_" + criterion.pk + "_" + topic.info.id + "'>";
+                    if ('period_days' in topic) {
+                        table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
+                        table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
+                    } else {
+                        table_html += "Фоновый топик";
+                    }
+                    table_html += "</td>";
+
+                    table_html += "<td id='trend_" + criterion.pk + "_" + topic.info.id + "'>";
+                    if ('trend_score' in topic && topic.trend_score !== 0) {
+                        table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
+                        if (topic.trend_score > 0) {
+                            table_html += '<div style="text-align: center;">' +
+                                '               <i class="fas fa-arrow-up"></i>' +
+                                '          </div>';
+                        } else {
+                            table_html += '<div style="text-align: center;">' +
+                                '               <i class="fas fa-arrow-down"></i>' +
+                                '          </div>';
+                        }
+                    }
+                    table_html += "</td>";
+
+                    table_html += "<td id='weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+
+                    table_html += "<td>\n" +
+                        "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id + "?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
+                        "                  <i class=\"nav-icon fas fa-eye\" style=\"font-size: 24px;\"" +
+                        "                     data-toggle=\"tooltip\" data-placement=\"top\" title=\"Анализ по тематике\"></i>\n" +
+                        "               </a>\n" +
+                        "          </td>";
+
+                    table_html += "</tr>";
                 }
-                table_html += "</td>";
-
-                table_html += "<td id='weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
-
-                table_html += "<td>\n" +
-                    "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id +"?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
-                    "                  <i class=\"nav-icon fas fa-eye\" style=\"font-size: 24px;\"" +
-                    "                     data-toggle=\"tooltip\" data-placement=\"top\" title=\"Анализ по тематике\"></i>\n" +
-                    "               </a>\n" +
-                    "          </td>";
-
-                table_html += "</tr>";
+                table_html += "</tbody>\n" +
+                    "     </table>";
             }
-            table_html += "</tbody>\n" +
-                "     </table>";
         }
         $('#main-topics').html(table_html);
         for (criterion of criterions) {
