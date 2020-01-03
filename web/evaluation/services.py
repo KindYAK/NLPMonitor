@@ -12,7 +12,7 @@ from topicmodelling.services import get_total_metrics
 
 def filter_analytical_query(topic_modelling, criterion_id, action, value):
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion_id}") \
-              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})\
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
               .filter("range", value={action: value}) \
               .source(['document_es_id']).sort('-value')
     return (d.document_es_id for d in s.scan())
@@ -22,7 +22,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                                date_from=None, date_to=None, analytical_query=None):
     # Basic search object
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
-              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
               .source(['document_es_id'])
 
     # Analytical querying
@@ -102,7 +102,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     top_news = set()
     top_news.update((d.document_es_id for d in document_evals))
     std_min = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
-              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
               .source(['document_es_id']).sort('value')
     if documents_ids_to_filter or analytical_query:
         std_min = std_min.filter("terms", **{'document_es_id': documents_ids_to_filter})
@@ -178,7 +178,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     documents_dict = dict((d.meta.id, d) for d in documents)
     std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{c.id}" for c in criterions]) \
             .filter("terms", **{'document_es_id': list(top_news_total)}) \
-            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
+            .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
             .source(['document_es_id', 'value'])[:10000]
     document_evals = std.scan()
 
@@ -318,7 +318,7 @@ def get_total_group_dynamics(topic_modelling, criterions, granularity, eval_indi
     std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}"
                                          for criterion in criterions
                                          if f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}" in eval_indices]) \
-        .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}) \
+        .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
         .source([])[:0]
     std.aggs.bucket(name="dynamics",
                     agg_type="date_histogram",
