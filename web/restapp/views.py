@@ -386,19 +386,19 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 (criterion_id, [bucket.to_dict() for bucket in buckets])
                     for criterion_id, buckets in posneg_top_topics.items()
             )
-            # posneg_bottom_topics = dict(
-            #     (criterion_id, [bucket.to_dict() for bucket in buckets])
-            #         for criterion_id, buckets in posneg_bottom_topics.items()
-            # )
+            posneg_bottom_topics = dict(
+                (criterion_id, [bucket.to_dict() for bucket in buckets])
+                    for criterion_id, buckets in posneg_bottom_topics.items()
+            )
             source_weights = dict(
-                ((source_id,
+                ((criterion_id,
                     [
                         {
                             "source": bucket.key,
                             "weight": bucket.source_value.value,
                         } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
                     ]
-                ) if not type(buckets) == list else (source_id, buckets)) for source_id, buckets in source_buckets.items()
+                ) if hasattr(buckets[0], "doc_count") else (criterion_id, buckets)) for criterion_id, buckets in source_buckets.items()
             )
             for document in documents:
                 document["document"] = {
