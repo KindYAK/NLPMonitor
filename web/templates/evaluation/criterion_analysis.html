@@ -18,8 +18,10 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
     <!-- daterange picker -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
-    <!-- Tempusdominus Bbootstrap 4 -->
+    <!-- Tempusdominus Bootstrap 4 -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
     <!-- Plotly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <!-- Chroma.js -->
@@ -43,6 +45,9 @@
         }
         .select2-selection {
             height: 100% !important;
+        }
+        h3[data-toggle="collapse"] {
+            cursor: pointer;
         }
     </style>
 {% endblock %}
@@ -542,160 +547,166 @@
     {# Главные топики #}
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Ключевые топики</h3>
-                </div>
-                <div class="card-body">
-                    <div id="main-topics">
-                        <script>
-                            var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
-                            var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
-                        </script>
-                        {% for criterion in criterions %}
-                            <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
-                            <table id="main-topics-table" class="table table-bordered table-hover">
-                                <thead>
-                                <tr role="row">
-                                    <th>Топик</th>
-                                    <th>Прогнозируемая резонансность</th>
-                                    <th>Прогнозируемая продолжительность</th>
-                                    <th>Тренд</th>
-                                    <th>Вес</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for topic in posneg_top_topics|get_item:criterion.id %}
-                                    <tr>
-                                        <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                                        <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.resonance_score %}
-                                                {{ topic.resonance_score|floatformat:3|unlocalize }}
-                                            {% else %}
-                                                Фоновый топик
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.resonance_score %}
-                                            <script>
-                                                $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
-                                            {% else %}
-                                                Фоновый топик
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.resonance_score %}
-                                            <script>
-                                                $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.trend_score and topic_trend_score != 0 %}
-                                                {{ topic.trend_score|floatformat:3|unlocalize }}
-                                                {% if topic.trend_score > 0 %}
-                                                    <div style="text-align: center;">
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </div>
-                                                {% else %}
-                                                    <div style="text-align: center;">
-                                                        <i class="fas fa-arrow-down"></i>
-                                                    </div>
+            <div class="accordion" id="accordionMainTopics">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-toggle="collapse" data-target="#collapseMainTopics" aria-expanded="false" aria-controls="collapseMainTopics">
+                            Ключевые топики
+                        </h3>
+                    </div>
+                    <div id="collapseMainTopics" class="collapse" aria-labelledby="collapseMainTopics" data-parent="#accordionMainTopics">
+                        <div class="card-body">
+                            <div id="main-topics">
+                                <script>
+                                    var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
+                                    var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
+                                </script>
+                                {% for criterion in criterions %}
+                                    <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
+                                    <table id="main-topics-table" class="table table-bordered table-hover">
+                                        <thead>
+                                        <tr role="row">
+                                            <th>Топик</th>
+                                            <th>Прогнозируемая резонансность</th>
+                                            <th>Прогнозируемая продолжительность</th>
+                                            <th>Тренд</th>
+                                            <th>Вес</th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for topic in posneg_top_topics|get_item:criterion.id %}
+                                            <tr>
+                                                <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.resonance_score %}
+                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                                                    </script>
                                                 {% endif %}
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.trend_score and topic_trend_score != 0 %}
-                                            <script>
-                                                $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
-                                        <td>
-                                            <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                                                <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.period_days %}
+                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.trend_score and topic_trend_score != 0 %}
+                                                        {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                        {% if topic.trend_score > 0 %}
+                                                            <div style="text-align: center;">
+                                                                <i class="fas fa-arrow-up"></i>
+                                                            </div>
+                                                        {% else %}
+                                                            <div style="text-align: center;">
+                                                                <i class="fas fa-arrow-down"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.trend_score and topic_trend_score != 0 %}
+                                                    <script>
+                                                        $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                <td>
+                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
+                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
 
-                            {% if criterion.value_range_from < 0 %}
-                            <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
-                            <table id="main-topics-table" class="table table-bordered table-hover">
-                                <thead>
-                                <tr role="row">
-                                    <th>Топик</th>
-                                    <th>Прогнозируемая резонансность</th>
-                                    <th>Прогнозируемая продолжительность</th>
-                                    <th>Тренд</th>
-                                    <th>Вес</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for topic in posneg_bottom_topics|get_item:criterion.id %}
-                                    <tr>
-                                        <td id="name_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                                        <td id="resonance_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.resonance_score %}
-                                                {{ topic.resonance_score|floatformat:3|unlocalize }}
-                                            {% else %}
-                                                Фоновый топик
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.resonance_score %}
-                                            <script>
-                                                $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.period_days %}
-                                                {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
-                                            {% else %}
-                                                Фоновый топик
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.resonance_score %}
-                                            <script>
-                                                $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                            {% if topic.trend_score and topic_trend_score != 0 %}
-                                                {{ topic.trend_score|floatformat:3|unlocalize }}
-                                                {% if topic.trend_score > 0 %}
-                                                    <div style="text-align: center;">
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </div>
-                                                {% else %}
-                                                    <div style="text-align: center;">
-                                                        <i class="fas fa-arrow-down"></i>
-                                                    </div>
+                                    {% if criterion.value_range_from < 0 %}
+                                    <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
+                                    <table id="main-topics-table" class="table table-bordered table-hover">
+                                        <thead>
+                                        <tr role="row">
+                                            <th>Топик</th>
+                                            <th>Прогнозируемая резонансность</th>
+                                            <th>Прогнозируемая продолжительность</th>
+                                            <th>Тренд</th>
+                                            <th>Вес</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for topic in posneg_bottom_topics|get_item:criterion.id %}
+                                            <tr>
+                                                <td id="name_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                <td id="resonance_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.resonance_score %}
+                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
+                                                    </script>
                                                 {% endif %}
-                                            {% endif %}
-                                        </td>
-                                        {% if topic.trend_score and topic_trend_score != 0 %}
-                                            <script>
-                                                $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
-                                            </script>
-                                        {% endif %}
-                                        <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
-                                        <td>
-                                            <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                                <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.period_days %}
+                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.trend_score and topic_trend_score != 0 %}
+                                                        {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                        {% if topic.trend_score > 0 %}
+                                                            <div style="text-align: center;">
+                                                                <i class="fas fa-arrow-up"></i>
+                                                            </div>
+                                                        {% else %}
+                                                            <div style="text-align: center;">
+                                                                <i class="fas fa-arrow-down"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.trend_score and topic_trend_score != 0 %}
+                                                    <script>
+                                                        $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                <td>
+                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
+                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% endif %}
                                 {% endfor %}
-                                </tbody>
-                            </table>
-                            {% endif %}
-                        {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -705,11 +716,15 @@
     {# Главные новости топика #}
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="accordion" id="accordionMainNews">
+                <div class="card">
                 <div class="card-header">
-                    <h3>Ключевые новости по критериям</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseMainNews" aria-expanded="false" aria-controls="collapseMainNews">
+                        Ключевые новости по критериям
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div id="collapseMainNews" class="collapse" aria-labelledby="collapseMainNews" data-parent="#accordionMainNews">
+                    <div class="card-body">
                     <div id="search-results">
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
@@ -750,6 +765,8 @@
                         </table>
                     </div>
                 </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
