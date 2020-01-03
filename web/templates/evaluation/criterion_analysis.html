@@ -624,6 +624,7 @@
                                 </tbody>
                             </table>
 
+                            {% if criterion.value_range_from < 0 %}
                             <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
                             <table id="main-topics-table" class="table table-bordered table-hover">
                                 <thead>
@@ -693,6 +694,7 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
