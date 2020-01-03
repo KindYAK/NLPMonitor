@@ -26,7 +26,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['criterions_list'] = EvalCriterion.objects.all()
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
-        context['topic_modellings'] = list(set([("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices]))
+        context['topic_modellings'] = list(sorted(list(set([("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices]))))
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
