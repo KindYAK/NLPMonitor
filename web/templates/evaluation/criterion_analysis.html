@@ -283,6 +283,7 @@
     </form>
 
     {% cache 28800 criterion_analysis request.GET %}
+    {% if groups|length > 0 %}
     {# Графики динамика группы #}
     <div class="row">
         <div class="col-12">
@@ -352,6 +353,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     {# Графики динамика критериев #}
     <div class="row">
