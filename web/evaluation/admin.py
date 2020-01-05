@@ -3,8 +3,8 @@ from .models import *
 
 
 class EvalCriterionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'group', 'is_categorical', 'is_integer', )
-    list_filter = ('group', 'is_categorical', 'is_integer', )
+    list_display = ('name', 'group', 'is_categorical', 'is_integer', 'calc_virt_negative', )
+    list_filter = ('group', 'is_categorical', 'is_integer', 'calc_virt_negative', )
     search_fields = ('name', )
 
 
