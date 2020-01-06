@@ -38,7 +38,8 @@ def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weigh
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
               .filter("terms", topic_id=topics).sort("-topic_weight") \
               .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-              .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
+              .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
+              .filter("range", datetime={"lte": datetime.datetime.now().date()}) \
               .source(['document_es_id', 'topic_weight'])[:100]
     std.aggs.bucket(name="dynamics",
                     agg_type="date_histogram",
