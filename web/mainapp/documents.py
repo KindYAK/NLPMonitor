@@ -155,7 +155,7 @@ class TopicDocument(es.Document):
         using = ES_CLIENT
 
         settings = {
-            "number_of_shards": 8,
+            "number_of_shards": 2,
             "number_of_replicas": 1,
             "max_result_window": 5000000,
         }
@@ -193,7 +193,7 @@ class DocumentEval(es.Document):
         using = ES_CLIENT
 
         settings = {
-            "number_of_shards": 8,
+            "number_of_shards": 2,
             "number_of_replicas": 1,
             "max_result_window": 5000000,
         }
