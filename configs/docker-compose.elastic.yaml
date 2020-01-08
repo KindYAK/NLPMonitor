@@ -43,6 +43,7 @@ services:
       - 9300
     networks:
       - esnet
+      - network
 
   kibana_cluster:
     image: 'kibana:${VERSION}'
@@ -63,7 +64,25 @@ services:
       - '5603:5000'
     networks:
       - esnet
+      - network
+
+  metricbeat:
+    image: 'docker.elastic.co/beats/metricbeat:7.5.1'
+    user: root
+    networks:
+      - esnet
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - metricbeat:/usr/share/metricbeat/data
+      - ./elastic_configs/metricbeat.basic.yml:/usr/share/metricbeat/metricbeat.yml
+    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
 
 networks:
   esnet:
     driver: bridge
+
+volumes:
+  metricbeat:
