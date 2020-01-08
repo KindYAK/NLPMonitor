@@ -67,7 +67,7 @@ services:
       - network
 
   metricbeat:
-    image: 'docker.elastic.co/beats/metricbeat:7.5.1'
+    image: 'docker.elastic.co/beats/metricbeat:${VERSION}'
     user: root
     networks:
       - esnet

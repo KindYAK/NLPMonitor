@@ -5,15 +5,21 @@ services:
       - elastic_configs/jvm.master.prod.env
     volumes:
       - /_DATA/elastic/esjack1/:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./es_backup.sh:/es_backup.sh
 
   master2:
     env_file:
       - elastic_configs/jvm.master.prod.env
     volumes:
       - /_FLASH/elastic/esjack2/:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./es_backup.sh:/es_backup.sh
 
   master3:
     env_file:
       - elastic_configs/jvm.master.prod.env
     volumes:
       - /_FLASH/elastic/esjack3/:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./es_backup.sh:/es_backup.sh
