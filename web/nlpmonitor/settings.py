@@ -224,7 +224,7 @@ ES_CLIENT = Elasticsearch(
         {'host': 'master3'},
     ],
     timeout=60,
-    max_retries=100,
+    max_retries=10,
     retry_on_timeout=True
 )
 
