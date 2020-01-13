@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
       - redis
-      - elasticsearch
+      - elasticsearch1
     networks:
       - network
     restart: always
@@ -43,36 +43,6 @@ services:
       - network
     command: postgres -c 'max_connections=9000'
     restart: always
-  elasticsearch:
-    image: "elasticsearch:7.3.1"
-    expose:
-      - 9200
-      - 9300
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-      - ../es_backup:/backup
-      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./es_backup.sh:/es_backup.sh
-    environment:
-      - cluster.name="elk-nlpmonitor-cluster"
-      - network.host=0.0.0.0
-      - discovery.type=single-node
-      - discovery.zen.minimum_master_nodes=1
-      - ${ELASTIC_JAVA_OPTIONS}
-    networks:
-      - network
-    restart: always
-  kibana:
-    image: "kibana:7.3.1"
-    environment:
-      - server.name="kibana"
-      - server.host="0"
-      - elasticsearch.url=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    networks:
-      - network
-    restart: always
   redis:
     image: "redis:5.0.5"
     networks:
@@ -85,8 +55,6 @@ volumes:
   django_root:
     driver: local
   pgdata:
-    driver: local
-  elasticsearch_data:
     driver: local
   redis:
     driver: local

@@ -221,9 +221,9 @@ ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 from elasticsearch import Elasticsearch
 ES_CLIENT = Elasticsearch(
     hosts=[
-        {'host': 'master1'},
-        {'host': 'master2'},
-        {'host': 'master3'},
+        {'host': 'elasticsearch1'},
+        {'host': 'elasticsearch2'},
+        {'host': 'elasticsearch3'},
     ],
     timeout=60,
     max_retries=10,

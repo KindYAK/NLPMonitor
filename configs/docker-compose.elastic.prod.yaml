@@ -1,25 +1,76 @@
 version: '3'
 services:
-  master1:
+  elasticsearch1:
+    image: "elasticsearch:${VERSION}"
     env_file:
+      - elastic_configs/jack/es-jack1.env
       - elastic_configs/jvm.master.prod.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+      - 9300
+    networks:
+      - esnet
+      - network
     volumes:
       - /_DATA/elastic/esjack1/:/usr/share/elasticsearch/data
       - ../es_backup:/backup
       - ./es_backup.sh:/es_backup.sh
+    restart: always
 
-  master2:
+  elasticsearch2:
+    image: "elasticsearch:${VERSION}"
     env_file:
+      - elastic_configs/jack/es-jack2.env
       - elastic_configs/jvm.master.prod.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+      - 9300
+    networks:
+      - esnet
+      - network
     volumes:
       - /_FLASH/elastic/esjack2/:/usr/share/elasticsearch/data
       - ../es_backup:/backup
       - ./es_backup.sh:/es_backup.sh
+    restart: always
 
-  master3:
+  elasticsearch3:
+    image: "elasticsearch:${VERSION}"
     env_file:
+      - elastic_configs/jack/es-jack3.env
       - elastic_configs/jvm.master.prod.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+      - 9300
+    networks:
+      - esnet
+      - network
     volumes:
       - /_FLASH/elastic/esjack3/:/usr/share/elasticsearch/data
       - ../es_backup:/backup
       - ./es_backup.sh:/es_backup.sh
+    restart: always
+
+  kibana:
+    environment:
+      - SERVER_REWRITEBASEPATH=true
+      - SERVER_BASEPATH=${KIBANA_PRIVATE_PATH}
+
+  metricbeat:
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock

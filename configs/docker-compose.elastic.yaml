@@ -1,62 +1,14 @@
 version: '3'
 services:
-  master1:
-    image: "elasticsearch:${VERSION}"
-    env_file:
-      - elastic_configs/jack/es-jack1.env
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    expose:
-      - 9200
-      - 9300
-    networks:
-      - esnet
-      - network
-    restart: always
-
-  master2:
-    image: "elasticsearch:${VERSION}"
-    env_file:
-      - elastic_configs/jack/es-jack2.env
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    expose:
-      - 9200
-      - 9300
-    networks:
-      - esnet
-      - network
-    restart: always
-
-  master3:
-    image: "elasticsearch:${VERSION}"
-    env_file:
-      - elastic_configs/jack/es-jack3.env
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    expose:
-      - 9200
-      - 9300
-    networks:
-      - esnet
-      - network
-    restart: always
-
-  kibana_cluster:
+  kibana:
     image: 'kibana:${VERSION}'
     environment:
-      SERVER_NAME: kibana_cluster.local
-      ELASTICSEARCH_HOSTS: http://master1:9200
-    ports:
-      - '${KIBANA_EXTERNAL_PORT}:5601'
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
+    expose:
+      - 5601
     depends_on:
-      - master1
+      - elasticsearch1
     networks:
       - esnet
       - network
@@ -64,8 +16,8 @@ services:
 
   hq:
     image: 'elastichq/elasticsearch-hq'
-    ports:
-      - '5603:5000'
+    expose:
+      - 5000
     networks:
       - esnet
       - network
@@ -77,10 +29,6 @@ services:
     networks:
       - esnet
     volumes:
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock
       - metricbeat:/usr/share/metricbeat/data
       - ./elastic_configs/metricbeat.basic.yml:/usr/share/metricbeat/metricbeat.yml
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
@@ -92,3 +40,4 @@ networks:
 
 volumes:
   metricbeat:
+    driver: local

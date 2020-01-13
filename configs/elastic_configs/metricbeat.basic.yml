@@ -1,6 +1,6 @@
 metricbeat.modules:
   - module: system
-    metricsets: ["cpu","memory","network"]
+    metricsets: ["cpu","memory","network","diskio"]
     enabled: true
     period: 15s
     processes: ['.*']
@@ -9,7 +9,7 @@ metricbeat.modules:
     metricsets: ["container", "cpu", "diskio", "healthcheck", "info", "memory", "network"]
     hosts: ["unix:///var/run/docker.sock"]
     period: 10s
-  
+
   - module: kibana
     metricsets: ["status"]
     period: 10s
@@ -18,7 +18,7 @@ metricbeat.modules:
     enabled: true
 
 output.elasticsearch:
-  hosts: ["master1:9200", "master2:9200", "master3:9200"]
+  hosts: ["elasticsearch1:9200", "elasticsearch2:9200", "elasticsearch3:9200"]
 
 # setup.kibana:
 #   host: "http://kibana_cluster:5601"
