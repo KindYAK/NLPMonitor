@@ -207,7 +207,9 @@ ES_INDEX_EMBEDDING = 'embedding'
 ES_INDEX_TOPIC_MODELLING = 'topic_modelling'
 # ES_INDEX_TOPIC_DOCUMENT = 'topic_document'
 ES_INDEX_TOPIC_DOCUMENT = 'topic_document_sharded'
+ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS = 'unique_ids_topic_document_sharded'
 ES_INDEX_DOCUMENT_EVAL = 'document_eval'
+ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS = 'unique_ids_document_eval'
 ES_INDEX_CLASSIFIER = 'classifier'
 ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
 ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
@@ -246,7 +248,8 @@ SHELL_PLUS_PRE_IMPORTS = (
     ('nlpmonitor.settings', ('ES_CLIENT', 'ES_INDEX_DOCUMENT', 'ES_INDEX_DASHOBARD', 'ES_INDEX_EMBEDDING',
                              'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT', 'ES_INDEX_CLASSIFIER',
                              'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL',
-                             'ES_INDEX_CUSTOM_DICTIONARY_WORD', )),
+                             'ES_INDEX_CUSTOM_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS',
+                             'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID', )),
     ('elasticsearch_dsl', ('Search', 'Index', 'Q')),
     'datetime',
 )

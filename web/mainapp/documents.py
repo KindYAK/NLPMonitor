@@ -7,7 +7,7 @@ from elasticsearch_dsl import Index, MetaField
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
-    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL
+    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -180,6 +180,26 @@ class TopicDocument(es.Document):
         }
 
 
+class TopicDocumentUniqueIDs(es.Document):
+    document_es_id = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS # f"{ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS}_{tm}"
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 3,
+            "number_of_replicas": 1,
+        }
+        mappings = {
+            "properties": {
+                "document_es_id": {
+                    "type": "keyword",
+                },
+            }
+        }
+
+
 class DocumentEval(es.Document):
     value = es.Float()
     document_es_id = es.Keyword()
@@ -216,6 +236,26 @@ class DocumentEval(es.Document):
                 },
                 "topic_ids_bottom": {
                     "type": "keyword"
+                },
+            }
+        }
+
+
+class DocumentEvalUniqueIDs(es.Document):
+    document_es_id = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS # f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}"
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 3,
+            "number_of_replicas": 1,
+        }
+        mappings = {
+            "properties": {
+                "document_es_id": {
+                    "type": "keyword",
                 },
             }
         }
