@@ -46,17 +46,21 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std = std.filter("range", document_datetime={"lte": date_to})
 
     # Posneg distribution
-    range_center = (criterion.value_range_from + criterion.value_range_to) / 2
-    neutrality_threshold = 0.1
+    if criterion.value_range_from < 0:
+        range_center = (criterion.value_range_from + criterion.value_range_to) / 2
+        neutral_neighborhood = 0.1
+    else:
+        range_center = 0
+        neutral_neighborhood = 0.001
     std.aggs.bucket(
         name="posneg",
         agg_type="range",
         field="value",
         ranges=
         [
-            {"from": criterion.value_range_from, "to": range_center-neutrality_threshold},
-            {"from": range_center - neutrality_threshold, "to": range_center + neutrality_threshold},
-            {"from": range_center + neutrality_threshold, "to": criterion.value_range_to},
+            {"from": criterion.value_range_from, "to": range_center-neutral_neighborhood},
+            {"from": range_center - neutral_neighborhood, "to": range_center + neutral_neighborhood},
+            {"from": range_center + neutral_neighborhood, "to": criterion.value_range_to},
         ]
     )
     std.aggs['posneg'].bucket(name="top_topics",
@@ -163,6 +167,31 @@ def normalize_documents_eval_dynamics(document_evals, total_metrics_dict):
                 bucket.dynamics_weight.value *= (1 + abs(val - total_val))
         else:
             bucket.dynamics_weight.value /= normalizer
+
+
+def normalize_documents_eval_dynamics_with_virt_negative(document_evals, topic_modelling, granularity, criterion):
+    s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}_neg") \
+        .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
+        .source([])[:0]
+    s.aggs.bucket(name="dynamics",
+                    agg_type="date_histogram",
+                    field="document_datetime",
+                    calendar_interval=granularity) \
+        .metric("dynamics_weight", agg_type="avg", field="value")
+    r = s.execute()
+    negative_values_dict = dict(
+        (t.key_as_string, t.dynamics_weight.value) for t in r.aggregations.dynamics.buckets
+    )
+    for bucket in document_evals.aggregations.dynamics.buckets:
+        if not bucket.dynamics_weight.value:
+            bucket.dynamics_weight.value = 0
+            continue
+        val = bucket.dynamics_weight.value
+        neg_val = negative_values_dict[bucket.key_as_string]
+        try:
+            bucket.dynamics_weight.value = (val / (val + neg_val))
+        except ZeroDivisionError:
+            bucket.dynamics_weight.value = val
 
 
 def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):

@@ -99,13 +99,15 @@ class CriterionEvalAnalysisView(TemplateView):
         else:
             context['source_weight'][criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)
 
-        context['y_axis_from'] = min(-1,
-                                     context['y_axis_from'] if 'y_axis_from' in context else -1,
-                                     min([bucket.dynamics_weight.value for bucket in absolute_value])
+        context['y_axis_from'] = min(
+                                         criterion.value_range_from,
+                                         context['y_axis_from'] if 'y_axis_from' in context else criterion.value_range_from,
+                                         min([bucket.dynamics_weight.value for bucket in absolute_value])
                                      )
-        context['y_axis_to'] = max(1,
-                                   context['y_axis_to'] if 'y_axis_to' in context else 1,
-                                   max([bucket.dynamics_weight.value for bucket in absolute_value])
+        max_value = max([bucket.dynamics_weight.value for bucket in absolute_value])
+        context['y_axis_to'] = max(
+                                       context['y_axis_to'] if 'y_axis_to' in context else max_value,
+                                       max_value,
                                    )
         if criterion.value_range_from < 0:
             context['posneg_distribution'][criterion.id] = document_evals.aggregations.posneg
@@ -129,7 +131,13 @@ class CriterionEvalAnalysisView(TemplateView):
         top_news_total.update(top_news)
 
         # Normalize
-        normalize_documents_eval_dynamics(document_evals, self.total_criterion_date_value_dict[criterion.id])
+        if not criterion.calc_virt_negative:
+            normalize_documents_eval_dynamics(document_evals, self.total_criterion_date_value_dict[criterion.id])
+        else:
+            normalize_documents_eval_dynamics_with_virt_negative(document_evals,
+                                                                 context['topic_modelling'],
+                                                                 context['granularity'],
+                                                                 criterion)
 
         absolute_value = document_evals.aggregations.dynamics.buckets
         positive = []
