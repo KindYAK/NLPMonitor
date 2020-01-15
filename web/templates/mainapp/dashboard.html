@@ -32,13 +32,13 @@
                         <div class="col-md-3">
                             <div class="form-group row">
                                 <div class="col-md-2">{{ form.corpus.label_tag }}</div>
-                                <div class="col-md-10">{% render_field form.corpus data-placeholder="Выберите корпус" class="form-control select2" %}</div>
+                                <div class="col-md-10">{% render_field form.corpus data-placeholder="Выберите корпус" class="form-control select2 select2-single" %}</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group row">
                                 <div class="col-md-2">{{ form.tags.label_tag }}</div>
-                                <div class="col-md-10">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2" multiple="multiple" %}</div>
+                                <div class="col-md-10">{% render_field form.tags data-placeholder="Выберите теги" class="form-control select2 select2-multi" multiple="multiple" %}</div>
                             </div>
                         </div>
                         <div class="col-md-3">

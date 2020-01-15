@@ -53,7 +53,7 @@
                                                         {{ field.label_tag }}
                                                         <i class="fas fa-question-circle" data-toggle="tooltip" title="Если вы не нашли нужный источник, пожалуйста напишите на nlpmonitor.kz@gmail.com"></i>
                                                     </div>
-                                                    <div class="col-md-8">{% render_field field class="form-control select2" %}</div>
+                                                    <div class="col-md-8">{% render_field field class="form-control select2 select2-single" %}</div>
                                                 {% elif field.name == "datetime" %}
                                                     <div class="col-md-4">{{ field.label_tag }}</div>
                                                     <div class="col-md-8 input-group date">
