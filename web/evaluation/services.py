@@ -343,20 +343,36 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
     return buckets
 
 
-def get_total_group_dynamics(topic_modelling, criterions, granularity, eval_indices):
-    std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}"
-                                         for criterion in criterions
-                                         if f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}" in eval_indices]) \
-        .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
-        .source([])[:0]
-    std.aggs.bucket(name="dynamics",
-                    agg_type="date_histogram",
-                    field="document_datetime",
-                    calendar_interval=granularity) \
-        .metric("dynamics_weight", agg_type="avg", field="value")
-    r = std.execute()
-    dynamics = apply_fir_filter([bucket.dynamics_weight.value for bucket in r.aggregations.dynamics.buckets], granularity)
+def get_total_group_dynamics(absoulte_values_dict, criterions, granularity, is_smooth):
+    from collections import defaultdict
+
+    # Dictionarize
+    criterion_dynamics_dictionarized = {}
+    all_ticks = set()
+    for criterion in criterions:
+        if not criterion.id in absoulte_values_dict:
+            continue
+        criterion_dynamics_dictionarized[criterion.id] = defaultdict(
+            int,
+            ((bucket.key_as_string, bucket.dynamics_weight.value) for bucket in absoulte_values_dict[criterion.id])
+        )
+        all_ticks.update(criterion_dynamics_dictionarized[criterion.id].keys())
+
+    # Calculate total group dynamics
+    number_of_criterions = sum([c.id in absoulte_values_dict for c in criterions])
+    if number_of_criterions == 0:
+        return {}
+    total_group_dynamics = {}
+    for tick in all_ticks:
+        total_group_dynamics[tick] = \
+            sum((criterion_dynamics_dictionarized[c.id][tick] for c in criterions if c.id in absoulte_values_dict)) / number_of_criterions
+
+    # Sort, prepare, return
+    ticks_sorted = sorted(list(all_ticks))
+    dynamics = [total_group_dynamics[tick] for tick in ticks_sorted]
+    if is_smooth:
+        dynamics = apply_fir_filter(dynamics, granularity)
     return {
-        "ticks": [bucket.key_as_string for bucket in r.aggregations.dynamics.buckets],
+        "ticks": ticks_sorted,
         "dynamics": dynamics,
     }

@@ -187,7 +187,12 @@ class CriterionEvalAnalysisView(TemplateView):
         self.criterion_eval_update_context(context, criterion, document_evals, absolute_value, positive, negative)
 
     def get_group_evals(self, context, group):
-        context['group_total_dynamics'][group['id']] = get_total_group_dynamics(context['topic_modelling'], group['criterions'], context['granularity'], self.eval_indices)
+        context['group_total_dynamics'][group['id']] = get_total_group_dynamics(
+                                                                                    context['absolute_value'],
+                                                                                    group['criterions'],
+                                                                                    context['granularity'],
+                                                                                    context['smooth'],
+                                                                                )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
