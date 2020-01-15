@@ -121,10 +121,14 @@
     {# Фильтрация #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionFilteringSetting">
             <div class="card">
                 <div class="card-header">
-                    <h3>Фильтрация</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseFilteringSetting" aria-expanded="false" aria-controls="collapseFilteringSetting">
+                        Фильтрация
+                    </h3>
                 </div>
+                <div id="collapseFilteringSetting" class="collapse show" aria-labelledby="collapseFilteringSetting" data-parent="#accordionFilteringSetting">
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
@@ -167,6 +171,8 @@
                         </div>
                     </div>
                 </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -174,10 +180,14 @@
     {# Аналитические запросы #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionAnalyticalQuerySetting">
             <div class="card">
                 <div class="card-header">
-                    <h3>Аналитические запросы</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseAnalyticalQuerySetting" aria-expanded="false" aria-controls="collapseAnalyticalQuerySetting">
+                        Аналитические запросы
+                    </h3>
                 </div>
+                <div id="collapseAnalyticalQuerySetting" class="collapse show" aria-labelledby="collapseAnalyticalQuerySetting" data-parent="#accordionAnalyticalQuerySetting">
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
@@ -227,6 +237,8 @@
                         </div>
                     </div>
                 </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -234,10 +246,14 @@
     {# Управление графиками #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionGraphSetting">
             <div class="card">
                 <div class="card-header">
-                    <h3>Графики - опции</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseGraphSetting" aria-expanded="false" aria-controls="collapseGraphSetting">
+                        Графики - опции
+                    </h3>
                 </div>
+                <div id="collapseGraphSetting" class="collapse" aria-labelledby="collapseGraphSetting" data-parent="#accordionGraphSetting">
                 <div class="card-body">
                     <div id="plotsMenu">
                         <div class="row">
@@ -277,20 +293,72 @@
                         </div>
                     </div>
                 </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
     </form>
 
     {% cache 28800 criterion_analysis request.GET %}
+    {% if posneg_distribution %}
+    {# Распределение позитив-негатив #}
+    <div class="row">
+        <div class="col-12">
+            <div class="accordion" id="accordionPosNeg">
+            <div class="card">
+                <div class="card-header">
+                    <h3 data-toggle="collapse" data-target="#collapsePosNeg" aria-expanded="false" aria-controls="collapsePosNeg">
+                        Позитив-негатив
+                    </h3>
+                </div>
+                <div id="collapsePosNeg" class="collapse show" aria-labelledby="collapsePosNeg" data-parent="#accordionPosNeg">
+                {% for criterion in criterions %}
+                    {% if criterion.value_range_from < 0 %}
+                        <div class="card-body">
+                            <div id="bar_plot">
+                                <div id="posneg_distribution_{{ criterion.id }}"></div>
+                                <script>
+                                    var data = [
+                                        {
+                                            x: ["Негатив", "Нейтральные", "Позитив"],
+                                            y: [{% for bucket in posneg_distribution|get_item:criterion.id|get_item:'buckets' %}{{ bucket.doc_count }}, {% endfor %}],
+                                            marker: {
+                                                color: ['#d3322b', '#fee42c', '#23964f']
+                                            },
+                                            type: 'bar'
+                                        }
+                                    ];
+                                    var layout = {
+                                        title: '{{ criterion.name }}',
+                                        showlegend: false,
+                                        bargap: 0.025,
+                                    };
+                                    Plotly.plot('posneg_distribution_{{ criterion.id }}', data, layout, {responsive: true});
+                                </script>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% if groups|length > 0 %}
     {# Графики динамика группы #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionGroupDynamics">
             <div class="card">
                 <div class="card-header">
-                    <h3>Динамика общая</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseGroupDynamics" aria-expanded="false" aria-controls="collapseGroupDynamics">
+                        Динамика общая
+                    </h3>
                 </div>
+                <div id="collapseGroupDynamics" class="collapse show" aria-labelledby="collapseGroupDynamics" data-parent="#accordionGroupDynamics">
                 {% for group in groups %}
                     {% if group_total_dynamics|get_item:group.id %}
                         <div class="card-body">
@@ -350,6 +418,8 @@
                         </div>
                     {% endif %}
                 {% endfor %}
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -358,10 +428,14 @@
     {# Графики динамика критериев #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionDynamics">
             <div class="card">
                 <div class="card-header">
-                    <h3>Динамика критериев</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseDynamics" aria-expanded="false" aria-controls="collapseDynamics">
+                        Динамика критериев
+                    </h3>
                 </div>
+                <div id="collapseDynamics" class="collapse show" aria-labelledby="collapseDynamics" data-parent="#accordionDynamics">
                 <div class="card-body">
                     <div id="dynamic_plots">
                         {# Абсолютные значения #}
@@ -462,6 +536,8 @@
                         {% endif %}
                     {% endfor %}
                 </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -469,10 +545,14 @@
     {# Бар график #}
     <div class="row">
         <div class="col-12">
+            <div class="accordion" id="accordionBarPlots">
             <div class="card">
                 <div class="card-header">
-                    <h3>Распределение по СМИ</h3>
+                    <h3 data-toggle="collapse" data-target="#collapseBarPlots" aria-expanded="false" aria-controls="collapseBarPlots">
+                        Распределение по СМИ
+                    </h3>
                 </div>
+                <div id="collapseBarPlots" class="collapse show" aria-labelledby="collapseBarPlots" data-parent="#accordionBarPlots">
                 {% for criterion in criterions %}
                 <div class="card-body">
                     <div id="bar_plot">
@@ -502,49 +582,11 @@
                     </div>
                 </div>
                 {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    {% if posneg_distribution %}
-        {# Распределение позитив-негатив #}
-        <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Позитив-негатив</h3>
                 </div>
-                {% for criterion in criterions %}
-                    {% if criterion.value_range_from < 0 %}
-                        <div class="card-body">
-                            <div id="bar_plot">
-                                <div id="posneg_distribution_{{ criterion.id }}"></div>
-                                <script>
-                                    var data = [
-                                        {
-                                            x: ["Негатив", "Нейтральные", "Позитив"],
-                                            y: [{% for bucket in posneg_distribution|get_item:criterion.id|get_item:'buckets' %}{{ bucket.doc_count }}, {% endfor %}],
-                                            marker: {
-                                                color: ['#d3322b', '#fee42c', '#23964f']
-                                            },
-                                            type: 'bar'
-                                        }
-                                    ];
-                                    var layout = {
-                                        title: '{{ criterion.name }}',
-                                        showlegend: false,
-                                        bargap: 0.025,
-                                    };
-                                    Plotly.plot('posneg_distribution_{{ criterion.id }}', data, layout, {responsive: true});
-                                </script>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
+            </div>
             </div>
         </div>
     </div>
-    {% endif %}
 
     {# Главные топики #}
     <div class="row">
@@ -790,5 +832,9 @@
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
             '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
             ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
+    </script>
+
+    <script>
+        $('.collapse').collapse('hide')
     </script>
 {% endblock %}
