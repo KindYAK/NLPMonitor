@@ -358,14 +358,14 @@ def get_total_group_dynamics(absoulte_values_dict, criterions, granularity, is_s
         )
         all_ticks.update(criterion_dynamics_dictionarized[criterion.id].keys())
 
-    # Calculate total group dynamics
-    number_of_criterions = sum([c.id in absoulte_values_dict for c in criterions])
-    if number_of_criterions == 0:
+    if not all_ticks:
         return {}
+
+    # Calculate total group dynamics
     total_group_dynamics = {}
     for tick in all_ticks:
         total_group_dynamics[tick] = \
-            sum((criterion_dynamics_dictionarized[c.id][tick] for c in criterions if c.id in absoulte_values_dict)) / number_of_criterions
+            sum((criterion_dynamics_dictionarized[c.id][tick] for c in criterions if c.id in absoulte_values_dict))
 
     # Sort, prepare, return
     ticks_sorted = sorted(list(all_ticks))
