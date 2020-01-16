@@ -49,6 +49,7 @@ class SearchView(TemplateView):
         context = super().get_context_data(**kwargs)
         form = self.form_class(data=self.request.GET)
         context['form'] = form
+        search_request = {}
         if form.is_valid():
             search_request = form.cleaned_data
 
@@ -60,7 +61,6 @@ class SearchView(TemplateView):
         if cache.get(key):
             return context
 
-        search_request = {}
         # Total metrics
         sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
         sd_total.aggs.bucket(name="dynamics",
