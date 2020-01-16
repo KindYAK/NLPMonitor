@@ -7,10 +7,10 @@
 {% load serializers %}
 
 {% block title %}
-    Оценка по критерию
+    Оценки по критериям
 {% endblock %}
 {% block heading %}
-    Оценка по критерию
+    Оценки по критериям
 {% endblock %}
 
 {% block head %}
@@ -58,13 +58,16 @@
 {% endblock %}
 
 {% block content %}
+    <div class="card-header">
+        <h1 class="m-0 text-dark">Формирование запроса</h1>
+    </div>
     <form method="GET" action="" style="display: contents;">
     {# Основная форма #}
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Управление</h3>
+                    <h3>Выбор модели и критериев</h3>
                 </div>
                 <div class="card-body">
                     <div id="plotsMenu">
@@ -304,6 +307,10 @@
     </form>
 
     {% cache 28800 criterion_analysis request.GET %}
+    <div class="card-header">
+        <h1 class="m-0 text-dark">Результаты</h1>
+    </div>
+
     {% if posneg_distribution %}
     {# Распределение позитив-негатив #}
     <div class="row">
