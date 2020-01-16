@@ -125,6 +125,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseFilteringSetting" aria-expanded="false" aria-controls="collapseFilteringSetting">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Фильтрация
                     </h3>
                 </div>
@@ -184,6 +185,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseAnalyticalQuerySetting" aria-expanded="false" aria-controls="collapseAnalyticalQuerySetting">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Аналитические запросы
                     </h3>
                 </div>
@@ -250,6 +252,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseGraphSetting" aria-expanded="false" aria-controls="collapseGraphSetting">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Графики - опции
                     </h3>
                 </div>
@@ -309,6 +312,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapsePosNeg" aria-expanded="false" aria-controls="collapsePosNeg">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Позитив-негатив
                     </h3>
                 </div>
@@ -355,6 +359,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseGroupDynamics" aria-expanded="false" aria-controls="collapseGroupDynamics">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Динамика общая
                     </h3>
                 </div>
@@ -432,6 +437,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseDynamics" aria-expanded="false" aria-controls="collapseDynamics">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Динамика критериев
                     </h3>
                 </div>
@@ -549,6 +555,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseBarPlots" aria-expanded="false" aria-controls="collapseBarPlots">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Распределение по СМИ
                     </h3>
                 </div>
@@ -595,6 +602,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 data-toggle="collapse" data-target="#collapseMainTopics" aria-expanded="false" aria-controls="collapseMainTopics">
+                            <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                             Ключевые топики
                         </h3>
                     </div>
@@ -764,6 +772,7 @@
                 <div class="card">
                 <div class="card-header">
                     <h3 data-toggle="collapse" data-target="#collapseMainNews" aria-expanded="false" aria-controls="collapseMainNews">
+                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
                         Ключевые новости по критериям
                     </h3>
                 </div>
@@ -835,6 +844,26 @@
     </script>
 
     <script>
-        $('.collapse').collapse('hide')
+        $('.collapse').collapse('hide');
+        $('h3').hover(
+            function () {
+                $(this).find('i').addClass('fas');
+                $(this).find('i').removeClass('far');
+            },
+            function () {
+                $(this).find('i').addClass('far');
+                $(this).find('i').removeClass('fas');
+            }
+        );
+
+        $('h3').click(function(){
+            if($(this).find('i').hasClass('fa-caret-square-down')) {
+                $(this).find('i').addClass('fa-caret-square-up');
+                $(this).find('i').removeClass('fa-caret-square-down');
+            } else {
+                $(this).find('i').addClass('fa-caret-square-down');
+                $(this).find('i').removeClass('fa-caret-square-up');
+            }
+        });
     </script>
 {% endblock %}
