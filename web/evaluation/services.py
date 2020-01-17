@@ -362,7 +362,7 @@ def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight
     range_center = (criterion.value_range_from + criterion.value_range_to) / 2
     neutrality_threshold = 0.1
     topic_eval_sorted = list(filter(lambda x: x[1] > range_center + neutrality_threshold, topic_eval_sorted))
-    topic_eval_sorted = topic_eval_sorted[:len(topic_eval_sorted) // 2]
+    topic_eval_sorted = topic_eval_sorted[:(len(topic_eval_sorted) + 1) // 2]
 
     # Get least highlighted topics
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
@@ -377,7 +377,7 @@ def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight
         .metric("topic_weight", agg_type="sum", field="topic_weight")
     r = std.execute()
     topics_sorted = sorted(((bucket.key, bucket.topic_weight.value) for bucket in r.aggregations.topics.buckets), key=lambda x: x[1] / topic_eval_dict[x[0]], reverse=False)
-    topics_sorted = topics_sorted[:min(10, len(topics_sorted) // 2)]
+    topics_sorted = topics_sorted[:min(10, (len(topics_sorted) + 1) // 2)]
 
     # Creating result list
     res = [
@@ -393,8 +393,8 @@ def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight
             "info": topics_dict[topic[0]],
         } for topic in topics_sorted
     ]
-    max_weight = max((t['weight'] for t in res))
-    for t in res:
+    max_weight = max((t['weight'] for t in res)) if res else None
+    for t in (res if res else []):
         t['weight'] /= max_weight
     return res
 
