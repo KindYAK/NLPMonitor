@@ -398,7 +398,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                             "weight": bucket.source_value.value,
                         } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
                     ]
-                ) if hasattr(buckets[0], "doc_count") else (criterion_id, buckets)) for criterion_id, buckets in source_buckets.items()
+                ) if buckets and hasattr(buckets[0], "doc_count") else (criterion_id, buckets)) for criterion_id, buckets in source_buckets.items()
             )
             for document in documents:
                 document["document"] = {
