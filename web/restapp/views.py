@@ -303,6 +303,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         posneg_distribution = {}
         posneg_top_topics = {}
         posneg_bottom_topics = {}
+        low_volume_positive_topics = {}
         top_news_total = set()
         for criterion in criterions:
             # Current topic metrics
@@ -327,24 +328,34 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[0].bottom_topics.buckets,
                                               topics_dict, tm_dict, topic_weight_threshold, date_to)
 
+            # Get non-highlighted topics
+            low_volume_positive_topics[criterion.id] = get_low_volume_positive_topics(tm_dict,
+                                                                                      topics_dict,
+                                                                                      criterion,
+                                                                                      topic_weight_threshold,
+                                                                                      date_from,
+                                                                                      date_to)
+
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict,
                                                         date_from, date_to).values()
 
-        return documents_eval_dict, source_weight, posneg_distribution, posneg_top_topics, posneg_bottom_topics
+        return documents_eval_dict, source_weight, posneg_distribution, posneg_top_topics, posneg_bottom_topics, low_volume_positive_topics
 
     def list(self, request):
         filter_type = request.GET['type']
         posneg_distribution = {}
         posneg_top_topics = {}
         posneg_bottom_topics = {}
+        low_volume_positive_topics = {}
         if filter_type == "topics":
             documents, source_buckets = self.topics_search()
         elif filter_type == "search":
             documents, source_buckets = self.search_search()
         elif filter_type == "criterions":
             documents, source_buckets, posneg_distribution, \
-                posneg_top_topics, posneg_bottom_topics = self.search_criterions()
+                posneg_top_topics, posneg_bottom_topics, \
+                low_volume_positive_topics = self.search_criterions()
         else:
             return Response(
                 {
@@ -361,6 +372,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
             if document.meta.score:
                 return round(document.meta.score, 3) if document.meta.score != 0 else 1.000
             return 1
+
         if filter_type in ["topics", "search"]:
             source_weights = [
                         {
@@ -377,7 +389,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     "datetime": document.datetime,
                 } for document in documents
             ]
-        else:
+        elif filter_type in ["criterions"]:
             posneg_distribution = dict(
                 (key, [b.doc_count for b in bucket])
                 for key, bucket in posneg_distribution.items()
@@ -407,6 +419,13 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     "source": document["document"].source,
                     "datetime": document["document"].datetime,
                 }
+        else:
+            return Response(
+                {
+                    "status": 400,
+                    "error": "Search type not implemented",
+                }
+            )
 
         return Response(
             {
@@ -416,5 +435,6 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 "posneg_distribution": posneg_distribution,
                 "posneg_top_topics": posneg_top_topics,
                 "posneg_bottom_topics": posneg_bottom_topics,
+                "low_volume_positive_topics": low_volume_positive_topics
             }
         )

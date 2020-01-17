@@ -656,7 +656,7 @@
                                                         Фоновый топик
                                                     {% endif %}
                                                 </td>
-                                                {% if topic.resonance_score %}
+                                                {% if topic.period_score %}
                                                     <script>
                                                         $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
                                                     </script>
@@ -727,7 +727,7 @@
                                                         Фоновый топик
                                                     {% endif %}
                                                 </td>
-                                                {% if topic.resonance_score %}
+                                                {% if topic.period_score %}
                                                     <script>
                                                         $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
                                                     </script>
@@ -785,10 +785,10 @@
                     </div>
                     <div id="collapseUnhighlightedPos" class="collapse" aria-labelledby="collapseUnhighlightedPos" data-parent="#accordionUnhighlightedPos">
                         <div class="card-body">
-                            <div id="main-topics">
+                            <div id="low-volume-topics">
                                 {% for criterion in criterions %}
                                     <h4>{{ criterion.name }} - наименее освещённые топики с позитивным влиянием</h4>
-                                    <table id="main-topics-table" class="table table-bordered table-hover">
+                                    <table id="low-volume-table" class="table table-bordered table-hover">
                                         <thead>
                                         <tr role="row">
                                             <th>Топик</th>
@@ -821,7 +821,7 @@
                                                         Фоновый топик
                                                     {% endif %}
                                                 </td>
-                                                {% if topic.resonance_score %}
+                                                {% if topic.period_score %}
                                                     <script>
                                                         $('#low_period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
                                                     </script>

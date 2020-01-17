@@ -94,8 +94,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
         });
     }
 
-    function rerender_table_plot(result) {
-        // Redraw documents table
+    function rerender_documents(result) {
         var table_html = "<div id=\"search-results\">\n" +
             "                        <table id=\"search-results-table\" class=\"table table-bordered table-hover\">\n" +
             "                            <thead>\n" +
@@ -135,8 +134,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
         table.destroy();
         $('#search-results').html(table_html);
         table = init_table();
+    }
 
-        // Redraw source distribution plot
+    function rerender_source_distribution(result) {
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for(criterion of criterions){
@@ -173,8 +173,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             }
             Plotly.newPlot('source_distribution_' + criterion_id.toString(), data, layout, {responsive: true});
         }
+    }
 
-        // Redraw posneg plot
+    function rerender_posneg_plot(result) {
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for (criterion of criterions) {
@@ -204,8 +205,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             };
             Plotly.newPlot('posneg_distribution_' + criterion_id, data, layout, {responsive: true});
         }
+    }
 
-        // Redraw main topics
+    function rerender_main_topics(result) {
         var table_html = "<div id=\"main-topics\">\n";
         for (criterion of criterions) {
             table_html += "<h4>" + criterion.fields.name + " - главные топики по положительному влиянию</h4>" +
@@ -226,7 +228,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "<td id='name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
 
                 table_html += "<td id='resonance_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('resonance_score' in topic){
+                if ('resonance_score' in topic) {
                     table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
                 } else {
                     table_html += "Фоновый топик";
@@ -234,7 +236,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "</td>";
 
                 table_html += "<td id='period_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('period_days' in topic){
+                if ('period_days' in topic) {
                     table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
                     table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
                 } else {
@@ -243,9 +245,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "</td>";
 
                 table_html += "<td id='trend_" + criterion.pk + "_" + topic.info.id + "'>";
-                if('trend_score' in topic && topic.trend_score !== 0){
+                if ('trend_score' in topic && topic.trend_score !== 0) {
                     table_html += topic.trend_score.toFixed(3).toString().replace(".", ",");
-                    if(topic.trend_score > 0){
+                    if (topic.trend_score > 0) {
                         table_html += '<div style="text-align: center;">' +
                             '               <i class="fas fa-arrow-up"></i>' +
                             '          </div>';
@@ -260,7 +262,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                 table_html += "<td id='weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
 
                 table_html += "<td>\n" +
-                    "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id +"?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
+                    "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id + "?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
                     "                  <i class=\"nav-icon fas fa-eye\" style=\"font-size: 24px;\"" +
                     "                     data-toggle=\"tooltip\" data-placement=\"top\" title=\"Анализ по тематике\"></i>\n" +
                     "               </a>\n" +
@@ -363,6 +365,78 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
         }
     }
 
+    function rerender_low_volume_topics(result) {
+        var table_html = "<div id=\"low-volume-topics\">\n";
+        for (criterion of criterions) {
+            table_html += "<h4>" + criterion.fields.name + " - наименее освещённые топики с позитивным влиянием</h4>" +
+                "           <table id=\"low-volume-table\" class=\"table table-bordered table-hover\">\n" +
+                "                   <thead>\n" +
+                "                      <tr role='row'>" +
+                "                          <th>Топик</th>\n" +
+                "                          <th>Прогнозируемая резонансность</th>\n" +
+                "                          <th>Прогнозируемая продолжительность</th>\n" +
+                "                          <th>Вес</th>\n" +
+                "                          <th></th>" +
+                "                      </tr>\n" +
+                "                    </thead>\n" +
+                "                <tbody>";
+            for (topic of result.low_volume_positive_topics[criterion.pk]) {
+                table_html += "<tr>";
+                table_html += "<td id='low_name_" + criterion.pk + "_" + topic.info.id + "'>" + topic.info.name + "</td>";
+
+                table_html += "<td id='low_resonance_" + criterion.pk + "_" + topic.info.id + "'>";
+                if ('resonance_score' in topic && topic['resonance_score']) {
+                    table_html += topic.resonance_score.toFixed(3).toString().replace(".", ",");
+                } else {
+                    table_html += "Фоновый топик";
+                }
+                table_html += "</td>";
+
+                table_html += "<td id='low_period_" + criterion.pk + "_" + topic.info.id + "'>";
+                if ('period_days' in topic && topic['period_days']) {
+                    table_html += topic.period_days.toFixed(1).toString().replace(".", ",");
+                    table_html += " дней (Score: " + topic.period_score.toFixed(3).toString().replace(".", ",") + ")"
+                } else {
+                    table_html += "Фоновый топик";
+                }
+                table_html += "</td>";
+
+                table_html += "<td id='low_weight_" + criterion.pk + "_" + topic.info.id + "'>" + topic.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+
+                table_html += "<td>\n" +
+                    "              <a href='/topicmodelling/topic_documents_list/" + topic_modelling + "/" + topic.info.id + "?topic_name=" + topic.info.name + "&topic_weight_threshold=" + topic_weight_threshold.toString() + "' class=\"nav-link nowrap\">\n" +
+                    "                  <i class=\"nav-icon fas fa-eye\" style=\"font-size: 24px;\"" +
+                    "                     data-toggle=\"tooltip\" data-placement=\"top\" title=\"Анализ по тематике\"></i>\n" +
+                    "               </a>\n" +
+                    "          </td>";
+
+                table_html += "</tr>";
+            }
+            table_html += "</tbody>\n" +
+                "     </table>";
+        }
+        $('#low-volume-topics').html(table_html);
+
+        for (criterion of criterions) {
+            for (topic of result.low_volume_positive_topics[criterion.pk]) {
+                if('resonance_score' in topic && topic['resonance_score']){
+                    $('#low_resonance_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScale(topic.resonance_score));
+                }
+                if('period_score' in topic && topic['period_score']) {
+                    $('#low_period_' + criterion.pk + '_' + topic.info.id).css('background-color', colorScale(topic.period_score));
+                }
+            }
+        }
+    }
+
+    function rerender_blocks(result) {
+        rerender_documents(result);
+        rerender_source_distribution(result);
+        rerender_posneg_plot(result);
+        rerender_main_topics(result);
+        rerender_low_volume_topics(result);
+    }
+
     function request_documents(range_from, range_to) {
         var url = '/api/range_documents/?topic_modelling=' + topic_modelling +
                     "&date_from=" + range_from +
@@ -387,7 +461,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                         alert("Что-то пошло не так :( Истекла сессия? Попробуйте обновить страницу");
                         return;
                     }
-                    rerender_table_plot(result);
+                    rerender_blocks(result);
                 },
                 error: function (result) {
                     alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
