@@ -772,6 +772,80 @@
         </div>
     </div>
 
+    {# Неосвещённый позитив #}
+    <div class="row">
+        <div class="col-12">
+            <div class="accordion" id="accordionUnhighlightedPos">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 data-toggle="collapse" data-target="#collapseUnhighlightedPos" aria-expanded="false" aria-controls="collapseUnhighlightedPos">
+                            <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                            Неосвещённый позитив
+                        </h3>
+                    </div>
+                    <div id="collapseUnhighlightedPos" class="collapse" aria-labelledby="collapseUnhighlightedPos" data-parent="#accordionUnhighlightedPos">
+                        <div class="card-body">
+                            <div id="main-topics">
+                                {% for criterion in criterions %}
+                                    <h4>{{ criterion.name }} - наименее освещённые топики с позитивным влиянием</h4>
+                                    <table id="main-topics-table" class="table table-bordered table-hover">
+                                        <thead>
+                                        <tr role="row">
+                                            <th>Топик</th>
+                                            <th>Прогнозируемая резонансность</th>
+                                            <th>Прогнозируемая продолжительность</th>
+                                            <th>Вес</th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for topic in low_volume_positive_topics|get_item:criterion.id %}
+                                            <tr>
+                                                <td id="low_name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                <td id="low_resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.resonance_score %}
+                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#low_resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="low_period_{{ criterion.id }}_{{ topic.info.id }}">
+                                                    {% if topic.period_days %}
+                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
+                                                    {% else %}
+                                                        Фоновый топик
+                                                    {% endif %}
+                                                </td>
+                                                {% if topic.resonance_score %}
+                                                    <script>
+                                                        $('#low_period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
+                                                    </script>
+                                                {% endif %}
+                                                <td id="low_weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                <td>
+                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
+                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {# Главные новости топика #}
     <div class="row">
         <div class="col-12">

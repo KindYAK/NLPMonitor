@@ -89,6 +89,7 @@ class CriterionEvalAnalysisView(TemplateView):
         return max_criterion_value_dict
 
     def criterion_eval_update_context(self, context, criterion, document_evals, absolute_value, positive, negative):
+        # Dynamics
         context['absolute_value'][criterion.id] = absolute_value
         context['positive'][criterion.id] = positive
         context['negative'][criterion.id] = negative
@@ -109,9 +110,12 @@ class CriterionEvalAnalysisView(TemplateView):
                                        context['y_axis_to'] if 'y_axis_to' in context else max_value,
                                        max_value,
                                    )
+
+        # Posneg distribution
         if criterion.value_range_from < 0:
             context['posneg_distribution'][criterion.id] = document_evals.aggregations.posneg
 
+        # Top and bottom topics
         last_date = datetime.datetime.strptime(absolute_value[-1].key_as_string[:10], "%Y-%m-%d").date()
         context['posneg_top_topics'][criterion.id] = \
             normalize_buckets_main_topics(document_evals.aggregations.posneg.buckets[-1].top_topics.buckets,
@@ -119,6 +123,12 @@ class CriterionEvalAnalysisView(TemplateView):
         context['posneg_bottom_topics'][criterion.id] = \
             normalize_buckets_main_topics(document_evals.aggregations.posneg[0].bottom_topics.buckets,
                                           self.topics_dict, self.tm_dict, context['topic_weight_threshold'], last_date)
+
+        # Get non-highlighted topics
+        context['low_volume_positive_topics'][criterion.id] = get_low_volume_positive_topics(self.tm_dict,
+                                                                                             self.topics_dict,
+                                                                                             criterion,
+                                                                                             context['topic_weight_threshold'])
 
     def get_criterion_evals(self, context, top_news_total, criterion):
         # Current topic metrics
@@ -208,7 +218,7 @@ class CriterionEvalAnalysisView(TemplateView):
 
         dicts_to_init = ['absolute_value', 'positive', 'negative', 'source_weight',
                          'posneg_distribution', 'posneg_top_topics', 'posneg_bottom_topics',
-                         'group_total_dynamics']
+                         'group_total_dynamics', 'low_volume_positive_topics']
         for key in dicts_to_init:
             context[key] = {}
 

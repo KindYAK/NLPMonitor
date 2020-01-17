@@ -2,6 +2,7 @@ import datetime
 
 from elasticsearch_dsl import Search, Q
 
+from evaluation.models import TopicsEval
 from mainapp.constants import SEARCH_CUTOFF_CONFIG
 from mainapp.services import apply_fir_filter
 from mainapp.services_es import get_elscore_cutoff
@@ -294,7 +295,6 @@ def get_topic_dict(topic_modelling):
     tm_info_dict = tm.to_dict()
 
     # Fill topic objects with meta data
-    topic_info_dict = {}
     topic_info_dict = dict(
         (topic.id, topic.to_dict()) for topic in tm['topics']
     )
@@ -341,6 +341,62 @@ def normalize_buckets_main_topics(buckets, topics_dict, tm_dict, topic_weight_th
             else:
                 bucket.trend_score = 0
     return buckets
+
+
+def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight_threshold, date_from=None, date_to=None):
+    # Get topic evaluations
+    evaluations = TopicsEval.objects.filter(criterion=criterion, topics__topic_modelling_name=tm_dict['name']) \
+                    .distinct().prefetch_related('topics')
+    topic_eval_dict = {}
+    for evaluation in evaluations:
+        if not evaluation.topics.exists():
+            continue
+        eval_topic_id = evaluation.topics.first().topic_id
+        if eval_topic_id not in topic_eval_dict:
+            topic_eval_dict[eval_topic_id] = []
+        topic_eval_dict[eval_topic_id].append(evaluation.value)
+
+    for t in topic_eval_dict.keys():
+        topic_eval_dict[t] = sum(topic_eval_dict[t]) / len(topic_eval_dict[t])
+    topic_eval_sorted = sorted(topic_eval_dict.items(), key=lambda x: x[1], reverse=True)
+    range_center = (criterion.value_range_from + criterion.value_range_to) / 2
+    neutrality_threshold = 0.1
+    topic_eval_sorted = list(filter(lambda x: x[1] > range_center + neutrality_threshold, topic_eval_sorted))
+    topic_eval_sorted = topic_eval_sorted[:len(topic_eval_sorted) // 2]
+
+    # Get least highlighted topics
+    std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
+          .filter("terms", **{"topic_id": [t[0] for t in topic_eval_sorted]}) \
+          .filter("range", topic_weight={"gte": topic_weight_threshold}) \
+          .source([])[:0]
+    if date_from:
+        std = std.filter("range", datetime={"gte": date_from})
+    if date_to:
+        std = std.filter("range", datetime={"lte": date_to})
+    std.aggs.bucket(name="topics", agg_type="terms", field="topic_id", size=len(topic_eval_sorted)) \
+        .metric("topic_weight", agg_type="sum", field="topic_weight")
+    r = std.execute()
+    topics_sorted = sorted(((bucket.key, bucket.topic_weight.value) for bucket in r.aggregations.topics.buckets), key=lambda x: x[1] / topic_eval_dict[x[0]], reverse=False)
+    topics_sorted = topics_sorted[:min(10, len(topics_sorted) // 2)]
+
+    # Creating result list
+    res = [
+        {
+            "weight": topic[1] / topic_eval_dict[topic[0]],
+            "resonance_score": (topics_dict[topic[0]]['period_maxes_mean'] - tm_dict['period_maxes_mean_median']) \
+                               / tm_dict['period_maxes_mean_std'] if 'period_maxes_mean' in topics_dict[
+                topic[0]] else None,
+            "period_score": (topics_dict[topic[0]]['period_mean'] - tm_dict['period_median']) / tm_dict['period_std'] \
+                if 'period_meain' in topics_dict[topic[0]] else None,
+            "period_days": topics_dict[topic[0]]['period_mean'] \
+                if 'period_meain' in topics_dict[topic[0]] else None,
+            "info": topics_dict[topic[0]],
+        } for topic in topics_sorted
+    ]
+    max_weight = max((t['weight'] for t in res))
+    for t in res:
+        t['weight'] /= max_weight
+    return res
 
 
 def get_total_group_dynamics(absoulte_values_dict, criterions, granularity, is_smooth):
