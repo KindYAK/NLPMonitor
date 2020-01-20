@@ -1,2 +1,3 @@
 # Requirements are split to minimize rebuilding layers.
 # Move all of the stuff here to -base on every major update
+dateparser>=0.7.2
