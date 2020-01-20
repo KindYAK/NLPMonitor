@@ -1,4 +1,3 @@
-from elasticsearch_dsl.response.aggs import FieldBucket
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
@@ -33,11 +32,13 @@ class CriterionEvalAnalysisView(TemplateView):
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+
         context['topic_modelling'] = self.request.GET['topic_modelling'] if 'topic_modelling' in self.request.GET else context['topic_modellings'][0][0]
-        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
-        context['criterions_list'] = context['criterions_list'].filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in self.eval_indices])
         context['public_groups'] = context['public_groups'].filter(topic_modelling_name=context['topic_modelling'])
         context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
+
+        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
+        context['criterions_list'] = context['criterions_list'].filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in self.eval_indices]).distinct()
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
             if 'criterions' in self.request.GET else \
             [context['criterions_list'].first()]
