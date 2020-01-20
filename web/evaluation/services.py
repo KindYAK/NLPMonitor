@@ -364,6 +364,9 @@ def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight
     topic_eval_sorted = list(filter(lambda x: x[1] > range_center + neutrality_threshold, topic_eval_sorted))
     topic_eval_sorted = topic_eval_sorted[:(len(topic_eval_sorted) + 1) // 2]
 
+    if len(topic_eval_sorted) == 0:
+        return []
+
     # Get least highlighted topics
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \
           .filter("terms", **{"topic_id": [t[0] for t in topic_eval_sorted]}) \
