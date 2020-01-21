@@ -461,8 +461,8 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
         return Response(
             {
                 "status": 200,
-                "criterions": criterions,
-                "my_groups": my_groups,
-                "public_groups": public_groups,
+                "criterions": sorted(criterions, key=lambda x: x['id']),
+                "my_groups": sorted(my_groups, key=lambda x: x['id']),
+                "public_groups": sorted(public_groups, key=lambda x: x['id']),
             }
         )

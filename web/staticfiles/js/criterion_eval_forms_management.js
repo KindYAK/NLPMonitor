@@ -25,7 +25,7 @@ $('#topic_modelling').change(function () {
     $('button[type=submit]').attr('disabled', 'disabled');
     $('#criterions').html("");
     $('#criterions').select2({
-        closeOnSelect: true,
+        closeOnSelect: false,
     });
     $('#criterion_q').html("");
     $('#criterion_q').select2({
@@ -49,7 +49,7 @@ $('#topic_modelling').change(function () {
 
                 // Handle criterions
                 var criterions_list_html = "";
-                let mark_selected = true;
+                let mark_selected = false;
                 for (let criterion of result.criterions) {
                     if (mark_selected) {
                         criterions_list_html += '<option selected value="' + criterion.id + '">' + criterion.name + '</option>';

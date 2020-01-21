@@ -32,3 +32,4 @@ stop_words==2018.7.23
 numba==0.46.0
 djangorestframework==3.9.4
 transliterate==1.10.2
+dateparser>=0.7.2
