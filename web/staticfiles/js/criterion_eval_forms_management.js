@@ -60,7 +60,7 @@ $('#topic_modelling').change(function () {
                 }
                 $('#criterions').html(criterions_list_html);
                 $('#criterions').select2({
-                    closeOnSelect: true,
+                    closeOnSelect: false,
                 });
 
                 $('#collapseAnalyticalQuerySetting').collapse('show');
