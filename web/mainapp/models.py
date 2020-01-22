@@ -107,7 +107,7 @@ class Document(models.Model):
     unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность source, datetime, title")
 
     author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
-    sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность")
+    sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()

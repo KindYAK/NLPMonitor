@@ -80,7 +80,7 @@
                             <div class="row">
                                 <div class="col-lg-5">
                                     <div class="form-group">
-                                        <label for="granularity">Тематическое моделирование</label>
+                                        <label for="topic_modelling">Тематическое моделирование</label>
                                         <select class="custom-select form-control select2 select2-single"
                                                 name="topic_modelling" id="topic_modelling">
                                             {% for topic_modelling_opt in topic_modellings %}
@@ -104,7 +104,7 @@
                                 </div>
                                 <div class="col-lg-5">
                                     <div class="form-group" id="tmForm">
-                                        <label for="granularity">Критерии</label>
+                                        <label for="criterions">Критерии</label>
                                         <select class="custom-select form-control select2 select2-multi"
                                                 name="criterions" id="criterions" multiple="multiple">
                                             {% for criterion in criterions_list %}
@@ -151,7 +151,7 @@
                                     <div class="row">
                                         <div class="col-lg-5">
                                             <div class="form-group">
-                                                <label for="granularity">Ключевое слово</label>
+                                                <label for="keyword">Ключевое слово</label>
                                                 <input class="form-control" type="text" name="keyword" id="keyword"
                                                        placeholder="Поиск...">
                                                 <script>
@@ -161,7 +161,7 @@
                                         </div>
                                         <div class="col-lg-5">
                                             <div class="form-group">
-                                                <label for="granularity">Группы</label>
+                                                <label for="group">Группы</label>
                                                 <select class="custom-select form-control select2 select2-single"
                                                         name="group" id="group">
                                                     <option selected value='-1'>-----Мои группы-----</option>

@@ -168,8 +168,11 @@ class DocumentDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         if cache.get(key):
             return context
-        context['document'] = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
-                .filter("term", **{"id": kwargs['document_id']}).execute()[0]
+        r = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", **{"id": kwargs['document_id']})[:1].execute()
+        if len(r) > 0:
+            context['document'] = r[0]
+        else:
+            context['error'] = "Документ не найден - возможно он ещё не обработан в хранилище"
         return context
 
 
