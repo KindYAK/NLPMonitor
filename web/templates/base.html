@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -231,7 +232,10 @@
         <!-- To the right -->
         <div class="float-right d-none d-sm-inline"></div>
         <!-- Default to the left -->
-        <strong>&copy; 2019 <a href="http://iict.kz">РГП на ПХВ ИИВТ МОН РК</a>.</strong> Все права защищены
+        <strong>
+            {# TODO Remove! #}
+            <a href="{% get_media_prefix %}pres.pptx" style="cursor: inherit; color: inherit;">&copy;</a>
+            2<a href="{% get_media_prefix %}pres.pdf" style="cursor: inherit; color: inherit;">0</a>19 <a href="http://iict.kz">РГП на ПХВ ИИВТ МОН РК</a>.</strong> Все права защищены
     </footer>
 </div>
 <!-- ./wrapper -->
