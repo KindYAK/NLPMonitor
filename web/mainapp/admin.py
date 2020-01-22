@@ -9,7 +9,7 @@ class CorpusAdmin(admin.ModelAdmin):
 
 
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url', 'corpus', )
+    list_display = ('name', 'url', 'corpus', 'is_for_content_loaders', )
     list_filter = ('corpus', 'is_for_content_loaders', )
     search_fields = ('name', 'url', )
 

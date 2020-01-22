@@ -19,6 +19,11 @@
         .form-group {
             margin-bottom: 0;
         }
+        .soc-icon {
+            height: 50px;
+            cursor: pointer;
+            padding: 3px;
+        }
     </style>
 {% endblock %}
 
@@ -53,7 +58,22 @@
                                                         {{ field.label_tag }}
                                                         <i class="fas fa-question-circle" data-toggle="tooltip" title="Если вы не нашли нужный источник, пожалуйста напишите на nlpmonitor.kz@gmail.com"></i>
                                                     </div>
-                                                    <div class="col-md-8">{% render_field field class="form-control select2 select2-single" %}</div>
+                                                    <div class="col-md-4">
+                                                        {% render_field field class="form-control select2 select2-single" %}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <img source_id="45" class="soc-icon" src="{% static 'img/social_networks/facebook.png' %}">
+                                                        <img source_id="46" class="soc-icon" src="{% static 'img/social_networks/instagram.png' %}">
+                                                        <img source_id="47" class="soc-icon" src="{% static 'img/social_networks/vk.png' %}">
+                                                        <img source_id="48" class="soc-icon" src="{% static 'img/social_networks/telegram.png' %}">
+                                                        <img source_id="49" class="soc-icon" src="{% static 'img/social_networks/twitter.png' %}">
+                                                        <img source_id="50" class="soc-icon" src="{% static 'img/social_networks/livejournal.png' %}">
+                                                    </div>
+                                                    <script>
+                                                        $('.soc-icon').click(function() {
+                                                            $("#id_source").val($(this).attr("source_id")).trigger('change');
+                                                        });
+                                                    </script>
                                                 {% elif field.name == "datetime" %}
                                                     <div class="col-md-4">{{ field.label_tag }}</div>
                                                     <div class="col-md-8 input-group date">
