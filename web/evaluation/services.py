@@ -275,6 +275,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
 def divide_posneg_source_buckets(buckets):
     sources_criterion_dict = {}
     for i, pn in enumerate(buckets):
+        tonality = ["negative", "neutral", "positive"][i]
         for bucket in pn.source.buckets:
             if bucket.key not in sources_criterion_dict:
                 sources_criterion_dict[bucket.key] = {}
@@ -282,7 +283,6 @@ def divide_posneg_source_buckets(buckets):
                 sources_criterion_dict[bucket.key]['positive'] = 0
                 sources_criterion_dict[bucket.key]['neutral'] = 0
                 sources_criterion_dict[bucket.key]['negative'] = 0
-            tonality = ["negative", "neutral", "positive"][i]
             sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
     sources_criterion_dict = sorted(sources_criterion_dict.values(),
                                     key=lambda x: x['positive'] + x['negative'] + x['neutral'],

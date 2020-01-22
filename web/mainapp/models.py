@@ -80,10 +80,11 @@ class Document(models.Model):
         (3, "Blogs/Opinions"),
     )
 
-    source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
-    author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор")
-    title = models.CharField(max_length=2500, verbose_name="Заголовок")
-    text = models.TextField(verbose_name="Текст")
+    source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник*")
+    author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор (FK)")
+    author_txt = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор")
+    title = models.CharField(max_length=2500, verbose_name="Заголовок*")
+    text = models.TextField(verbose_name="Текст*")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
     url = models.CharField(max_length=1000, null=True, blank=True, verbose_name="URL")
