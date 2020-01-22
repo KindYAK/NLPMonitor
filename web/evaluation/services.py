@@ -79,8 +79,9 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                                   size=20)
     else:
         # Source distributions
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
-            .metric("source_value", agg_type="avg", field="value")
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source")
+        std.aggs['source'].metric("source_value_sum", agg_type="sum", field="value")
+        std.aggs['source'].metric("source_value_average", agg_type="avg", field="value")
 
     # Dynamics
     if granularity:
@@ -118,6 +119,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     std_min = std_min[:200]
     document_evals_min = std_min.execute()
     top_news.update((d.document_es_id for d in document_evals_min))
+
     return document_evals, top_news
 
 

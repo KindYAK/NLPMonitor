@@ -95,8 +95,15 @@ class CriterionEvalAnalysisView(TemplateView):
         context['positive'][criterion.id] = positive
         context['negative'][criterion.id] = negative
         if criterion.value_range_from >= 0:
+            max_sum = max((bucket.source_value_sum.value for bucket in document_evals.aggregations.source.buckets))
+            max_average = max((bucket.source_value_average.value for bucket in document_evals.aggregations.source.buckets))
+            for bucket in document_evals.aggregations.source.buckets:
+                bucket.value = (
+                                (bucket.source_value_sum.value / max_sum) +
+                                (bucket.source_value_average.value / max_average)
+                               ) / 2
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                            key=lambda x: x.source_value.value,
+                                                            key=lambda x: x.value,
                                                             reverse=True)
         else:
             context['source_weight'][criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)

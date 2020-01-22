@@ -621,7 +621,7 @@
                                                 var data = [
                                                     {
                                                         x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
-                                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|round_fl:2|safe }}, {% endfor %}],
+                                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.value|round_fl:2|safe }}, {% endfor %}],
                                                         type: 'bar'
                                                     }
                                                 ];
