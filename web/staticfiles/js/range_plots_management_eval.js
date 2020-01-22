@@ -137,6 +137,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
     }
 
     function rerender_source_distribution(result) {
+        $('#collapseBarPlots').collapse('show');
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for(criterion of criterions){
@@ -176,6 +177,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
     }
 
     function rerender_posneg_plot(result) {
+        $('#collapsePosNeg').collapse('show');
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for (criterion of criterions) {
