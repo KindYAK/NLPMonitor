@@ -94,13 +94,16 @@ class DocumentForm(forms.ModelForm):
         model = Document
         fields = ['source', 'title', 'author_txt', 'text', 'url', 'datetime', 'sentiment_loader', ]
 
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
+                 label_suffix=None, empty_permitted=False, instance=None, use_required_attribute=None, renderer=None):
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, instance,
+                         use_required_attribute, renderer)
+        self.fields['source'].queryset = Source.objects.filter(is_for_content_loaders=True)
+
     def clean(self):
-        try:
-            title = self.cleaned_data['title']
-            source = self.cleaned_data['source']
-            datetime = self.cleaned_data['datetime']
-            if Document.objects.filter(title=title, source=source, datetime=datetime).exists():
-                raise forms.ValidationError("Такая новость уже существует")
-        except KeyError:
-            pass
+        title = self.cleaned_data.get('title', '')
+        source = self.cleaned_data.get('source', '')
+        datetime = self.cleaned_data.get('datetime', '')
+        if Document.objects.filter(title=title, source=source, datetime=datetime).exists():
+            raise forms.ValidationError("Такая новость уже существует")
         return super().clean()

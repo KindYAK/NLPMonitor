@@ -26,6 +26,7 @@ class Source(models.Model):
     name = models.CharField(max_length=50, verbose_name="Название")
     url = models.CharField(max_length=150, null=True, blank=True, verbose_name="URL")
     corpus = models.ForeignKey('Corpus', on_delete=models.CASCADE, verbose_name="Корпус")
+    is_for_content_loaders = models.BooleanField(default=False, verbose_name="Для 'Блогеров'")
 
     def __str__(self):
         return self.name
