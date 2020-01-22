@@ -231,7 +231,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id][criterion_id] = \
                 td.value / -max_criterion_value_dict[criterion_id]["max_negative"]
     dict_vals = sorted(documents_eval_dict.items(), key=lambda x: sum(abs(i) for i in x[1].values() if type(i) == float), reverse=True)
-    return dict(dict_vals[:200])
+    return dict(dict_vals[:400])
 
 
 def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_threshold):

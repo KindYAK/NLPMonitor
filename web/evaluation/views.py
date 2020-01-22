@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 from evaluation.models import EvalCriterion, EvalCriterionGroup
 from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models_user import TopicGroup
-from mainapp.services import apply_fir_filter
+from mainapp.services import apply_fir_filter, unique_ize
 from .services import *
 
 
@@ -241,5 +241,5 @@ class CriterionEvalAnalysisView(TemplateView):
 
         # Get documents, set weights
         documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)
-        context['documents'] = documents_eval_dict
+        context['documents'] = unique_ize(documents_eval_dict.values(), key=lambda x: x['document'].id)[:200]
         return context
