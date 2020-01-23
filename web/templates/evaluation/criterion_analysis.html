@@ -157,10 +157,6 @@
                                                 <script>
                                                     $('#keyword').val('{{ keyword }}');
                                                 </script>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="form-group">
                                                 <label for="group">Группы</label>
                                                 <select class="custom-select form-control select2 select2-single"
                                                         name="group" id="group">
@@ -179,6 +175,22 @@
                                                     {% else %}
                                                         $('#group').val('-1');
                                                     {% endif %}
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="form-group" id="tmForm">
+                                                <label for="criterions">Источники</label>
+                                                <select class="custom-select form-control select2 select2-multi"
+                                                        name="sources" id="sources" multiple="multiple">
+                                                    {% for source in sources_list %}
+                                                        <option value="{{ source.id }}">{{ source.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <script>
+                                                    {% for source in sources %}
+                                                        $("#sources option[value='" + {{ source.id }} +"']").prop("selected", true);
+                                                    {% endfor %}
                                                 </script>
                                             </div>
                                         </div>
@@ -980,7 +992,7 @@
     {# Custom script #}
     <script>
         run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
-            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
+            '{{ keyword }}', {{ sources|json|safe }}, '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
             ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([
                 {% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
     </script>

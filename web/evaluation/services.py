@@ -19,7 +19,7 @@ def filter_analytical_query(topic_modelling, criterion_id, action, value):
     return (d.document_es_id for d in s.scan())
 
 
-def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter,
+def get_current_document_evals(topic_modelling, criterion, granularity, sources, documents_ids_to_filter,
                                date_from=None, date_to=None, analytical_query=None):
     # Basic search object
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
@@ -39,6 +39,9 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     # Filter by group and keyword
     if documents_ids_to_filter or analytical_query:
         std = std.filter("terms", **{'document_es_id': documents_ids_to_filter})
+
+    if sources:
+        std = std.filter("terms", document_source=[source.name for source in sources])
 
     # Range selection
     if date_from:
@@ -112,6 +115,8 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
               .source(['document_es_id']).sort('value')
     if documents_ids_to_filter or analytical_query:
         std_min = std_min.filter("terms", **{'document_es_id': documents_ids_to_filter})
+    if sources:
+        std_min = std.filter("terms", document_source=[source.name for source in sources])
     if date_from:
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
     if date_to:

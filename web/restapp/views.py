@@ -269,6 +269,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d").date()
         topic_modelling = self.request.GET['topic_modelling']
         criterions = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions'))
+        sources = Source.objects.filter(id__in=self.request.GET.getlist('sources'))
         keyword = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
         group = TopicGroup.objects.get(id=self.request.GET['group']) \
             if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", "None", None] \
@@ -309,7 +310,9 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         for criterion in criterions:
             # Current topic metrics
             document_evals, top_news = get_current_document_evals(topic_modelling, criterion, None,
-                                                                  documents_ids_to_filter, date_from, date_to,
+                                                                  sources,
+                                                                  documents_ids_to_filter,
+                                                                  date_from, date_to,
                                                                   analytical_query=analytical_query)
             top_news_total.update(top_news)
             if criterion.value_range_from < 0:

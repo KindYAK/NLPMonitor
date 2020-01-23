@@ -63,7 +63,7 @@ function generate_plot_data_for_posneg_sources(sources){
 }
 
 
-function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword,
+function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword, sources,
                                     group_id, criterion_q, action_q, value_q, plot_ids) {
     var main_plot_id = "value_dynamics";
 
@@ -447,6 +447,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     "&topic_weight_threshold=" + topic_weight_threshold.toString();
         for (criterion of criterions){
             url += "&criterions=" + criterion.pk.toString()
+        }
+        for (source of sources){
+            url += "&sources=" + source.pk.toString()
         }
         url += "&keyword=" + keyword +
                     "&group=" + group_id +

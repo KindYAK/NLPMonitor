@@ -29,7 +29,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_modellings'] = list(sorted(list(set(
             [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices if not tm.endswith("_neg")]
         ))))
-        context['sources'] = Source.objects.filter(document__isnull=False).distinct()
+        context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -44,6 +44,8 @@ class CriterionEvalAnalysisView(TemplateView):
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
             if 'criterions' in self.request.GET else \
             [context['criterions_list'].first()]
+        context['sources'] = Source.objects.filter(id__in=self.request.GET.getlist('sources')) \
+            if 'sources' in self.request.GET else None
         context['keyword'] = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
         context['group'] = TopicGroup.objects.get(id=self.request.GET['group']) \
             if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
@@ -137,6 +139,7 @@ class CriterionEvalAnalysisView(TemplateView):
         # Current topic metrics
         document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion,
                                                               context['granularity'],
+                                                              context['sources'],
                                                               self.documents_ids_to_filter,
                                                               analytical_query=self.analytical_query)
         if not top_news:
