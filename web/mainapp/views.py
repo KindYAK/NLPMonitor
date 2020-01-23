@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -82,7 +83,6 @@ class SearchView(TemplateView):
         # Search
         search_request['datetime_from'] = datetime.date(2000, 1, 1)
         search_request['datetime_to'] = datetime.datetime.now().date()
-
         s = execute_search(search_request, return_search_obj=True)[:200]
         s.aggs.bucket(name="dynamics",
                       agg_type="date_histogram",
@@ -106,12 +106,13 @@ class SearchView(TemplateView):
         context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
 
         # TODO Temporary minister stub
-        sde = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_bigartm_two_years_1") \
+        sde = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_bigartm_test_1") \
                 .filter("terms", document_es_id=[d['document_es_id'] for d in context['documents']]) \
                 .source(("document_es_id", "value"))[:100]
         r = sde.execute()
-        document_eval_dict = dict(
-            (d.document_es_id, d.value) for d in r
+        document_eval_dict = defaultdict(
+            int,
+            ((d.document_es_id, d.value) for d in r)
         )
         for document in context['documents']:
             document['sentiment'] = document_eval_dict[document['document_es_id']]
