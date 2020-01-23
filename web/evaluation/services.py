@@ -79,7 +79,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
         std.aggs['posneg'].bucket(name="source",
                                   agg_type="terms",
                                   field="document_source",
-                                  size=20)
+                                  size=100)
     else:
         # Source distributions
         std.aggs.bucket(name="source", agg_type="terms", field="document_source")
@@ -305,7 +305,7 @@ def divide_posneg_source_buckets(buckets):
             sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
     sources_criterion_dict = sorted(sources_criterion_dict.values(),
                                     key=lambda x: x['positive'] + x['negative'] + x['neutral'],
-                                    reverse=True)
+                                    reverse=True)[:20]
     return sources_criterion_dict
 
 
