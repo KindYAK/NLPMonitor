@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
+    <!-- Chroma.js -->
+    <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     <style>
         .row {
             margin-bottom: 15px;
@@ -315,16 +317,21 @@
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
+                                <th>Тональность</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
+                            <script>
+                                var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-0.5, 0.5]);
+                            </script>
                             {% for document in documents %}
                                 <tr>
                                     <td>{{ document.score|floatformat:3|unlocalize }}</td>
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
+                                    <td id="sentiment_{{ document.id }}">{{ document.sentiment|floatformat:3|unlocalize }}</td>
                                     <td>
                                         <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
                                             <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
@@ -332,6 +339,9 @@
                                         </a>
                                     </td>
                                 </tr>
+                                <script>
+                                    $('#sentiment_{{ document.id }}').css('background-color', colorScale({{ document.sentiment|safe }}));
+                                </script>
                             {% endfor %}
                             </tbody>
                         </table>
