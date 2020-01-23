@@ -1,3 +1,5 @@
+import datetime
+
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.http import HttpResponseRedirect
@@ -78,6 +80,9 @@ class SearchView(TemplateView):
         )
 
         # Search
+        search_request['datetime_from'] = datetime.date(2000, 1, 1)
+        search_request['datetime_to'] = datetime.datetime.now().date()
+
         s = execute_search(search_request, return_search_obj=True)[:200]
         s.aggs.bucket(name="dynamics",
                       agg_type="date_histogram",

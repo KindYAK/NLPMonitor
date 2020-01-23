@@ -65,9 +65,6 @@ class DocumentSearchForm(forms.Form):
     title = forms.CharField(label="Заголовок", required=False)
     text = forms.CharField(label="Текст", required=False)
 
-    datetime_from = forms.DateField(label="Дата - Начало периода", input_formats=['%d-%m-%Y'], required=False)
-    datetime_to = forms.DateField(label="Дата - Конец периода", input_formats=['%d-%m-%Y'], required=False)
-
     num_views_from = forms.IntegerField(label="Количество просмотров - больше чем", required=False)
     num_views_to = forms.IntegerField(label="Количество просмотров - меньше чем", required=False)
     num_shares_from = forms.IntegerField(label="Количество репостов - больше чем", required=False)
