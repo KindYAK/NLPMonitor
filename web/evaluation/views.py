@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 
 from evaluation.models import EvalCriterion, EvalCriterionGroup
 from mainapp.forms import get_topic_weight_threshold_options
+from mainapp.models import Source
 from mainapp.models_user import TopicGroup
 from mainapp.services import apply_fir_filter, unique_ize
 from .services import *
@@ -28,6 +29,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_modellings'] = list(sorted(list(set(
             [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices if not tm.endswith("_neg")]
         ))))
+        context['sources'] = Source.objects.filter(document__isnull=False).distinct()
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -95,13 +97,6 @@ class CriterionEvalAnalysisView(TemplateView):
         context['positive'][criterion.id] = positive
         context['negative'][criterion.id] = negative
         if criterion.value_range_from >= 0:
-            max_sum = max((bucket.source_value_sum.value for bucket in document_evals.aggregations.source.buckets))
-            max_average = max((bucket.source_value_average.value for bucket in document_evals.aggregations.source.buckets))
-            for bucket in document_evals.aggregations.source.buckets:
-                bucket.value = (
-                                (bucket.source_value_sum.value / max_sum) +
-                                (bucket.source_value_average.value / max_average)
-                               ) / 2
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
                                                             key=lambda x: x.value,
                                                             reverse=True)

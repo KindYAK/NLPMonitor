@@ -120,7 +120,21 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     document_evals_min = std_min.execute()
     top_news.update((d.document_es_id for d in document_evals_min))
 
+    if criterion.value_range_from >= 0:
+        document_evals = calc_source_input(document_evals)
+
     return document_evals, top_news
+
+
+def calc_source_input(document_evals):
+    max_sum = max((bucket.source_value_sum.value for bucket in document_evals.aggregations.source.buckets))
+    max_average = max((bucket.source_value_average.value for bucket in document_evals.aggregations.source.buckets))
+    for bucket in document_evals.aggregations.source.buckets:
+        bucket.value = (
+                               (bucket.source_value_sum.value / max_sum) +
+                               (bucket.source_value_average.value / max_average)
+                       ) / 2
+    return document_evals
 
 
 def get_criterions_values_for_normalization(criterions, topic_modelling, granularity=None, analytical_query=None):

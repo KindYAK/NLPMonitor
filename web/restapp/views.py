@@ -317,7 +317,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 posneg_distribution[criterion.id] = document_evals.aggregations.posneg.buckets
             else:
                 source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                     key=lambda x: x.source_value.value,
+                                                     key=lambda x: x.value,
                                                      reverse=True)
 
             # Main topics
@@ -408,8 +408,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     [
                         {
                             "source": bucket.key,
-                            "weight": bucket.source_value.value,
-                        } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
+                            "weight": bucket.value,
+                        } for bucket in sorted(buckets, key=lambda x: x.value, reverse=True)
                     ]
                 ) if buckets and hasattr(buckets[0], "doc_count") else (criterion_id, buckets)) for criterion_id, buckets in source_buckets.items()
             )
