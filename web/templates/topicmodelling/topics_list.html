@@ -245,7 +245,7 @@
             </div>
         </div>
     </div>
-
+    {% endcache %}
     {% if request.user.is_superuser or request.user.expert %}
     {# Topic eval modal #}
     <div class="modal fade" id="topicEvalModal" tabindex="-1" role="dialog"
@@ -277,7 +277,6 @@
         </div>
     </div>
     {% endif %}
-    {% endcache %}
 {% endblock %}
 
 {% block foot %}
