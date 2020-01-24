@@ -88,7 +88,12 @@ function run_topics_eval(topic_modelling, csrf_token, criterions) {
 
     // Event management, init
     create_eval_control();
-    $('#criterionSelect').change(function() {create_eval_control(); color_evaluated_buttons();});
+    $('#criterionSelect').change(function() {
+        create_eval_control();
+        $("#topicFilterInput").val("-1").trigger('change');
+        $('#topicSearchInput').val('');
+        color_evaluated_buttons();
+    });
     $('.set-topic-eval').click(function(e) {
         e.preventDefault();
         var topic_id = e.target.id.split("evalTopic_")[1];
