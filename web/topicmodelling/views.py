@@ -111,7 +111,11 @@ class TopicDocumentListView(TemplateView):
         total_metrics_dict = get_total_metrics(kwargs['topic_modelling'], context['granularity'], context['topic_weight_threshold'])
 
         # Current topic metrics
-        topic_documents = get_current_topics_metrics(kwargs['topic_modelling'], topics, context['granularity'], context['topic_weight_threshold'])
+        topic_documents, number_of_documents = get_current_topics_metrics(kwargs['topic_modelling'],
+                                                                          topics,
+                                                                          context['granularity'],
+                                                                          context['topic_weight_threshold']
+                                                                          )
 
         # Get documents, set weights
         documents = get_documents_with_weights(topic_documents)
@@ -132,6 +136,7 @@ class TopicDocumentListView(TemplateView):
 
         # Create context
         context['documents'] = unique_ize(documents, key=lambda x: x.id)
+        context['number_of_documents'] = number_of_documents
         context['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power

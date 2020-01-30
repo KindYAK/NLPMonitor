@@ -49,7 +49,7 @@ def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weigh
     std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
         .metric("source_weight", agg_type="sum", field="topic_weight")
     topic_documents = std.execute()
-    return topic_documents
+    return topic_documents, std.count().value
 
 
 def get_total_metrics(topic_modelling, granularity, topic_weight_threshold):
