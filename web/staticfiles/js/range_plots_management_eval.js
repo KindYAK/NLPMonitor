@@ -91,6 +91,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             "info": true,
             "autoWidth": true,
             "pageLength": 25,
+            "lengthMenu": [ 10, 25, 50, 75, 100, 200]
         });
     }
 
