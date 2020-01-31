@@ -269,19 +269,18 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
 
     if keyword:
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
-        q = Q('multi_match',
-              query=keyword,
-              fields=['title^10',
-                      'tags^3',
-                      'categories^3',
-                      'text^2'])
+        q = Q(
+            'bool',
+            should=[Q("match_phrase", text=k.strip()) for k in keyword.split("|")] + [Q("match_phrase", title=k) for k in keyword.split("|")],
+            minimum_should_match=1
+        )
         s = s.query(q)
         s = s.source(tuple())
         search_lvl = "SEARCH_LVL_LIGHT"
         s = s[:SEARCH_CUTOFF_CONFIG[search_lvl]['ABS_MAX_RESULTS_CUTOFF']]
         r = s.execute()
-        cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
-        keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
+        # cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
+        keyword_ids_to_filter = [d.meta.id for d in r]
         if topics:
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))
         else:
