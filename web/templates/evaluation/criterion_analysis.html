@@ -29,6 +29,11 @@
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     {# Custom script #}
     <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
+    {% if request.user.is_superuser %}
+        <!-- Clipboard.js -->
+        <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
+        <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
+    {% endif %}
     <style>
         .col-lg-2 {
             display: flex;
@@ -422,8 +427,21 @@
                                         <div class="card-body">
                                             <div id="dynamic_plots">
                                                 {# Абсолютные значения #}
-                                                <div class="dynamics-plot"
-                                                     id="total_dynamics_plot_{{ group.id }}"></div>
+                                                <div class="clipboard" style="display: none">
+                                                    <div style="text-align: center;">
+                                                        <button class="btn btn-primary" id="total_dynamics_plot_{{ group.id }}_copy">
+                                                            Временной ряд в буфер обмена
+                                                        </button>
+                                                    </div>
+                                                    <script>
+                                                        new ClipboardJS('#total_dynamics_plot_{{ group.id }}_copy', {
+                                                            text: function (trigger) {
+                                                                return get_time_series("total_dynamics_plot_{{ group.id }}");
+                                                            }
+                                                        });
+                                                    </script>
+                                                </div>
+                                                <div class="dynamics-plot" id="total_dynamics_plot_{{ group.id }}"></div>
                                                 <script>
                                                     var selectorOptions = {
                                                         buttons: [{
@@ -503,6 +521,20 @@
                             <div class="card-body">
                                 <div id="dynamic_plots">
                                     {# Абсолютные значения #}
+                                    <div class="clipboard" style="display: none">
+                                        <div style="text-align: center;">
+                                            <button class="btn btn-primary" id="value_dynamics_copy">
+                                                Временной ряд в буфер обмена
+                                            </button>
+                                        </div>
+                                        <script>
+                                            new ClipboardJS('#value_dynamics_copy', {
+                                                text: function (trigger) {
+                                                    return get_time_series("value_dynamics");
+                                                }
+                                            });
+                                        </script>
+                                    </div>
                                     <div class="dynamics-plot" id="value_dynamics"></div>
                                     <script>
                                         var selectorOptions = {
@@ -563,6 +595,20 @@
                                 {% for criterion in criterions %}
                                     {% if criterion.value_range_from < 0 %}
                                         {# Позитив-негатив #}
+                                        <div class="clipboard" style="display: none">
+                                            <div style="text-align: center;">
+                                                <button class="btn btn-primary" id="value_dynamics_posneg_{{ criterion.id }}_copy">
+                                                    Временной ряд в буфер обмена
+                                                </button>
+                                            </div>
+                                            <script>
+                                                new ClipboardJS('#value_dynamics_posneg_{{ criterion.id }}_copy', {
+                                                    text: function (trigger) {
+                                                        return get_time_series_posneg("value_dynamics_posneg_{{ criterion.id }}");
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
                                         <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
                                         <script>
                                             var data = [
@@ -626,6 +672,24 @@
                             {% for criterion in criterions %}
                                 <div class="card-body">
                                     <div id="bar_plot">
+                                        <div class="clipboard" style="display: none">
+                                            <div style="text-align: center;">
+                                                <button class="btn btn-primary" id="source_distribution_{{ criterion.id }}_copy">
+                                                    Временной ряд в буфер обмена
+                                                </button>
+                                            </div>
+                                            <script>
+                                                new ClipboardJS('#source_distribution_{{ criterion.id }}_copy', {
+                                                    text: function (trigger) {
+                                                        {% if criterion.value_range_from >= 0 %}
+                                                            return get_bar("source_distribution_{{ criterion.id }}");
+                                                        {% else %}
+                                                            return get_bar_posneg("source_distribution_{{ criterion.id }}");
+                                                        {% endif %}
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
                                         <div id="source_distribution_{{ criterion.id }}"></div>
                                         <script>
                                             {% if criterion.value_range_from >= 0 %}
@@ -996,5 +1060,10 @@
             ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([
                 {% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
     </script>
+    {% if request.user.is_superuser %}
+        <script>
+            $('.clipboard').show();
+        </script>
+    {% endif %}
     <script src="{% static 'js/criterion_eval_forms_management.js' %}"></script>
 {% endblock %}
