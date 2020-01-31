@@ -29,7 +29,7 @@
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     {# Custom script #}
     <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
         <!-- Clipboard.js -->
         <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
         <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
@@ -1060,7 +1060,7 @@
             ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([
                 {% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
     </script>
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
         <script>
             $('.clipboard').show();
         </script>

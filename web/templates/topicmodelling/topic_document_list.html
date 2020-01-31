@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
         <!-- Clipboard.js -->
         <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
         <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
@@ -391,7 +391,7 @@
                                    {{ topic_weight_threshold|unlocalize }},
                                    true);
     </script>
-    {% if request.user.is_superuser %}
+    {% if request.user.is_superuser or request.user.expert %}
         <script>
             $('.clipboard').show();
         </script>
