@@ -271,8 +271,8 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
         q = Q(
             'bool',
-            should=[Q("match_phrase", text=k.strip()) for k in keyword.split("|")] +
-                   [Q("match_phrase", title=k) for k in keyword.split("|")] +
+            should=[Q("match_phrase", text_lemmatized=k.strip()) for k in keyword.split("|")] +
+                   [Q("match_phrase", text=k) for k in keyword.split("|")] +
                    [Q("match_phrase", title=k) for k in keyword.split("|")],
             minimum_should_match=1
         )
