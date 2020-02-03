@@ -64,7 +64,7 @@ function generate_plot_data_for_posneg_sources(sources){
 
 
 function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword, sources,
-                                    group_id, criterion_q, action_q, value_q, plot_ids) {
+                                    group_id, criterion_q, action_q, value_q, plot_ids, length_additional_options=[]) {
     var main_plot_id = "value_dynamics";
 
     function rerender_new_range(range_from, range_to, id_to_skip) {
@@ -91,7 +91,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             "info": true,
             "autoWidth": true,
             "pageLength": 25,
-            "lengthMenu": [10, 25, 50, 75, 100, 200]
+            "lengthMenu": [10, 25, 50, 75, 100, 200].concat(length_additional_options)
         });
     }
 

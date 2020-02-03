@@ -30,6 +30,10 @@ class CriterionEvalAnalysisView(TemplateView):
             [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices if not tm.endswith("_neg")]
         ))))
         context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
+        # TODO Complicated cache issues - maybe TODO later
+        # context['top_news_num'] = 5000 if (hasattr(self.request.user, "expert") or self.request.user.is_superuser) else 200
+        context['top_news_num'] = 1000
+
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -141,7 +145,8 @@ class CriterionEvalAnalysisView(TemplateView):
                                                               context['granularity'],
                                                               context['sources'],
                                                               self.documents_ids_to_filter,
-                                                              analytical_query=self.analytical_query)
+                                                              analytical_query=self.analytical_query,
+                                                              top_news_num=context['top_news_num'])
         if not top_news:
             return
         top_news_total.update(top_news)
@@ -245,6 +250,10 @@ class CriterionEvalAnalysisView(TemplateView):
             self.get_group_evals(context, group)
 
         # Get documents, set weights
-        documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)
-        context['documents'] = unique_ize(documents_eval_dict.values(), key=lambda x: x['document'].id)[:200]
+        documents_eval_dict = get_documents_with_values(top_news_total,
+                                                        context['criterions'],
+                                                        context['topic_modelling'],
+                                                        max_criterion_value_dict,
+                                                        top_news_num=context['top_news_num'])
+        context['documents'] = unique_ize(documents_eval_dict.values(), key=lambda x: x['document'].id)[:context['top_news_num']]
         return context

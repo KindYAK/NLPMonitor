@@ -216,7 +216,7 @@ def normalize_documents_eval_dynamics_with_virt_negative(document_evals, topic_m
             bucket.dynamics_weight.value = val
 
 
-def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):
+def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None, top_news_num=200):
     # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
@@ -252,7 +252,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id][criterion_id] = \
                 td.value / -max_criterion_value_dict[criterion_id]["max_negative"]
     dict_vals = sorted(documents_eval_dict.items(), key=lambda x: sum(abs(i) for i in x[1].values() if type(i) == float), reverse=True)
-    return dict(dict_vals[:400])
+    return dict(dict_vals[:top_news_num*2])
 
 
 def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_threshold):
