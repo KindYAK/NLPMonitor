@@ -614,8 +614,7 @@
                                             var data = [
                                                 {
                                                     mode: 'lines',
-                                                    x: [{% for tick in positive|get_item:criterion.id %}new Date
-                                                        ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    x: [{% for tick in positive|get_item:criterion.id %}new Date ('{{ tick.key_as_string }}'), {% endfor %}],
                                                     y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
                                                     name: '{{ criterion.name }} - позитив',
                                                     line: {
@@ -624,8 +623,7 @@
                                                 },
                                                 {
                                                     mode: 'lines',
-                                                    x: [{% for tick in negative|get_item:criterion.id %}new Date
-                                                        ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    x: [{% for tick in negative|get_item:criterion.id %}new Date ('{{ tick.key_as_string }}'), {% endfor %}],
                                                     y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
                                                     name: '{{ criterion.name }} - негатив',
                                                     line: {
@@ -1005,6 +1003,9 @@
                                             <th>Дата</th>
                                             <th>Заголовок</th>
                                             <th>Источник</th>
+                                            {% if request.user.is_superuser or request.user.expert %}
+                                                <th>URL</th>
+                                            {% endif %}
                                             <th></th>
                                         </tr>
                                         </thead>
@@ -1023,6 +1024,13 @@
                                                 <td>{{ document|get_item:'document'|get_item:'datetime' }}</td>
                                                 <td>{{ document|get_item:'document'|get_item:'title' }}</td>
                                                 <td>{{ document|get_item:'document'|get_item:'source' }}</td>
+                                                {% if request.user.is_superuser or request.user.expert %}
+                                                    <td>
+                                                        <a href="{{ document|get_item:'document'|get_item:'url' }}">
+                                                            Ссылка
+                                                        </a>
+                                                    </td>
+                                                {% endif %}
                                                 <td>
                                                     <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}"
                                                        class="nav-link nowrap">

@@ -62,7 +62,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
         field="value",
         ranges=
         [
-            {"from": criterion.value_range_from, "to": range_center-neutral_neighborhood},
+            {"from": criterion.value_range_from, "to": range_center - neutral_neighborhood},
             {"from": range_center - neutral_neighborhood, "to": range_center + neutral_neighborhood},
             {"from": range_center + neutral_neighborhood, "to": criterion.value_range_to},
         ]
@@ -220,7 +220,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
-             .source(('id', 'title', 'source', 'datetime',))[:1000]
+             .source(('id', 'url', 'title', 'source', 'datetime',))[:1000]
     if date_from:
         sd = sd.filter("range", datetime={"gte": date_from})
     if date_to:
