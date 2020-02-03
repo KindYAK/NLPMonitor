@@ -20,7 +20,7 @@ def filter_analytical_query(topic_modelling, criterion_id, action, value):
 
 
 def get_current_document_evals(topic_modelling, criterion, granularity, sources, documents_ids_to_filter,
-                               date_from=None, date_to=None, analytical_query=None):
+                               date_from=None, date_to=None, analytical_query=None, top_news_num=200):
     # Basic search object
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
@@ -104,7 +104,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
                 .metric("dynamics_weight", agg_type="avg", field="value")
 
     # Execute search
-    std = std[:200]
+    std = std[:top_news_num]
     document_evals = std.execute()
 
     # Top_news ids - get minimum values
@@ -121,7 +121,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
     if date_to:
         std_min = std_min.filter("range", document_datetime={"lte": date_to})
-    std_min = std_min[:200]
+    std_min = std_min[:top_news_num]
     document_evals_min = std_min.execute()
     top_news.update((d.document_es_id for d in document_evals_min))
 
@@ -271,7 +271,9 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
         q = Q(
             'bool',
-            should=[Q("match_phrase", text=k.strip()) for k in keyword.split("|")] + [Q("match_phrase", title=k) for k in keyword.split("|")],
+            should=[Q("match_phrase", text=k.strip()) for k in keyword.split("|")] +
+                   [Q("match_phrase", title=k) for k in keyword.split("|")] +
+                   [Q("match_phrase", title=k) for k in keyword.split("|")],
             minimum_should_match=1
         )
         s = s.query(q)
