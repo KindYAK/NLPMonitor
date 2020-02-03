@@ -3,7 +3,7 @@ function get_time_series(plot_id){
     output = "";
     for(i = 0; i < plot.x.length; i++){
         let d = new Date(plot.x[i]);
-        output += d.getDate().toString() + "." + d.getMonth() + "." + d.getFullYear() + "\t"
+        output += d.getDate().toString() + "." + (d.getMonth() + 1).toString() + "." + d.getFullYear() + "\t"
                     + plot.y[i].toString().replace(".", ",") + "\n";
     }
     return output;
@@ -15,7 +15,7 @@ function get_time_series_posneg(plot_id){
     output = "";
     for(i = 0; i < plot_pos.x.length; i++){
         let d = new Date(plot_pos.x[i]);
-        output += d.getDate().toString() + "." + d.getMonth() + "." + d.getFullYear() + "\t"
+        output += d.getDate().toString() + "." + (d.getMonth() + 1).toString() + "." + d.getFullYear() + "\t"
                     + plot_pos.y[i].toString().replace(".", ",") + "\t" + plot_neg.y[i].toString().replace(".", ",") + "\n";
     }
     return output;
