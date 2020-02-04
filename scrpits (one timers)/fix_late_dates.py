@@ -5,7 +5,7 @@ from mainapp.services import batch_qs
 
 batch_size = 10000
 
-qs = Document.objects.filter(id__gt=0)
+qs = Document.objects.filter(id__gt=0).order_by('id')
 number_of_documents = qs.count()
 for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
     print(f"Processing {i*batch_size}/{number_of_documents}")
