@@ -5,6 +5,7 @@
 {% load l10n %}
 {% load dictionary_getter %}
 {% load serializers %}
+{% load custom_stuff %}
 
 {% block title %}
     Оценки по критериям
@@ -693,7 +694,7 @@
                                             {% if criterion.value_range_from >= 0 %}
                                                 var data = [
                                                     {
-                                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
+                                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key|remove_http }}', {% endfor %}],
                                                         y: [{% for source in source_weight|get_item:criterion.id %}{{ source.value|round_fl:2|safe }}, {% endfor %}],
                                                         type: 'bar'
                                                     }
