@@ -21,7 +21,11 @@ function generate_plot_data_for_posneg_sources(sources){
     var positives_by_source_percents = [];
 
     for (source of sources) {
-        keys.push(source.key.replace("https://", "").replace("http://", ""));
+        let key = source.key.replace("https://", "").replace("http://", "");
+        if(key.endsWith("/")){
+            key = key.substring(0, key.length - 1);
+        }
+        keys.push(key);
         negatives_by_source.push(source.negative);
         neutrals_by_source.push(source.neutral);
         positives_by_source.push(source.positive);

@@ -4,6 +4,7 @@
 {% load staticfiles %}
 {% load l10n %}
 {% load serializers %}
+{% load custom_stuff %}
 
 {% block title %}
     {% if request.GET.topic_name %}
@@ -311,7 +312,7 @@
                         <script>
                             var data = [
                                 {
-                                    x: [{% for source in source_weight %}'{{ source.key }}', {% endfor %}],
+                                    x: [{% for source in source_weight %}'{{ source.key|remove_http }}', {% endfor %}],
                                     y: [{% for source in source_weight %}{{ source.source_weight.value|round_fl:2|safe }}, {% endfor %}],
                                     type: 'bar'
                                 }
