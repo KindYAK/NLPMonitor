@@ -42,6 +42,7 @@ class Command(BaseCommand):
         qs = Document.objects.filter(id__gt=self.from_id)
         if self.to_id:
             qs = qs.filter(id__lte=self.to_id)
+        qs = qs.order_by('id')
         # import datetime
         # qs = qs.filter(datetime__gte=datetime.date(2018, 10, 1), datetime__lte=datetime.date(2018, 10, 10)).order_by('id')
         print("Start build")
