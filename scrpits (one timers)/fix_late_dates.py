@@ -12,6 +12,9 @@ for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
     for j, doc in enumerate(batch):
         if i == 0:
             print(f"{j}/{batch_size}")
-        if doc.datetime and doc.datetime.date() > datetime.datetime.now().date() and doc.datetime.day <= 12:
-            doc.datetime = doc.datetime.replace(month=doc.datetime.day, day=doc.datetime.month)
+        print("!", doc.datetime)
+        if doc.datetime and doc.datetime.date() > datetime.datetime.now().date():
+            actual_date = doc.datetime + datetime.timedelta(hours=6)
+            if actual_date.day <= 12:
+                doc.datetime = doc.datetime.replace(month=actual_date.day, day=actual_date.month)
     Document.objects.bulk_update(batch, fields=['datetime'])
