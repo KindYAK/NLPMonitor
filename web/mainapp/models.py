@@ -73,6 +73,7 @@ class Document(models.Model):
     class Meta:
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
+        unique_together = ('source', 'date', 'title', )
 
     TYPES = (
         (0, "News"),
@@ -84,7 +85,7 @@ class Document(models.Model):
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник*")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор (FK)")
     author_txt = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор")
-    title = models.CharField(max_length=2500, verbose_name="Заголовок*")
+    title = models.CharField(max_length=500, verbose_name="Заголовок*")
     text = models.TextField(verbose_name="Текст*")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
@@ -92,6 +93,7 @@ class Document(models.Model):
     type = models.SmallIntegerField(choices=TYPES, default=0, verbose_name="Тип публикации (в основном для Тенгри)")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
+    date = models.DateField(null=True, blank=True, verbose_name="Дата публикации (dateonly)")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
 
     num_views = models.IntegerField(null=True, blank=True, verbose_name="Количество просмотров")
@@ -104,17 +106,12 @@ class Document(models.Model):
 
     topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic', verbose_name="Топики", blank=True)
 
-    unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность source, datetime, title")
-
     author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
     sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        hash = hashlib.md5()
-        hash.update(str(self.source.id).encode())
-        hash.update(str(self.datetime.date()).encode() if self.datetime else "".encode())
-        hash.update(str(self.title).encode())
-        self.unique_hash = hash.hexdigest()
+        if self.datetime and not self.date:
+            self.date = self.datetime.date()
         super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):

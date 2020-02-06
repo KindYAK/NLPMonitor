@@ -12,7 +12,6 @@ for i, batch in enumerate(batch_qs(qs, batch_size=batch_size)):
     for j, doc in enumerate(batch):
         if i == 0:
             print(f"{j}/{batch_size}")
-        print("!", doc.datetime)
         if doc.datetime and doc.datetime.date() > datetime.datetime.now().date():
             actual_date = doc.datetime + datetime.timedelta(hours=6)
             if actual_date.day <= 12:
