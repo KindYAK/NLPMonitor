@@ -11,6 +11,8 @@ services:
   nginx:
     volumes:
       - ./nginx-app-prod.conf:/etc/nginx/conf.d/app.conf
+      - ../certbot/conf:/etc/letsencrypt:rw
+      - ../certbot/www:/var/www/certbot:rw
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot

@@ -22,8 +22,6 @@ services:
       - static_root:/static_root
       - media_root:/media_root
       - ./htpasswd:/etc/nginx/.htpasswd
-      - ./certbot/conf:/etc/letsencrypt:rw
-      - ./certbot/www:/var/www/certbot:rw
     depends_on:
       - web
     networks:
