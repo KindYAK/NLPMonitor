@@ -28,3 +28,11 @@ for hit in res['hits']['hits']:
 
 with open("/output.json", "w", encoding="utf-8") as f:
     f.write(json.dumps(output))
+
+
+
+conn = redis.StrictRedis(
+        host='109.233.109.110',
+        port=6378,
+        password='')
+conn.ping()

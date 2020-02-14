@@ -10,8 +10,9 @@ services:
         soft: -1
         hard: -1
     expose:
-      - 9200
       - 9300
+    ports:
+      - "9501:9200"
     networks:
       - esnet
       - network
@@ -31,8 +32,9 @@ services:
         soft: -1
         hard: -1
     expose:
-      - 9200
       - 9300
+    ports:
+      - "9502:9200"
     networks:
       - esnet
       - network
@@ -52,8 +54,9 @@ services:
         soft: -1
         hard: -1
     expose:
-      - 9200
       - 9300
+    ports:
+      - "9503:9200"
     networks:
       - esnet
       - network
