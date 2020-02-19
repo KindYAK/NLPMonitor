@@ -6,6 +6,8 @@ register = Library()
 
 @register.filter
 def json(queryset):
+    if queryset is None:
+        return "''"
     return serialize('json', queryset)
 
 

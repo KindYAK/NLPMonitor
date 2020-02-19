@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <title>NLPMonitor - {% block title %}{% endblock %}</title>
+    <title>Media Analytics - {% block title %}{% endblock %}</title>
 
     <!-- Yandex.Metrika counter --> <script type="text/javascript" > (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)}; m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)}) (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym"); ym(56001304, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); </script> <noscript><div><img src="https://mc.yandex.ru/watch/56001304" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter -->
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -103,7 +104,7 @@
         <!-- Brand Logo -->
         <a href="/" class="brand-link">
             <span style="margin-left: 1.2rem;" class="fas fa-file-medical-alt"></span>
-            <span class="brand-text font-weight-light">NLPMonitor</span>
+            <span class="brand-text font-weight-light">Media Analytics</span>
         </a>
 
         <!-- Sidebar -->
@@ -231,7 +232,10 @@
         <!-- To the right -->
         <div class="float-right d-none d-sm-inline"></div>
         <!-- Default to the left -->
-        <strong>&copy; 2019 <a href="http://iict.kz">РГП на ПХВ ИИВТ МОН РК</a>.</strong> Все права защищены
+        <strong>
+            {# TODO Remove! #}
+            <a href="{% get_media_prefix %}pres.pptx" style="cursor: inherit; color: inherit;">&copy;</a>
+            2<a href="{% get_media_prefix %}pres.pdf" style="cursor: inherit; color: inherit;">0</a>19 <a href="http://iict.kz">РГП на ПХВ ИИВТ МОН РК</a>.</strong> Все права защищены
     </footer>
 </div>
 <!-- ./wrapper -->

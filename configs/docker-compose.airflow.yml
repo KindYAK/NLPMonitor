@@ -3,8 +3,6 @@ version: '3'
 services:
   airflow-postgresql:
     image: "postgres:11.4"
-    expose:
-      - 5432
     volumes:
       - airflow-postgresql:/bitnami/postgresql
       - ../db_airflow_backup:/backup

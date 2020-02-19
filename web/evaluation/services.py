@@ -19,8 +19,8 @@ def filter_analytical_query(topic_modelling, criterion_id, action, value):
     return (d.document_es_id for d in s.scan())
 
 
-def get_current_document_evals(topic_modelling, criterion, granularity, documents_ids_to_filter,
-                               date_from=None, date_to=None, analytical_query=None):
+def get_current_document_evals(topic_modelling, criterion, granularity, sources, documents_ids_to_filter,
+                               date_from=None, date_to=None, analytical_query=None, top_news_num=200):
     # Basic search object
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
@@ -39,6 +39,9 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
     # Filter by group and keyword
     if documents_ids_to_filter or analytical_query:
         std = std.filter("terms", **{'document_es_id': documents_ids_to_filter})
+
+    if sources:
+        std = std.filter("terms", document_source=[source.name for source in sources])
 
     # Range selection
     if date_from:
@@ -59,7 +62,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         field="value",
         ranges=
         [
-            {"from": criterion.value_range_from, "to": range_center-neutral_neighborhood},
+            {"from": criterion.value_range_from, "to": range_center - neutral_neighborhood},
             {"from": range_center - neutral_neighborhood, "to": range_center + neutral_neighborhood},
             {"from": range_center + neutral_neighborhood, "to": criterion.value_range_to},
         ]
@@ -76,11 +79,12 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
         std.aggs['posneg'].bucket(name="source",
                                   agg_type="terms",
                                   field="document_source",
-                                  size=20)
+                                  size=100)
     else:
         # Source distributions
-        std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
-            .metric("source_value", agg_type="avg", field="value")
+        std.aggs.bucket(name="source", agg_type="terms", field="document_source")
+        std.aggs['source'].metric("source_value_sum", agg_type="sum", field="value")
+        std.aggs['source'].metric("source_value_average", agg_type="avg", field="value")
 
     # Dynamics
     if granularity:
@@ -100,7 +104,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
                 .metric("dynamics_weight", agg_type="avg", field="value")
 
     # Execute search
-    std = std[:200]
+    std = std[:top_news_num]
     document_evals = std.execute()
 
     # Top_news ids - get minimum values
@@ -111,14 +115,31 @@ def get_current_document_evals(topic_modelling, criterion, granularity, document
               .source(['document_es_id']).sort('value')
     if documents_ids_to_filter or analytical_query:
         std_min = std_min.filter("terms", **{'document_es_id': documents_ids_to_filter})
+    if sources:
+        std_min = std.filter("terms", document_source=[source.name for source in sources])
     if date_from:
         std_min = std_min.filter("range", document_datetime={"gte": date_from})
     if date_to:
         std_min = std_min.filter("range", document_datetime={"lte": date_to})
-    std_min = std_min[:200]
+    std_min = std_min[:top_news_num]
     document_evals_min = std_min.execute()
     top_news.update((d.document_es_id for d in document_evals_min))
+
+    if criterion.value_range_from >= 0:
+        document_evals = calc_source_input(document_evals)
+
     return document_evals, top_news
+
+
+def calc_source_input(document_evals):
+    max_sum = max((bucket.source_value_sum.value for bucket in document_evals.aggregations.source.buckets))
+    max_average = max((bucket.source_value_average.value for bucket in document_evals.aggregations.source.buckets))
+    for bucket in document_evals.aggregations.source.buckets:
+        bucket.value = (
+                               (bucket.source_value_sum.value / max_sum) +
+                               (bucket.source_value_average.value / max_average)
+                       ) / 2
+    return document_evals
 
 
 def get_criterions_values_for_normalization(criterions, topic_modelling, granularity=None, analytical_query=None):
@@ -195,11 +216,11 @@ def normalize_documents_eval_dynamics_with_virt_negative(document_evals, topic_m
             bucket.dynamics_weight.value = val
 
 
-def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None):
+def get_documents_with_values(top_news_total, criterions, topic_modelling, max_criterion_value_dict, date_from=None, date_to=None, top_news_num=200):
     # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
-             .source(('id', 'title', 'source', 'datetime',))[:1000]
+             .source(('id', 'url', 'title', 'source', 'datetime',))[:1000]
     if date_from:
         sd = sd.filter("range", datetime={"gte": date_from})
     if date_to:
@@ -231,7 +252,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
             documents_eval_dict[td.document_es_id][criterion_id] = \
                 td.value / -max_criterion_value_dict[criterion_id]["max_negative"]
     dict_vals = sorted(documents_eval_dict.items(), key=lambda x: sum(abs(i) for i in x[1].values() if type(i) == float), reverse=True)
-    return dict(dict_vals[:200])
+    return dict(dict_vals[:top_news_num*2])
 
 
 def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_threshold):
@@ -248,19 +269,20 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
 
     if keyword:
         s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
-        q = Q('multi_match',
-              query=keyword,
-              fields=['title^10',
-                      'tags^3',
-                      'categories^3',
-                      'text^2'])
+        q = Q(
+            'bool',
+            should=[Q("match_phrase", text_lemmatized=k.strip()) for k in keyword.split("|")] +
+                   [Q("match_phrase", text=k) for k in keyword.split("|")] +
+                   [Q("match_phrase", title=k) for k in keyword.split("|")],
+            minimum_should_match=1
+        )
         s = s.query(q)
         s = s.source(tuple())
         search_lvl = "SEARCH_LVL_LIGHT"
         s = s[:SEARCH_CUTOFF_CONFIG[search_lvl]['ABS_MAX_RESULTS_CUTOFF']]
         r = s.execute()
-        cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
-        keyword_ids_to_filter = [d.meta.id for d in r[:cutoff]]
+        # cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
+        keyword_ids_to_filter = [d.meta.id for d in r]
         if topics:
             documents_ids_to_filter = list(set(documents_ids_to_filter).intersection(set(keyword_ids_to_filter)))
         else:
@@ -273,6 +295,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
 def divide_posneg_source_buckets(buckets):
     sources_criterion_dict = {}
     for i, pn in enumerate(buckets):
+        tonality = ["negative", "neutral", "positive"][i]
         for bucket in pn.source.buckets:
             if bucket.key not in sources_criterion_dict:
                 sources_criterion_dict[bucket.key] = {}
@@ -280,11 +303,10 @@ def divide_posneg_source_buckets(buckets):
                 sources_criterion_dict[bucket.key]['positive'] = 0
                 sources_criterion_dict[bucket.key]['neutral'] = 0
                 sources_criterion_dict[bucket.key]['negative'] = 0
-            tonality = ["negative", "neutral", "positive"][i]
             sources_criterion_dict[bucket.key][tonality] = bucket.doc_count
     sources_criterion_dict = sorted(sources_criterion_dict.values(),
                                     key=lambda x: x['positive'] + x['negative'] + x['neutral'],
-                                    reverse=True)
+                                    reverse=True)[:20]
     return sources_criterion_dict
 
 
@@ -363,6 +385,9 @@ def get_low_volume_positive_topics(tm_dict, topics_dict, criterion, topic_weight
     neutrality_threshold = 0.1
     topic_eval_sorted = list(filter(lambda x: x[1] > range_center + neutrality_threshold, topic_eval_sorted))
     topic_eval_sorted = topic_eval_sorted[:(len(topic_eval_sorted) + 1) // 2]
+
+    if len(topic_eval_sorted) == 0:
+        return []
 
     # Get least highlighted topics
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_dict['name']}") \

@@ -67,10 +67,10 @@ password=
 
 [operators]
 default_owner=airflow
-default_cpus=1
-default_ram=512
-default_disk=512
-default_gpus=0
+default_cpus=4
+default_ram=30720
+default_disk=30720
+default_gpus=1
 
 [hive]
 default_hive_mapred_queue=

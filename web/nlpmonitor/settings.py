@@ -221,9 +221,18 @@ from elasticsearch import Elasticsearch
 
 ES_CLIENT = Elasticsearch(
     hosts=[
-        {'host': 'elasticsearch1'},
-        {'host': 'elasticsearch2'},
-        {'host': 'elasticsearch3'},
+        {
+            'host': os.getenv('ES_HOST', 'elasticsearch1'),
+            'port': os.getenv('ES_PORT1', 9200),
+        },
+        {
+            'host': os.getenv('ES_HOST', 'elasticsearch2'),
+            'port': os.getenv('ES_PORT2', 9200),
+        },
+        {
+            'host': os.getenv('ES_HOST', 'elasticsearch3'),
+            'port': os.getenv('ES_PORT3', 9200),
+        },
     ] if not DEBUG else
         [{'host': 'elasticsearch1'}],
     timeout=60,
@@ -248,7 +257,7 @@ SHELL_PLUS_PRE_IMPORTS = (
                              'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT', 'ES_INDEX_CLASSIFIER',
                              'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL',
                              'ES_INDEX_CUSTOM_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS',
-                             'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID',)),
+                             'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID', )),
     ('elasticsearch_dsl', ('Search', 'Index', 'Q')),
     'datetime',
 )

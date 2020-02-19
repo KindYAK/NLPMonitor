@@ -21,7 +21,11 @@ function generate_plot_data_for_posneg_sources(sources){
     var positives_by_source_percents = [];
 
     for (source of sources) {
-        keys.push(source.key);
+        let key = source.key.replace("https://", "").replace("http://", "");
+        if(key.endsWith("/")){
+            key = key.substring(0, key.length - 1);
+        }
+        keys.push(key);
         negatives_by_source.push(source.negative);
         neutrals_by_source.push(source.neutral);
         positives_by_source.push(source.positive);
@@ -63,8 +67,8 @@ function generate_plot_data_for_posneg_sources(sources){
 }
 
 
-function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword,
-                                    group_id, criterion_q, action_q, value_q, plot_ids) {
+function run_range_plot_management(criterions, topic_modelling, topic_weight_threshold, keyword, sources,
+                                    group_id, criterion_q, action_q, value_q, plot_ids, length_additional_options=[]) {
     var main_plot_id = "value_dynamics";
 
     function rerender_new_range(range_from, range_to, id_to_skip) {
@@ -91,6 +95,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
             "info": true,
             "autoWidth": true,
             "pageLength": 25,
+            "lengthMenu": [10, 25, 50, 75, 100, 200].concat(length_additional_options)
         });
     }
 
@@ -137,6 +142,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
     }
 
     function rerender_source_distribution(result) {
+        $('#collapseBarPlots').collapse('show');
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for(criterion of criterions){
@@ -176,6 +182,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
     }
 
     function rerender_posneg_plot(result) {
+        $('#collapsePosNeg').collapse('show');
         for (criterion_id in result.source_weights) {
             var value_range_from = null;
             for (criterion of criterions) {
@@ -445,6 +452,9 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     "&topic_weight_threshold=" + topic_weight_threshold.toString();
         for (criterion of criterions){
             url += "&criterions=" + criterion.pk.toString()
+        }
+        for (source of sources){
+            url += "&sources=" + source.pk.toString()
         }
         url += "&keyword=" + keyword +
                     "&group=" + group_id +

@@ -249,7 +249,7 @@ class DocumentEvalUniqueIDs(es.Document):
         using = ES_CLIENT
 
         settings = {
-            "number_of_shards": 3,
+            "number_of_shards": 2,
             "number_of_replicas": 1,
         }
         mappings = {

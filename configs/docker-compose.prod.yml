@@ -11,3 +11,15 @@ services:
   nginx:
     volumes:
       - ./nginx-app-prod.conf:/etc/nginx/conf.d/app.conf
+      - ../certbot/conf:/etc/letsencrypt:rw
+      - ../certbot/www:/var/www/certbot:rw
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  db:
+    ports:
+      - "5456:5432"

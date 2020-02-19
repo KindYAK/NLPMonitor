@@ -5,6 +5,7 @@
 {% load l10n %}
 {% load dictionary_getter %}
 {% load serializers %}
+{% load custom_stuff %}
 
 {% block title %}
     Оценки по критериям
@@ -19,7 +20,8 @@
     <!-- daterange picker -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
     <!-- Tempusdominus Bootstrap 4 -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Bootstrap 4 -->
     <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
     <!-- Plotly.js -->
@@ -27,25 +29,35 @@
     <!-- Chroma.js -->
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     {# Custom script #}
-    <script src="{% static 'js/range_plots_management_eval.js' %} "></script>
+    <script src="{% static 'js/range_plots_management_eval_v2.js' %} "></script>
+    {% if request.user.is_superuser or request.user.expert %}
+        <!-- Clipboard.js -->
+        <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
+        <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
+    {% endif %}
     <style>
         .col-lg-2 {
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .form-group {
             margin-bottom: 0;
         }
+
         .select2-container {
             height: 38px;
         }
+
         #tmForm .select2-container {
             height: 108px !important;
         }
+
         .select2-selection {
             height: 100% !important;
         }
+
         h3[data-toggle="collapse"] {
             cursor: pointer;
         }
@@ -53,7 +65,7 @@
 {% endblock %}
 
 {% block bc %}
-    <li class="breadcrumb-item"><a href="/venv">NLPMonitor</a></li>
+    <li class="breadcrumb-item"><a href="/venv">Media Analytics</a></li>
     <li class="breadcrumb-item active">Оценка по критериям</li>
 {% endblock %}
 
@@ -62,706 +74,577 @@
         <h1 class="m-0 text-dark">Формирование запроса</h1>
     </div>
     <form method="GET" action="" style="display: contents;">
-    {# Основная форма #}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Выбор модели и критериев</h3>
-                </div>
-                <div class="card-body">
-                    <div id="plotsMenu">
-                        <div class="row">
-                            <div class="col-lg-5">
-                                <div class="form-group">
-                                    <label for="granularity">Тематическое моделирование</label>
-                                    <select class="custom-select form-control select2 select2-single" name="topic_modelling" id="topic_modelling">
-                                        {% for topic_modelling_opt in topic_modellings %}
-                                            <option value="{{ topic_modelling_opt.0 }}">{{ topic_modelling_opt.1 }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <label for="topic_weight_threshold">Порог принадлежности к топику</label>
-                                    <select class="custom-select" name="topic_weight_threshold" id="topic_weight_threshold">
-                                        {% for option in topic_weight_threshold_options %}
-                                            <option value="{{ option.0|unlocalize }}">{{ option.1 }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <script>
-                                        $('#topic_weight_threshold').val('{{ topic_weight_threshold|unlocalize }}');
-                                    </script>
-                                    <script>
-                                        $('#topic_modelling').val('{{ topic_modelling }}');
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-lg-5">
-                                <div class="form-group" id="tmForm">
-                                    <label for="granularity">Критерии</label>
-                                    <select class="custom-select form-control select2 select2-multi" name="criterions" id="criterions" multiple="multiple">
-                                        {% for criterion in criterions_list %}
-                                            <option value="{{ criterion.id }}">{{ criterion.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <script>
-                                        {% for criterion in criterions %}
-                                            $("#criterions option[value='" + {{ criterion.id }} + "']").prop("selected", true);
-                                        {% endfor %}
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-primary float-right" style="margin-top: 30px;">Применить</button>
-                                </div>
-                            </div>
-                        </div>
+        {# Основная форма #}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Выбор модели и критериев</h3>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {# Фильтрация #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionFilteringSetting">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseFilteringSetting" aria-expanded="false" aria-controls="collapseFilteringSetting">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Фильтрация
-                    </h3>
-                </div>
-                <div id="collapseFilteringSetting" class="collapse" aria-labelledby="collapseFilteringSetting" data-parent="#accordionFilteringSetting">
-                <div class="card-body">
-                    <div id="plotsMenu">
-                        <div class="row">
-                            <div class="col-lg-5">
-                                <div class="form-group">
-                                    <label for="granularity">Ключевое слово</label>
-                                    <input class="form-control" type="text" name="keyword" id="keyword" placeholder="Поиск...">
-                                    <script>
-                                        $('#keyword').val('{{ keyword }}');
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-lg-5">
-                                <div class="form-group">
-                                    <label for="granularity">Группы</label>
-                                    <select class="custom-select form-control select2 select2-single" name="group" id="group">
-                                    <option selected value='-1'>-----Мои группы-----</option>
-                                        {% for group in my_groups %}
-                                            <option value='{{ group.id }}'>{{ group.name }}</option>
-                                        {% endfor %}
-                                        <option value='-2'>-----Публичные группы-----</option>
-                                        {% for group in public_groups %}
-                                            <option value='{{ group.id }}'>{{ group.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <script>
-                                        {% if group %}
-                                            $('#group').val('{{ group.id }}');
-                                        {% else %}
-                                            $('#group').val('-1');
-                                        {% endif %}
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-primary float-right" style="margin-top: 30px;">Применить</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {# Аналитические запросы #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionAnalyticalQuerySetting">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseAnalyticalQuerySetting" aria-expanded="false" aria-controls="collapseAnalyticalQuerySetting">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Аналитические запросы
-                    </h3>
-                </div>
-                <div id="collapseAnalyticalQuerySetting" class="collapse" aria-labelledby="collapseAnalyticalQuerySetting" data-parent="#accordionAnalyticalQuerySetting">
-                <div class="card-body">
-                    <div id="plotsMenu">
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label for="criterion_q">Критерий</label>
-                                    <select class="custom-select form-control select2 select2-single" name="criterion_q" id="criterion_q">
-                                        <option value="-1">-----Выбор критерия-----</option>
-                                        {% for criterion in criterions_list %}
-                                            <option value="{{ criterion.id }}">{{ criterion.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <script>
-                                        $('#criterion_q').val('{{ criterion_q }}');
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <div class="form-group">
-                                    <label for="action_q">Действие</label>
-                                    <select class="custom-select form-control select2 select2-single" name="action_q" id="action_q">
-                                        <option value="gte">&gt;=</option>
-                                        <option value="gt">&gt;</option>
-                                        <option value="eq">=</option>
-                                        <option value="lt">&lt;</option>
-                                        <option value="lte">&lt;=</option>
-                                    </select>
-                                    <script>
-                                        $('#action_q').val('{{ action_q }}');
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-md-1">
-                                <div class="form-group">
-                                    <label for="value_q">Значение</label>
-                                    <input class="form-control" type="text" name="value_q" id="value_q" placeholder="0.5">
-                                    <script>
-                                        $('#value_q').val('{{ value_q }}');
-                                    </script>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-primary float-right" style="margin-top: 30px;">Применить</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {# Управление графиками #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionGraphSetting">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseGraphSetting" aria-expanded="false" aria-controls="collapseGraphSetting">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Графики - опции
-                    </h3>
-                </div>
-                <div id="collapseGraphSetting" class="collapse" aria-labelledby="collapseGraphSetting" data-parent="#accordionGraphSetting">
-                <div class="card-body">
-                    <div id="plotsMenu">
-                        <div class="row">
-                            <div class="col-lg-3"></div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <label for="granularity">Гранулярность</label>
-                                    <select class="custom-select" name="granularity" id="granularity">
-                                        <option value="1d">1 День</option>
-                                        <option value="1w">1 Неделя</option>
-                                        <option value="1M">1 Месяц</option>
-                                        <option value="1q">3 Месяца</option>
-                                        <option value="1y">1 Год</option>
-                                    </select>
-                                </div>
-                                <script>
-                                    $('#granularity').val('{{ granularity }}');
-                                </script>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" name="smooth" id="smoothSwitch">
-                                        <label class="custom-control-label" for="smoothSwitch">Сглаживание</label>
+                    <div class="card-body">
+                        <div id="plotsMenu">
+                            <div class="row">
+                                <div class="col-lg-5">
+                                    <div class="form-group">
+                                        <label for="topic_modelling">Тематическое моделирование</label>
+                                        <select class="custom-select form-control select2 select2-single"
+                                                name="topic_modelling" id="topic_modelling">
+                                            {% for topic_modelling_opt in topic_modellings %}
+                                                <option value="{{ topic_modelling_opt.0 }}">{{ topic_modelling_opt.1 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="topic_weight_threshold">Порог принадлежности к топику</label>
+                                        <select class="custom-select" name="topic_weight_threshold"
+                                                id="topic_weight_threshold">
+                                            {% for option in topic_weight_threshold_options %}
+                                                <option value="{{ option.0|unlocalize }}">{{ option.1 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <script>
+                                            $('#topic_weight_threshold').val('{{ topic_weight_threshold|unlocalize }}');
+                                        </script>
+                                        <script>
+                                            $('#topic_modelling').val('{{ topic_modelling }}');
+                                        </script>
                                     </div>
                                 </div>
-                                <script>
-                                    $('#smoothSwitch').prop("checked", {% if smooth %}true{% else %}false{% endif %})
-                                </script>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                        <button type="submit" class="btn btn-primary float-right">Применить</button>
+                                <div class="col-lg-5">
+                                    <div class="form-group" id="tmForm">
+                                        <label for="criterions">Критерии</label>
+                                        <select class="custom-select form-control select2 select2-multi"
+                                                name="criterions" id="criterions" multiple="multiple">
+                                            {% for criterion in criterions_list %}
+                                                <option value="{{ criterion.id }}">{{ criterion.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <script>
+                                            {% for criterion in criterions %}
+                                                $("#criterions option[value='" + {{ criterion.id }} +"']").prop("selected", true);
+                                            {% endfor %}
+                                        </script>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary float-right"
+                                                style="margin-top: 30px;">Применить
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3"></div>
                         </div>
                     </div>
                 </div>
-                </div>
-            </div>
             </div>
         </div>
-    </div>
+
+        {# Фильтрация #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionFilteringSetting">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseFilteringSetting" aria-expanded="false"
+                                aria-controls="collapseFilteringSetting">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Фильтрация
+                            </h3>
+                        </div>
+                        <div id="collapseFilteringSetting" class="collapse show" aria-labelledby="collapseFilteringSetting"
+                             data-parent="#accordionFilteringSetting">
+                            <div class="card-body">
+                                <div id="plotsMenu">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="keyword">Ключевое слово</label>
+                                                <input class="form-control" type="text" name="keyword" id="keyword"
+                                                       placeholder="Поиск...">
+                                                <script>
+                                                    $('#keyword').val('{{ keyword }}');
+                                                </script>
+                                                <label for="group">Группы</label>
+                                                <select class="custom-select form-control select2 select2-single"
+                                                        name="group" id="group">
+                                                    <option selected value='-1'>-----Мои группы-----</option>
+                                                    {% for group in my_groups %}
+                                                        <option value='{{ group.id }}'>{{ group.name }}</option>
+                                                    {% endfor %}
+                                                    <option value='-2'>-----Публичные группы-----</option>
+                                                    {% for group in public_groups %}
+                                                        <option value='{{ group.id }}'>{{ group.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <script>
+                                                    {% if group %}
+                                                        $('#group').val('{{ group.id }}');
+                                                    {% else %}
+                                                        $('#group').val('-1');
+                                                    {% endif %}
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="form-group" id="tmForm">
+                                                <label for="criterions">Источники</label>
+                                                <select class="custom-select form-control select2 select2-multi"
+                                                        name="sources" id="sources" multiple="multiple">
+                                                    {% for source in sources_list %}
+                                                        <option value="{{ source.id }}">{{ source.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <script>
+                                                    {% for source in sources %}
+                                                        $("#sources option[value='" + {{ source.id }} +"']").prop("selected", true);
+                                                    {% endfor %}
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary float-right"
+                                                        style="margin-top: 30px;">Применить
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Аналитические запросы #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionAnalyticalQuerySetting">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseAnalyticalQuerySetting"
+                                aria-expanded="false" aria-controls="collapseAnalyticalQuerySetting">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Аналитические запросы
+                            </h3>
+                        </div>
+                        <div id="collapseAnalyticalQuerySetting" class="collapse show"
+                             aria-labelledby="collapseAnalyticalQuerySetting"
+                             data-parent="#accordionAnalyticalQuerySetting">
+                            <div class="card-body">
+                                <div id="plotsMenu">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="criterion_q">Критерий</label>
+                                                <select class="custom-select form-control select2 select2-single"
+                                                        name="criterion_q" id="criterion_q">
+                                                    <option value="-1">-----Выбор критерия-----</option>
+                                                    {% for criterion in criterions_list %}
+                                                        <option value="{{ criterion.id }}">{{ criterion.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <script>
+                                                    $('#criterion_q').val('{{ criterion_q }}');
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="action_q">Действие</label>
+                                                <select class="custom-select form-control select2 select2-single"
+                                                        name="action_q" id="action_q">
+                                                    <option value="gte">&gt;=</option>
+                                                    <option value="gt">&gt;</option>
+                                                    <option value="eq">=</option>
+                                                    <option value="lt">&lt;</option>
+                                                    <option value="lte">&lt;=</option>
+                                                </select>
+                                                <script>
+                                                    $('#action_q').val('{{ action_q }}');
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="value_q">Значение</label>
+                                                <input class="form-control" type="text" name="value_q" id="value_q"
+                                                       placeholder="0.5">
+                                                <script>
+                                                    $('#value_q').val('{{ value_q }}');
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary float-right"
+                                                        style="margin-top: 30px;">Применить
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Управление графиками #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionGraphSetting">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseGraphSetting" aria-expanded="false"
+                                aria-controls="collapseGraphSetting">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Графики - опции
+                            </h3>
+                        </div>
+                        <div id="collapseGraphSetting" class="collapse show" aria-labelledby="collapseGraphSetting"
+                             data-parent="#accordionGraphSetting">
+                            <div class="card-body">
+                                <div id="plotsMenu">
+                                    <div class="row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-2">
+                                            <div class="form-group">
+                                                <label for="granularity">Гранулярность</label>
+                                                <select class="custom-select" name="granularity" id="granularity">
+                                                    <option value="1d">1 День</option>
+                                                    <option value="1w">1 Неделя</option>
+                                                    <option value="1M">1 Месяц</option>
+                                                    <option value="1q">3 Месяца</option>
+                                                    <option value="1y">1 Год</option>
+                                                </select>
+                                            </div>
+                                            <script>
+                                                $('#granularity').val('{{ granularity }}');
+                                            </script>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <div class="form-group">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" name="smooth"
+                                                           id="smoothSwitch">
+                                                    <label class="custom-control-label"
+                                                           for="smoothSwitch">Сглаживание</label>
+                                                </div>
+                                            </div>
+                                            <script>
+                                                $('#smoothSwitch').prop("checked", {% if smooth %}true{% else %}false{% endif %})
+                                            </script>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary float-right">Применить
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
 
     {% cache 28800 criterion_analysis request.GET %}
-    <div class="card-header">
-        <h1 class="m-0 text-dark">Результаты</h1>
-    </div>
+        <div class="card-header">
+            <h1 class="m-0 text-dark">Результаты</h1>
+        </div>
 
-    {% if posneg_distribution %}
-    {# Распределение позитив-негатив #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionPosNeg">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapsePosNeg" aria-expanded="false" aria-controls="collapsePosNeg">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Позитив-негатив
-                    </h3>
-                </div>
-                <div id="collapsePosNeg" class="collapse show" aria-labelledby="collapsePosNeg" data-parent="#accordionPosNeg">
-                {% for criterion in criterions %}
-                    {% if criterion.value_range_from < 0 %}
-                        <div class="card-body">
-                            <div id="bar_plot">
-                                <div id="posneg_distribution_{{ criterion.id }}"></div>
-                                <script>
-                                    var data = [
-                                        {
-                                            x: ["Негатив", "Нейтральные", "Позитив"],
-                                            y: [{% for bucket in posneg_distribution|get_item:criterion.id|get_item:'buckets' %}{{ bucket.doc_count }}, {% endfor %}],
-                                            marker: {
-                                                color: ['#d3322b', '#fee42c', '#23964f']
-                                            },
-                                            type: 'bar'
-                                        }
-                                    ];
-                                    var layout = {
-                                        title: '{{ criterion.name }}',
-                                        showlegend: false,
-                                        bargap: 0.025,
-                                    };
-                                    Plotly.plot('posneg_distribution_{{ criterion.id }}', data, layout, {responsive: true});
-                                </script>
+        {% if posneg_distribution %}
+            {# Распределение позитив-негатив #}
+            <div class="row">
+                <div class="col-12">
+                    <div class="accordion" id="accordionPosNeg">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 data-toggle="collapse" data-target="#collapsePosNeg" aria-expanded="false"
+                                    aria-controls="collapsePosNeg">
+                                    <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                    Позитив-негатив
+                                </h3>
                             </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if groups|length > 0 %}
-    {# Графики динамика группы #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionGroupDynamics">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseGroupDynamics" aria-expanded="false" aria-controls="collapseGroupDynamics">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Динамика общая
-                    </h3>
-                </div>
-                <div id="collapseGroupDynamics" class="collapse show" aria-labelledby="collapseGroupDynamics" data-parent="#accordionGroupDynamics">
-                {% for group in groups %}
-                    {% if group_total_dynamics|get_item:group.id %}
-                        <div class="card-body">
-                            <div id="dynamic_plots">
-                                {# Абсолютные значения #}
-                                <div class="dynamics-plot"  id="total_dynamics_plot_{{ group.id }}"></div>
-                                <script>
-                                    var selectorOptions = {
-                                        buttons: [{
-                                            step: 'month',
-                                            stepmode: 'backward',
-                                            count: 1,
-                                            label: '1m'
-                                        }, {
-                                            step: 'month',
-                                            stepmode: 'backward',
-                                            count: 6,
-                                            label: '6m'
-                                        }, {
-                                            step: 'year',
-                                            stepmode: 'todate',
-                                            count: 1,
-                                            label: 'YTD'
-                                        }, {
-                                            step: 'year',
-                                            stepmode: 'backward',
-                                            count: 1,
-                                            label: '1y'
-                                        }, {
-                                            step: 'all',
-                                        }],
-                                    };
-
-                                    var data = [
-                                        {
-                                            mode: 'lines',
-                                            x: [{% for tick in group_total_dynamics|get_item:group.id|get_item:'ticks' %}new Date('{{ tick }}'), {% endfor %}],
-                                            y: [{% for tick in group_total_dynamics|get_item:group.id|get_item:'dynamics' %}{{ tick|round_fl:5|safe }}, {% endfor %}],
-                                            name: '{{ criterion.name }}',
-                                            fill: 'tozeroy',
-                                        },
-                                    ];
-                                    var layout = {
-                                        title: 'Среднее значение группы критериев {{ group.name }}',
-                                        xaxis: {
-                                            rangeselector: selectorOptions,
-                                            rangeslider: {},
-                                            fixedrange: true
-                                        },
-                                        yaxis: {
-                                            fixedrange: true,
-                                        }
-                                    };
-                                    Plotly.plot('total_dynamics_plot_{{ group.id }}', data, layout, {responsive: true});
-                                </script>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# Графики динамика критериев #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionDynamics">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseDynamics" aria-expanded="false" aria-controls="collapseDynamics">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Динамика критериев
-                    </h3>
-                </div>
-                <div id="collapseDynamics" class="collapse show" aria-labelledby="collapseDynamics" data-parent="#accordionDynamics">
-                <div class="card-body">
-                    <div id="dynamic_plots">
-                        {# Абсолютные значения #}
-                        <div class="dynamics-plot" id="value_dynamics"></div>
-                        <script>
-                            var selectorOptions = {
-                                buttons: [{
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1m'
-                                }, {
-                                    step: 'month',
-                                    stepmode: 'backward',
-                                    count: 6,
-                                    label: '6m'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'todate',
-                                    count: 1,
-                                    label: 'YTD'
-                                }, {
-                                    step: 'year',
-                                    stepmode: 'backward',
-                                    count: 1,
-                                    label: '1y'
-                                }, {
-                                    step: 'all',
-                                }],
-                            };
-
-                            var data = [
+                            <div id="collapsePosNeg" class="collapse show" aria-labelledby="collapsePosNeg"
+                                 data-parent="#accordionPosNeg">
                                 {% for criterion in criterions %}
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
-                                    name: '{{ criterion.name }}',
-                                    {% if criterions|length == 1 %}
-                                        fill: 'tozeroy',
-                                    {% endif %}
-                                },
-                                {% endfor %}
-                            ];
-                            var layout = {
-                                title: 'Среднее значение',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {},
-                                    fixedrange: true
-                                },
-                                yaxis: {
-                                    fixedrange: true,
-                                    range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
-                                }
-                            };
-                            Plotly.plot('value_dynamics', data, layout, {responsive: true});
-                        </script>
-                    </div>
-                    {% for criterion in criterions %}
-                        {% if criterion.value_range_from < 0 %}
-                        {# Позитив-негатив #}
-                        <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
-                        <script>
-                            var data = [
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in positive|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
-                                    name: '{{ criterion.name }} - позитив',
-                                    line: {
-                                        color: '#23964f',
-                                    },
-                                },
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in negative|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
-                                    name: '{{ criterion.name }} - негатив',
-                                    line: {
-                                        color: '#d3322b',
-                                    },
-                                },
-                            ];
-                            var layout = {
-                                title: 'Объём позитива и негатива по критерию {{ criterion.name }}',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {},
-                                    fixedrange: true
-                                },
-                                yaxis: {
-                                    fixedrange: true,
-                                }
-                            };
-                            Plotly.plot('value_dynamics_posneg_{{ criterion.id }}', data, layout, {responsive: true});
-                        </script>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {# Бар график #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionBarPlots">
-            <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseBarPlots" aria-expanded="false" aria-controls="collapseBarPlots">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Распределение по СМИ
-                    </h3>
-                </div>
-                <div id="collapseBarPlots" class="collapse show" aria-labelledby="collapseBarPlots" data-parent="#accordionBarPlots">
-                {% for criterion in criterions %}
-                <div class="card-body">
-                    <div id="bar_plot">
-                        <div id="source_distribution_{{ criterion.id }}"></div>
-                        <script>
-                            {% if criterion.value_range_from >= 0 %}
-                                var data = [
-                                    {
-                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key }}', {% endfor %}],
-                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.source_value.value|round_fl:2|safe }}, {% endfor %}],
-                                        type: 'bar'
-                                    }
-                                ];
-                            {% else %}
-                                var data = generate_plot_data_for_posneg_sources({{ source_weight|get_item:criterion.id|safe }});
-                            {% endif %}
-                            var layout = {
-                                title: '{{ criterion.name }}',
-                                showlegend: false,
-                                bargap: 0.025,
-                                {% if criterion.value_range_from < 0 %}
-                                    barmode: 'stack',
-                                {% endif %}
-                            };
-                            Plotly.plot('source_distribution_{{ criterion.id }}', data, layout, {responsive: true});
-                        </script>
-                    </div>
-                </div>
-                {% endfor %}
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    {# Главные топики #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionMainTopics">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 data-toggle="collapse" data-target="#collapseMainTopics" aria-expanded="false" aria-controls="collapseMainTopics">
-                            <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                            Ключевые топики
-                        </h3>
-                    </div>
-                    <div id="collapseMainTopics" class="collapse" aria-labelledby="collapseMainTopics" data-parent="#accordionMainTopics">
-                        <div class="card-body">
-                            <div id="main-topics">
-                                <script>
-                                    var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
-                                    var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
-                                </script>
-                                {% for criterion in criterions %}
-                                    <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
-                                    <table id="main-topics-table" class="table table-bordered table-hover">
-                                        <thead>
-                                        <tr role="row">
-                                            <th>Топик</th>
-                                            <th>Прогнозируемая резонансность</th>
-                                            <th>Прогнозируемая продолжительность</th>
-                                            <th>Тренд</th>
-                                            <th>Вес</th>
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for topic in posneg_top_topics|get_item:criterion.id %}
-                                            <tr>
-                                                <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                                                <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.resonance_score %}
-                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
-                                                    {% else %}
-                                                        Фоновый топик
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.resonance_score %}
-                                                    <script>
-                                                        $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.period_days %}
-                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
-                                                    {% else %}
-                                                        Фоновый топик
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.period_score %}
-                                                    <script>
-                                                        $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.trend_score and topic_trend_score != 0 %}
-                                                        {{ topic.trend_score|floatformat:3|unlocalize }}
-                                                        {% if topic.trend_score > 0 %}
-                                                            <div style="text-align: center;">
-                                                                <i class="fas fa-arrow-up"></i>
-                                                            </div>
-                                                        {% else %}
-                                                            <div style="text-align: center;">
-                                                                <i class="fas fa-arrow-down"></i>
-                                                            </div>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.trend_score and topic_trend_score != 0 %}
-                                                    <script>
-                                                        $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
-                                                <td>
-                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-
                                     {% if criterion.value_range_from < 0 %}
-                                    <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
-                                    <table id="main-topics-table" class="table table-bordered table-hover">
-                                        <thead>
-                                        <tr role="row">
-                                            <th>Топик</th>
-                                            <th>Прогнозируемая резонансность</th>
-                                            <th>Прогнозируемая продолжительность</th>
-                                            <th>Тренд</th>
-                                            <th>Вес</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for topic in posneg_bottom_topics|get_item:criterion.id %}
-                                            <tr>
-                                                <td id="name_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                                                <td id="resonance_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.resonance_score %}
-                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
-                                                    {% else %}
-                                                        Фоновый топик
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.resonance_score %}
+                                        <div class="card-body">
+                                            <div id="bar_plot">
+                                                <div id="posneg_distribution_{{ criterion.id }}"></div>
+                                                <script>
+                                                    var data = [
+                                                        {
+                                                            x: ["Негатив", "Нейтральные", "Позитив"],
+                                                            y: [{% for bucket in posneg_distribution|get_item:criterion.id|get_item:'buckets' %}{{ bucket.doc_count }}, {% endfor %}],
+                                                            marker: {
+                                                                color: ['#d3322b', '#fee42c', '#23964f']
+                                                            },
+                                                            type: 'bar'
+                                                        }
+                                                    ];
+                                                    var layout = {
+                                                        title: '{{ criterion.name }}',
+                                                        showlegend: false,
+                                                        bargap: 0.025,
+                                                    };
+                                                    Plotly.plot('posneg_distribution_{{ criterion.id }}', data, layout, {responsive: true});
+                                                </script>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if groups|length > 0 %}
+            {# Графики динамика группы #}
+            <div class="row">
+                <div class="col-12">
+                    <div class="accordion" id="accordionGroupDynamics">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 data-toggle="collapse" data-target="#collapseGroupDynamics" aria-expanded="false"
+                                    aria-controls="collapseGroupDynamics">
+                                    <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                    Динамика общая
+                                </h3>
+                            </div>
+                            <div id="collapseGroupDynamics" class="collapse show"
+                                 aria-labelledby="collapseGroupDynamics" data-parent="#accordionGroupDynamics">
+                                {% for group in groups %}
+                                    {% if group_total_dynamics|get_item:group.id %}
+                                        <div class="card-body">
+                                            <div id="dynamic_plots">
+                                                {# Абсолютные значения #}
+                                                <div class="clipboard" style="display: none">
+                                                    <div style="text-align: center;">
+                                                        <button class="btn btn-primary" id="total_dynamics_plot_{{ group.id }}_copy">
+                                                            Временной ряд в буфер обмена
+                                                        </button>
+                                                    </div>
                                                     <script>
-                                                        $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
+                                                        new ClipboardJS('#total_dynamics_plot_{{ group.id }}_copy', {
+                                                            text: function (trigger) {
+                                                                return get_time_series("total_dynamics_plot_{{ group.id }}");
+                                                            }
+                                                        });
                                                     </script>
-                                                {% endif %}
-                                                <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.period_days %}
-                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
-                                                    {% else %}
-                                                        Фоновый топик
+                                                </div>
+                                                <div class="dynamics-plot" id="total_dynamics_plot_{{ group.id }}"></div>
+                                                <script>
+                                                    var selectorOptions = {
+                                                        buttons: [{
+                                                            step: 'month',
+                                                            stepmode: 'backward',
+                                                            count: 1,
+                                                            label: '1m'
+                                                        }, {
+                                                            step: 'month',
+                                                            stepmode: 'backward',
+                                                            count: 6,
+                                                            label: '6m'
+                                                        }, {
+                                                            step: 'year',
+                                                            stepmode: 'todate',
+                                                            count: 1,
+                                                            label: 'YTD'
+                                                        }, {
+                                                            step: 'year',
+                                                            stepmode: 'backward',
+                                                            count: 1,
+                                                            label: '1y'
+                                                        }, {
+                                                            step: 'all',
+                                                        }],
+                                                    };
+
+                                                    var data = [
+                                                        {
+                                                            mode: 'lines',
+                                                            x: [
+                                                                {% for tick in group_total_dynamics|get_item:group.id|get_item:'ticks' %}
+                                                                    new Date('{{ tick }}'), {% endfor %}],
+                                                            y: [{% for tick in group_total_dynamics|get_item:group.id|get_item:'dynamics' %}{{ tick|round_fl:5|safe }}, {% endfor %}],
+                                                            name: '{{ criterion.name }}',
+                                                            fill: 'tozeroy',
+                                                        },
+                                                    ];
+                                                    var layout = {
+                                                        title: 'Среднее значение группы критериев {{ group.name }}',
+                                                        xaxis: {
+                                                            rangeselector: selectorOptions,
+                                                            rangeslider: {},
+                                                            fixedrange: true
+                                                        },
+                                                        yaxis: {
+                                                            fixedrange: true,
+                                                        }
+                                                    };
+                                                    Plotly.plot('total_dynamics_plot_{{ group.id }}', data, layout, {responsive: true});
+                                                </script>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Графики динамика критериев #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionDynamics">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseDynamics" aria-expanded="false"
+                                aria-controls="collapseDynamics">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Динамика критериев
+                            </h3>
+                        </div>
+                        <div id="collapseDynamics" class="collapse show" aria-labelledby="collapseDynamics"
+                             data-parent="#accordionDynamics">
+                            <div class="card-body">
+                                <div id="dynamic_plots">
+                                    {# Абсолютные значения #}
+                                    <div class="clipboard" style="display: none">
+                                        <div style="text-align: center;">
+                                            <button class="btn btn-primary" id="value_dynamics_copy">
+                                                Временной ряд в буфер обмена
+                                            </button>
+                                        </div>
+                                        <script>
+                                            new ClipboardJS('#value_dynamics_copy', {
+                                                text: function (trigger) {
+                                                    return get_time_series("value_dynamics");
+                                                }
+                                            });
+                                        </script>
+                                    </div>
+                                    <div class="dynamics-plot" id="value_dynamics"></div>
+                                    <script>
+                                        var selectorOptions = {
+                                            buttons: [{
+                                                step: 'month',
+                                                stepmode: 'backward',
+                                                count: 1,
+                                                label: '1m'
+                                            }, {
+                                                step: 'month',
+                                                stepmode: 'backward',
+                                                count: 6,
+                                                label: '6m'
+                                            }, {
+                                                step: 'year',
+                                                stepmode: 'todate',
+                                                count: 1,
+                                                label: 'YTD'
+                                            }, {
+                                                step: 'year',
+                                                stepmode: 'backward',
+                                                count: 1,
+                                                label: '1y'
+                                            }, {
+                                                step: 'all',
+                                            }],
+                                        };
+
+                                        var data = [
+                                            {% for criterion in criterions %}
+                                                {
+                                                    mode: 'lines',
+                                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date
+                                                        ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
+                                                    name: '{{ criterion.name }}',
+                                                    {% if criterions|length == 1 %}
+                                                        fill: 'tozeroy',
                                                     {% endif %}
-                                                </td>
-                                                {% if topic.period_score %}
-                                                    <script>
-                                                        $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.trend_score and topic_trend_score != 0 %}
-                                                        {{ topic.trend_score|floatformat:3|unlocalize }}
-                                                        {% if topic.trend_score > 0 %}
-                                                            <div style="text-align: center;">
-                                                                <i class="fas fa-arrow-up"></i>
-                                                            </div>
-                                                        {% else %}
-                                                            <div style="text-align: center;">
-                                                                <i class="fas fa-arrow-down"></i>
-                                                            </div>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.trend_score and topic_trend_score != 0 %}
-                                                    <script>
-                                                        $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
-                                                <td>
-                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
+                                                },
+                                            {% endfor %}
+                                        ];
+                                        var layout = {
+                                            title: 'Среднее значение',
+                                            xaxis: {
+                                                rangeselector: selectorOptions,
+                                                rangeslider: {},
+                                                fixedrange: true
+                                            },
+                                            yaxis: {
+                                                fixedrange: true,
+                                                range: [{{ y_axis_from|safe }}, {{ y_axis_to|safe }}]
+                                            }
+                                        };
+                                        Plotly.plot('value_dynamics', data, layout, {responsive: true});
+                                    </script>
+                                </div>
+                                {% for criterion in criterions %}
+                                    {% if criterion.value_range_from < 0 %}
+                                        {# Позитив-негатив #}
+                                        <div class="clipboard" style="display: none">
+                                            <div style="text-align: center;">
+                                                <button class="btn btn-primary" id="value_dynamics_posneg_{{ criterion.id }}_copy">
+                                                    Временной ряд в буфер обмена
+                                                </button>
+                                            </div>
+                                            <script>
+                                                new ClipboardJS('#value_dynamics_posneg_{{ criterion.id }}_copy', {
+                                                    text: function (trigger) {
+                                                        return get_time_series_posneg("value_dynamics_posneg_{{ criterion.id }}");
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
+                                        <div class="dynamics-plot" id="value_dynamics_posneg_{{ criterion.id }}"></div>
+                                        <script>
+                                            var data = [
+                                                {
+                                                    mode: 'lines',
+                                                    x: [{% for tick in positive|get_item:criterion.id %}new Date ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    y: [{% for tick in positive|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
+                                                    name: '{{ criterion.name }} - позитив',
+                                                    line: {
+                                                        color: '#23964f',
+                                                    },
+                                                },
+                                                {
+                                                    mode: 'lines',
+                                                    x: [{% for tick in negative|get_item:criterion.id %}new Date ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    y: [{% for tick in negative|get_item:criterion.id %}{{ tick.doc_count|round_fl:0|safe }}, {% endfor %}],
+                                                    name: '{{ criterion.name }} - негатив',
+                                                    line: {
+                                                        color: '#d3322b',
+                                                    },
+                                                },
+                                            ];
+                                            var layout = {
+                                                title: 'Объём позитива и негатива по критерию {{ criterion.name }}',
+                                                xaxis: {
+                                                    rangeselector: selectorOptions,
+                                                    rangeslider: {},
+                                                    fixedrange: true
+                                                },
+                                                yaxis: {
+                                                    fixedrange: true,
+                                                }
+                                            };
+                                            Plotly.plot('value_dynamics_posneg_{{ criterion.id }}', data, layout, {responsive: true});
+                                        </script>
                                     {% endif %}
                                 {% endfor %}
                             </div>
@@ -770,140 +653,404 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {# Неосвещённый позитив #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionUnhighlightedPos">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 data-toggle="collapse" data-target="#collapseUnhighlightedPos" aria-expanded="false" aria-controls="collapseUnhighlightedPos">
-                            <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                            Неосвещённый позитив
-                        </h3>
+        {# Бар график #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionBarPlots">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseBarPlots" aria-expanded="false"
+                                aria-controls="collapseBarPlots">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Распределение по СМИ
+                            </h3>
+                        </div>
+                        <div id="collapseBarPlots" class="collapse show" aria-labelledby="collapseBarPlots"
+                             data-parent="#accordionBarPlots">
+                            {% for criterion in criterions %}
+                                <div class="card-body">
+                                    <div id="bar_plot">
+                                        <div class="clipboard" style="display: none">
+                                            <div style="text-align: center;">
+                                                <button class="btn btn-primary" id="source_distribution_{{ criterion.id }}_copy">
+                                                    Временной ряд в буфер обмена
+                                                </button>
+                                            </div>
+                                            <script>
+                                                new ClipboardJS('#source_distribution_{{ criterion.id }}_copy', {
+                                                    text: function (trigger) {
+                                                        {% if criterion.value_range_from >= 0 %}
+                                                            return get_bar("source_distribution_{{ criterion.id }}");
+                                                        {% else %}
+                                                            return get_bar_posneg("source_distribution_{{ criterion.id }}");
+                                                        {% endif %}
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
+                                        <div id="source_distribution_{{ criterion.id }}"></div>
+                                        <script>
+                                            {% if criterion.value_range_from >= 0 %}
+                                                var data = [
+                                                    {
+                                                        x: [{% for source in source_weight|get_item:criterion.id %}'{{ source.key|remove_http }}', {% endfor %}],
+                                                        y: [{% for source in source_weight|get_item:criterion.id %}{{ source.value|round_fl:2|safe }}, {% endfor %}],
+                                                        type: 'bar'
+                                                    }
+                                                ];
+                                            {% else %}
+                                                var data = generate_plot_data_for_posneg_sources({{ source_weight|get_item:criterion.id|safe }});
+                                            {% endif %}
+                                            var layout = {
+                                                title: '{{ criterion.name }}',
+                                                showlegend: false,
+                                                bargap: 0.025,
+                                                {% if criterion.value_range_from < 0 %}
+                                                    barmode: 'stack',
+                                                {% endif %}
+                                            };
+                                            Plotly.plot('source_distribution_{{ criterion.id }}', data, layout, {responsive: true});
+                                        </script>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div id="collapseUnhighlightedPos" class="collapse" aria-labelledby="collapseUnhighlightedPos" data-parent="#accordionUnhighlightedPos">
-                        <div class="card-body">
-                            <div id="low-volume-topics">
-                                {% for criterion in criterions %}
-                                    <h4>{{ criterion.name }} - наименее освещённые топики с позитивным влиянием</h4>
-                                    <table id="low-volume-table" class="table table-bordered table-hover">
-                                        <thead>
-                                        <tr role="row">
-                                            <th>Топик</th>
-                                            <th>Прогнозируемая резонансность</th>
-                                            <th>Прогнозируемая продолжительность</th>
-                                            <th>Вес</th>
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for topic in low_volume_positive_topics|get_item:criterion.id %}
-                                            <tr>
-                                                <td id="low_name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                                                <td id="low_resonance_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.resonance_score %}
-                                                        {{ topic.resonance_score|floatformat:3|unlocalize }}
-                                                    {% else %}
-                                                        Фоновый топик
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.resonance_score %}
-                                                    <script>
-                                                        $('#low_resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="low_period_{{ criterion.id }}_{{ topic.info.id }}">
-                                                    {% if topic.period_days %}
-                                                        {{ topic.period_days|floatformat:1|unlocalize }} дней (Score: {{ topic.period_score|floatformat:3|unlocalize }})
-                                                    {% else %}
-                                                        Фоновый топик
-                                                    {% endif %}
-                                                </td>
-                                                {% if topic.period_score %}
-                                                    <script>
-                                                        $('#low_period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
-                                                    </script>
-                                                {% endif %}
-                                                <td id="low_weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
-                                                <td>
-                                                    <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}" class="nav-link nowrap">
-                                                        <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                                        data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
-                                                    </a>
-                                                </td>
+                </div>
+            </div>
+        </div>
+
+        {# Главные топики #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionMainTopics">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseMainTopics" aria-expanded="false"
+                                aria-controls="collapseMainTopics">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Ключевые топики
+                            </h3>
+                        </div>
+                        <div id="collapseMainTopics" class="collapse" aria-labelledby="collapseMainTopics"
+                             data-parent="#accordionMainTopics">
+                            <div class="card-body">
+                                <div id="main-topics">
+                                    <script>
+                                        var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
+                                        var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
+                                    </script>
+                                    {% for criterion in criterions %}
+                                        <h4>{{ criterion.name }} - главные топики по положительному влиянию</h4>
+                                        <table id="main-topics-table" class="table table-bordered table-hover">
+                                            <thead>
+                                            <tr role="row">
+                                                <th>Топик</th>
+                                                <th>Прогнозируемая резонансность</th>
+                                                <th>Прогнозируемая продолжительность</th>
+                                                <th>Тренд</th>
+                                                <th>Вес</th>
+                                                <th></th>
                                             </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                {% endfor %}
+                                            </thead>
+                                            <tbody>
+                                            {% for topic in posneg_top_topics|get_item:criterion.id %}
+                                                <tr>
+                                                    <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                    <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                                                        {% if topic.resonance_score %}
+                                                            {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                        {% else %}
+                                                            Фоновый топик
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if topic.resonance_score %}
+                                                        <script>
+                                                            $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                                                        </script>
+                                                    {% endif %}
+                                                    <td id="period_{{ criterion.id }}_{{ topic.info.id }}">
+                                                        {% if topic.period_days %}
+                                                            {{ topic.period_days|floatformat:1|unlocalize }} дней(Score:
+                                                            {{ topic.period_score|floatformat:3|unlocalize }})
+                                                        {% else %}
+                                                            Фоновый топик
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if topic.period_score %}
+                                                        <script>
+                                                            $('#period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
+                                                        </script>
+                                                    {% endif %}
+                                                    <td id="trend_{{ criterion.id }}_{{ topic.info.id }}">
+                                                        {% if topic.trend_score and topic_trend_score != 0 %}
+                                                            {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                            {% if topic.trend_score > 0 %}
+                                                                <div style="text-align: center;">
+                                                                    <i class="fas fa-arrow-up"></i>
+                                                                </div>
+                                                            {% else %}
+                                                                <div style="text-align: center;">
+                                                                    <i class="fas fa-arrow-down"></i>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if topic.trend_score and topic_trend_score != 0 %}
+                                                        <script>
+                                                            $('#trend_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.trend_score|safe }}));
+                                                        </script>
+                                                    {% endif %}
+                                                    <td id="weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                    <td>
+                                                        <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
+                                                           class="nav-link nowrap">
+                                                            <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                               data-toggle="tooltip" data-placement="top"
+                                                               title="Анализ по тематике"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+
+                                        {% if criterion.value_range_from < 0 %}
+                                            <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
+                                            <table id="main-topics-table" class="table table-bordered table-hover">
+                                                <thead>
+                                                <tr role="row">
+                                                    <th>Топик</th>
+                                                    <th>Прогнозируемая резонансность</th>
+                                                    <th>Прогнозируемая продолжительность</th>
+                                                    <th>Тренд</th>
+                                                    <th>Вес</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for topic in posneg_bottom_topics|get_item:criterion.id %}
+                                                    <tr>
+                                                        <td id="name_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                        <td id="resonance_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                            {% if topic.resonance_score %}
+                                                                {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                            {% else %}
+                                                                Фоновый топик
+                                                            {% endif %}
+                                                        </td>
+                                                        {% if topic.resonance_score %}
+                                                            <script>
+                                                                $('#resonance_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
+                                                            </script>
+                                                        {% endif %}
+                                                        <td id="period_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                            {% if topic.period_days %}
+                                                                {{ topic.period_days|floatformat:1|unlocalize }} дней
+                                                                (Score:{{ topic.period_score|floatformat:3|unlocalize }}
+                                                                )
+                                                            {% else %}
+                                                                Фоновый топик
+                                                            {% endif %}
+                                                        </td>
+                                                        {% if topic.period_score %}
+                                                            <script>
+                                                                $('#period_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.period_score|safe }}));
+                                                            </script>
+                                                        {% endif %}
+                                                        <td id="trend_neg_{{ criterion.id }}_{{ topic.info.id }}">
+                                                            {% if topic.trend_score and topic_trend_score != 0 %}
+                                                                {{ topic.trend_score|floatformat:3|unlocalize }}
+                                                                {% if topic.trend_score > 0 %}
+                                                                    <div style="text-align: center;">
+                                                                        <i class="fas fa-arrow-up"></i>
+                                                                    </div>
+                                                                {% else %}
+                                                                    <div style="text-align: center;">
+                                                                        <i class="fas fa-arrow-down"></i>
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </td>
+                                                        {% if topic.trend_score and topic_trend_score != 0 %}
+                                                            <script>
+                                                                $('#trend_neg_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.trend_score|safe }}));
+                                                            </script>
+                                                        {% endif %}
+                                                        <td id="weight_neg_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                        <td>
+                                                            <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
+                                                               class="nav-link nowrap">
+                                                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                                   data-toggle="tooltip" data-placement="top"
+                                                                   title="Анализ по тематике"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {# Главные новости топика #}
-    <div class="row">
-        <div class="col-12">
-            <div class="accordion" id="accordionMainNews">
-                <div class="card">
-                <div class="card-header">
-                    <h3 data-toggle="collapse" data-target="#collapseMainNews" aria-expanded="false" aria-controls="collapseMainNews">
-                        <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
-                        Ключевые новости по критериям
-                    </h3>
-                </div>
-                <div id="collapseMainNews" class="collapse" aria-labelledby="collapseMainNews" data-parent="#accordionMainNews">
-                    <div class="card-body" style="overflow-x: scroll;">
-                    <div id="search-results">
-                        <table id="search-results-table" class="table table-bordered table-hover">
-                            <thead>
-                            <tr role="row">
-                                {% for criterion in criterions %}
-                                    <th>{{ criterion.name }}</th>
-                                {% endfor %}
-                                <th>Дата</th>
-                                <th>Заголовок</th>
-                                <th>Источник</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for key, document in documents.items %}
-                                  <tr>
+        {# Неосвещённый позитив #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionUnhighlightedPos">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseUnhighlightedPos" aria-expanded="false"
+                                aria-controls="collapseUnhighlightedPos">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Неосвещённый позитив
+                            </h3>
+                        </div>
+                        <div id="collapseUnhighlightedPos" class="collapse" aria-labelledby="collapseUnhighlightedPos"
+                             data-parent="#accordionUnhighlightedPos">
+                            <div class="card-body">
+                                <div id="low-volume-topics">
                                     {% for criterion in criterions %}
-                                        <td>
-                                            {% if document|get_item:criterion.id %}
-                                                {{ document|get_item:criterion.id|floatformat:3|unlocalize }}
-                                            {% else %}
-                                                0,000
-                                            {% endif %}
-                                        </td>
+                                        <h4>{{ criterion.name }} - наименее освещённые топики с позитивным влиянием</h4>
+                                        <table id="low-volume-table" class="table table-bordered table-hover">
+                                            <thead>
+                                            <tr role="row">
+                                                <th>Топик</th>
+                                                <th>Прогнозируемая резонансность</th>
+                                                <th>Прогнозируемая продолжительность</th>
+                                                <th>Вес</th>
+                                                <th></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for topic in low_volume_positive_topics|get_item:criterion.id %}
+                                                <tr>
+                                                    <td id="low_name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                                                    <td id="low_resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                                                        {% if topic.resonance_score %}
+                                                            {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                                        {% else %}
+                                                            Фоновый топик
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if topic.resonance_score %}
+                                                        <script>
+                                                            $('#low_resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                                                        </script>
+                                                    {% endif %}
+                                                    <td id="low_period_{{ criterion.id }}_{{ topic.info.id }}">
+                                                        {% if topic.period_days %}
+                                                            {{ topic.period_days|floatformat:1|unlocalize }} дней(Score:
+                                                            {{ topic.period_score|floatformat:3|unlocalize }})
+                                                        {% else %}
+                                                            Фоновый топик
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if topic.period_score %}
+                                                        <script>
+                                                            $('#low_period_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.period_score|safe }}));
+                                                        </script>
+                                                    {% endif %}
+                                                    <td id="low_weight_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.weight|floatformat:3|unlocalize }}</td>
+                                                    <td>
+                                                        <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
+                                                           class="nav-link nowrap">
+                                                            <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                                               data-toggle="tooltip" data-placement="top"
+                                                               title="Анализ по тематике"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
                                     {% endfor %}
-                                    <td>{{ document|get_item:'document'|get_item:'datetime' }}</td>
-                                    <td>{{ document|get_item:'document'|get_item:'title' }}</td>
-                                    <td>{{ document|get_item:'document'|get_item:'source' }}</td>
-                                    <td>
-                                        <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}" class="nav-link nowrap">
-                                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"
-                                            data-toggle="tooltip" data-placement="top" title="Просмотреть новость"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                </div>
-            </div>
             </div>
         </div>
-    </div>
+
+        {# Главные новости топика #}
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion" id="accordionMainNews">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 data-toggle="collapse" data-target="#collapseMainNews" aria-expanded="false"
+                                aria-controls="collapseMainNews">
+                                <i class="collapse-caret far fa-caret-square-down" style="font-size: 24px;"></i>
+                                Ключевые новости по критериям
+                            </h3>
+                        </div>
+                        <div id="collapseMainNews" class="collapse" aria-labelledby="collapseMainNews"
+                             data-parent="#accordionMainNews">
+                            <div class="card-body" style="overflow-x: scroll;">
+                                <div id="search-results">
+                                    <table id="search-results-table" class="table table-bordered table-hover">
+                                        <thead>
+                                        <tr role="row">
+                                            {% for criterion in criterions %}
+                                                <th>{{ criterion.name }}</th>
+                                            {% endfor %}
+                                            <th>Дата</th>
+                                            <th>Заголовок</th>
+                                            <th>Источник</th>
+                                            {% if request.user.is_superuser or request.user.expert %}
+                                                <th>URL</th>
+                                            {% endif %}
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for document in documents %}
+                                            <tr>
+                                                {% for criterion in criterions %}
+                                                    <td>
+                                                        {% if document|get_item:criterion.id %}
+                                                            {{ document|get_item:criterion.id|floatformat:3|unlocalize }}
+                                                        {% else %}
+                                                            0,000
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                                <td>{{ document|get_item:'document'|get_item:'datetime' }}</td>
+                                                <td>{{ document|get_item:'document'|get_item:'title' }}</td>
+                                                <td>{{ document|get_item:'document'|get_item:'source' }}</td>
+                                                {% if request.user.is_superuser or request.user.expert %}
+                                                    <td>
+                                                        <a href="{{ document|get_item:'document'|get_item:'url' }}">
+                                                            Ссылка
+                                                        </a>
+                                                    </td>
+                                                {% endif %}
+                                                <td>
+                                                    <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}"
+                                                       class="nav-link nowrap">
+                                                        <i class="nav-icon fas fa-eye" style="font-size: 36px;"
+                                                           data-toggle="tooltip" data-placement="top"
+                                                           title="Просмотреть новость"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endcache %}
 {% endblock %}
 
@@ -914,37 +1061,26 @@
     <!-- InputMask -->
     <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
     <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
-    <!-- date-range-picker -->
-    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
 
     {# Custom script #}
     <script>
-        run_range_plot_management({{ criterions|json|safe }}, '{{ topic_modelling }}', {{topic_weight_threshold|safe }},
-            '{{ keyword }}', '{{ group.id }}', '{{ criterion_q }}', '{{ action_q }}', '{{ value_q }}',
-            ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]));
-    </script>
-
-    <script>
-        $('.collapse').collapse('hide');
-        $('h3').hover(
-            function () {
-                $(this).find('i').addClass('fas');
-                $(this).find('i').removeClass('far');
-            },
-            function () {
-                $(this).find('i').addClass('far');
-                $(this).find('i').removeClass('fas');
-            }
+        run_range_plot_management({{ criterions|json|safe }},
+            '{{ topic_modelling }}',
+            {{topic_weight_threshold|safe }},
+            '{{ keyword }}',
+            {{ sources|json|safe }},
+            '{{ group.id }}',
+            '{{ criterion_q }}',
+            '{{ action_q }}',
+            '{{ value_q }}',
+            ["value_dynamics", {% for criterion in criterions %}{% if criterion.value_range_from < 0 %}'value_dynamics_posneg_{{ criterion.id }}', {% endif %}{% endfor %}].concat([{% for group in groups %}'total_dynamics_plot_{{ group.id }}', {% endfor %}]),
+            {% if request.user.is_superuser or request.user.expert %}[250, 500, 1000]{% else %}[]{% endif %}
         );
-
-        $('h3').click(function(){
-            if($(this).find('i').hasClass('fa-caret-square-down')) {
-                $(this).find('i').addClass('fa-caret-square-up');
-                $(this).find('i').removeClass('fa-caret-square-down');
-            } else {
-                $(this).find('i').addClass('fa-caret-square-down');
-                $(this).find('i').removeClass('fa-caret-square-up');
-            }
-        });
     </script>
+    {% if request.user.is_superuser or request.user.expert %}
+        <script>
+            $('.clipboard').show();
+        </script>
+    {% endif %}
+    <script src="{% static 'js/criterion_eval_forms_management.js' %}"></script>
 {% endblock %}

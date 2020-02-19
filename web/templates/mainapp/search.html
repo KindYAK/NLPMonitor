@@ -12,12 +12,10 @@
 {% block head %}
     <!-- data tables -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
-    <!-- daterange picker -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
-    <!-- Tempusdominus Bbootstrap 4 -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
+    <!-- Chroma.js -->
+    <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     <style>
         .row {
             margin-bottom: 15px;
@@ -37,7 +35,7 @@
 {% endblock %}
 
 {% block bc %}
-    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item"><a href="/">Media Analytics</a></li>
     <li class="breadcrumb-item active">Поиск</li>
 {% endblock %}
 
@@ -87,21 +85,6 @@
                                                 <div class="col-md-4">{{ form.text.label_tag }}</div>
                                                 <div class="col-md-8">{% render_field form.text placeholder="Текст" class="form-control" %}</div>
                                             </div>
-                                             <div class="input-group">
-                                            <div class="row" style="width: 100%;">
-                                                <div class="col-md-5">
-                                                    <button type="button" class="btn btn-default float-right"
-                                                            id="daterange-btn">
-                                                        <i class="far fa-calendar-alt"></i>Даты<i class="fas fa-caret-down"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="col-md-7">
-                                                    <span id="daterange-selected">Даты не выбраны</span>
-                                                    <input type="hidden" id="datetime_from" name="datetime_from">
-                                                    <input type="hidden" id="datetime_to" name="datetime_to">
-                                                </div>
-                                            </div>
-                                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,16 +298,21 @@
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
+                                <th>Тональность</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
+                            <script>
+                                var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-0.5, 0.5]);
+                            </script>
                             {% for document in documents %}
                                 <tr>
                                     <td>{{ document.score|floatformat:3|unlocalize }}</td>
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
+                                    <td id="sentiment_{{ document.id }}">{{ document.sentiment|floatformat:3|unlocalize }}</td>
                                     <td>
                                         <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
                                             <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
@@ -332,6 +320,9 @@
                                         </a>
                                     </td>
                                 </tr>
+                                <script>
+                                    $('#sentiment_{{ document.id }}').css('background-color', colorScale({{ document.sentiment|safe }}));
+                                </script>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -351,41 +342,6 @@
     <!-- InputMask -->
     <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
     <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
-    <!-- date-range-picker -->
-    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %} "></script>
-    <script>
-        $('#daterange-btn').daterangepicker(
-            {
-                locale: {
-                    format: 'DD-MM-YYYY',
-                },
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                },
-                startDate: {% if request.GET.datetime_from %}'{{ request.GET.datetime_from }}'{% else %}moment().subtract(29, 'days'){% endif %},
-                endDate: {% if request.GET.datetime_to %}'{{ request.GET.datetime_to }}'{% else %}moment(){% endif %}
-            },
-            function (start, end) {
-                $('#daterange-selected').html(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
-                $('#datetime_from').val(start.format('DD-MM-YYYY'));
-                $('#datetime_to').val(end.format('DD-MM-YYYY'));
-            }
-        );
-        {% if request.GET.datetime_from %}
-            $('#datetime_from').val('{{ request.GET.datetime_from }}');
-        {% endif %}
-        {% if request.GET.datetime_to %}
-            $('#datetime_to').val('{{ request.GET.datetime_to }}');
-        {% endif %}
-        {% if request.GET.datetime_from or request.GET.datetime_to %}
-            $('#daterange-selected').html('{{ request.GET.datetime_from }}' + ' - ' + '{{ request.GET.datetime_to }}');
-        {% endif %}
-    </script>
 
     <!-- Range select -->
     <script src="{% static 'js/range_plots_management.js' %}"></script>

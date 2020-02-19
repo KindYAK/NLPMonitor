@@ -1,3 +1,6 @@
+import datetime
+from collections import defaultdict
+
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.http import HttpResponseRedirect
@@ -7,7 +10,7 @@ from elasticsearch_dsl import Search
 
 from mainapp.models import Document
 from mainapp.services_es import get_elscore_cutoff
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize
@@ -78,6 +81,8 @@ class SearchView(TemplateView):
         )
 
         # Search
+        search_request['datetime_from'] = datetime.date(2000, 1, 1)
+        search_request['datetime_to'] = datetime.datetime.now().date()
         s = execute_search(search_request, return_search_obj=True)[:200]
         s.aggs.bucket(name="dynamics",
                       agg_type="date_histogram",
@@ -92,12 +97,26 @@ class SearchView(TemplateView):
         context['total_found'] = relevant_count
         context['documents'] = [{
             "id": document.id,
+            "document_es_id": document.meta.id,
             "datetime": document.datetime if hasattr(document, "datetime") else "",
             "title": document.title,
             "source": document.source,
             "score": str(document.meta.score).replace(",", "."),
         } for document in results[:relevant_count*2]]
         context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
+
+        # TODO Temporary minister stub
+        sde = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_bigartm_test_1") \
+                .filter("terms", document_es_id=[d['document_es_id'] for d in context['documents']]) \
+                .source(("document_es_id", "value"))[:100]
+        r = sde.execute()
+        document_eval_dict = defaultdict(
+            int,
+            ((d.document_es_id, d.value) for d in r)
+        )
+        for document in context['documents']:
+            document['sentiment'] = document_eval_dict[document['document_es_id']]
+        # TODO END TEMP
 
         # Normalize dynamics
         for bucket in results.aggregations.dynamics.buckets:
@@ -168,8 +187,11 @@ class DocumentDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         if cache.get(key):
             return context
-        context['document'] = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
-                .filter("term", **{"id": kwargs['document_id']}).execute()[0]
+        r = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", **{"id": kwargs['document_id']})[:1].execute()
+        if len(r) > 0:
+            context['document'] = r[0]
+        else:
+            context['error'] = "Документ не найден - возможно он ещё не обработан в хранилище"
         return context
 
 

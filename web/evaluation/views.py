@@ -1,12 +1,12 @@
-from elasticsearch_dsl.response.aggs import FieldBucket
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 
 from evaluation.models import EvalCriterion, EvalCriterionGroup
 from mainapp.forms import get_topic_weight_threshold_options
+from mainapp.models import Source
 from mainapp.models_user import TopicGroup
-from mainapp.services import apply_fir_filter
+from mainapp.services import apply_fir_filter, unique_ize
 from .services import *
 
 
@@ -29,18 +29,27 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_modellings'] = list(sorted(list(set(
             [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices if not tm.endswith("_neg")]
         ))))
+        context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
+        # TODO Complicated cache issues - maybe TODO later
+        # context['top_news_num'] = 5000 if (hasattr(self.request.user, "expert") or self.request.user.is_superuser) else 200
+        context['top_news_num'] = 1000
+
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+
         context['topic_modelling'] = self.request.GET['topic_modelling'] if 'topic_modelling' in self.request.GET else context['topic_modellings'][0][0]
-        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
-        context['criterions_list'] = context['criterions_list'].filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in self.eval_indices])
         context['public_groups'] = context['public_groups'].filter(topic_modelling_name=context['topic_modelling'])
         context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
+
+        self.eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
+        context['criterions_list'] = context['criterions_list'].filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in self.eval_indices]).distinct()
         context['criterions'] = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions')) \
             if 'criterions' in self.request.GET else \
             [context['criterions_list'].first()]
+        context['sources'] = Source.objects.filter(id__in=self.request.GET.getlist('sources')) \
+            if 'sources' in self.request.GET else None
         context['keyword'] = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
         context['group'] = TopicGroup.objects.get(id=self.request.GET['group']) \
             if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", None] \
@@ -95,7 +104,7 @@ class CriterionEvalAnalysisView(TemplateView):
         context['negative'][criterion.id] = negative
         if criterion.value_range_from >= 0:
             context['source_weight'][criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                            key=lambda x: x.source_value.value,
+                                                            key=lambda x: x.value,
                                                             reverse=True)
         else:
             context['source_weight'][criterion.id] = divide_posneg_source_buckets(document_evals.aggregations.posneg.buckets)
@@ -134,8 +143,10 @@ class CriterionEvalAnalysisView(TemplateView):
         # Current topic metrics
         document_evals, top_news = get_current_document_evals(context['topic_modelling'], criterion,
                                                               context['granularity'],
+                                                              context['sources'],
                                                               self.documents_ids_to_filter,
-                                                              analytical_query=self.analytical_query)
+                                                              analytical_query=self.analytical_query,
+                                                              top_news_num=context['top_news_num'])
         if not top_news:
             return
         top_news_total.update(top_news)
@@ -239,6 +250,10 @@ class CriterionEvalAnalysisView(TemplateView):
             self.get_group_evals(context, group)
 
         # Get documents, set weights
-        documents_eval_dict = get_documents_with_values(top_news_total, context['criterions'],  context['topic_modelling'], max_criterion_value_dict)
-        context['documents'] = documents_eval_dict
+        documents_eval_dict = get_documents_with_values(top_news_total,
+                                                        context['criterions'],
+                                                        context['topic_modelling'],
+                                                        max_criterion_value_dict,
+                                                        top_news_num=context['top_news_num'])
+        context['documents'] = unique_ize(documents_eval_dict.values(), key=lambda x: x['document'].id)[:context['top_news_num']]
         return context

@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
+
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize
@@ -114,8 +115,11 @@ class TopicDocumentListView(TemplateView):
                                                context['topic_weight_threshold'])
 
         # Current topic metrics
-        topic_documents = get_current_topics_metrics(kwargs['topic_modelling'], topics, context['granularity'],
-                                                     context['topic_weight_threshold'])
+        topic_documents, number_of_documents = get_current_topics_metrics(kwargs['topic_modelling'],
+                                                                          topics,
+                                                                          context['granularity'],
+                                                                          context['topic_weight_threshold']
+                                                                          )
 
         # Get documents, set weights
         documents = get_documents_with_weights(topic_documents)
@@ -136,6 +140,7 @@ class TopicDocumentListView(TemplateView):
 
         # Create context
         context['documents'] = unique_ize(documents, key=lambda x: x.id)
+        context['number_of_documents'] = number_of_documents
         context['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power

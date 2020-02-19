@@ -1,26 +1,26 @@
-import pandas as pd
-import os, json, datetime, pytz, math
-
-from annoying.functions import get_object_or_None
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
+
 from mainapp.models import *
-from nlpmonitor.settings import MEDIA_ROOT
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
         i = 0
+        unique_collisions = 0
         for doc in Document.objects.all():
             try:
                 doc.save()
-            except Exception as e:
+            except IntegrityError as e:
+                unique_collisions += 1
                 print("!!!", e)
-                print("Deleting duplicate")
+                print("Deleting duplicate", unique_collisions)
                 doc.delete()
+            except Exception as e:
+                print("!!!!!!!!!! ANOTHER EXCEPTION", e)
             if not doc.unique_hash:
                 print("Not hash", doc.id)
             i += 1
-            if i % 10000 == 0:
+            if i % 100000 == 0:
                 print(i, "/", Document.objects.count())

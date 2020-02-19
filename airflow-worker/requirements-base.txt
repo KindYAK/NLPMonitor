@@ -26,10 +26,10 @@ pymorphy2==0.8
 scrapy==1.7.3
 scrapy-splash==0.7.2
 bs4==0.0.1
-dateparser>=0.7.1
 
 pandas==0.24.2
 stop_words==2018.7.23
 numba==0.46.0
 djangorestframework==3.9.4
 transliterate==1.10.2
+dateparser>=0.7.2

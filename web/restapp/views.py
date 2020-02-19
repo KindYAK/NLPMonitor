@@ -2,6 +2,7 @@ import json
 import datetime
 
 from annoying.functions import get_object_or_None
+from django.core.serializers import serialize
 from django.db.utils import IntegrityError
 from elasticsearch_dsl import Search, Q
 from rest_framework import viewsets
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
 from evaluation.services import *
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .serializers import *
 
 
@@ -268,6 +269,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d").date()
         topic_modelling = self.request.GET['topic_modelling']
         criterions = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions'))
+        sources = Source.objects.filter(id__in=self.request.GET.getlist('sources'))
         keyword = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
         group = TopicGroup.objects.get(id=self.request.GET['group']) \
             if 'group' in self.request.GET and self.request.GET['group'] not in ["-1", "-2", "", "None", None] \
@@ -308,7 +310,9 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         for criterion in criterions:
             # Current topic metrics
             document_evals, top_news = get_current_document_evals(topic_modelling, criterion, None,
-                                                                  documents_ids_to_filter, date_from, date_to,
+                                                                  sources,
+                                                                  documents_ids_to_filter,
+                                                                  date_from, date_to,
                                                                   analytical_query=analytical_query)
             top_news_total.update(top_news)
             if criterion.value_range_from < 0:
@@ -316,7 +320,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 posneg_distribution[criterion.id] = document_evals.aggregations.posneg.buckets
             else:
                 source_weight[criterion.id] = sorted(document_evals.aggregations.source.buckets,
-                                                     key=lambda x: x.source_value.value,
+                                                     key=lambda x: x.value,
                                                      reverse=True)
 
             # Main topics
@@ -407,8 +411,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                     [
                         {
                             "source": bucket.key,
-                            "weight": bucket.source_value.value,
-                        } for bucket in sorted(buckets, key=lambda x: x.source_value.value, reverse=True)
+                            "weight": bucket.value,
+                        } for bucket in sorted(buckets, key=lambda x: x.value, reverse=True)
                     ]
                 ) if buckets and hasattr(buckets[0], "doc_count") else (criterion_id, buckets)) for criterion_id, buckets in source_buckets.items()
             )
@@ -436,5 +440,32 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 "posneg_top_topics": posneg_top_topics,
                 "posneg_bottom_topics": posneg_bottom_topics,
                 "low_volume_positive_topics": low_volume_positive_topics
+            }
+        )
+
+
+class CriterionEvalUtilViewSet(viewsets.ViewSet):
+    def list(self, request):
+        if not 'topic_modelling' in request.GET:
+            return Response(
+                {
+                    "status": 500,
+                    "error": "You need to specify topic_modelling GET parameter"
+                }
+            )
+
+        topic_modelling = request.GET['topic_modelling']
+        public_groups = TopicGroup.objects.filter(is_public=True, topic_modelling_name=topic_modelling).values('id', 'name')
+        my_groups = TopicGroup.objects.filter(owner=self.request.user, topic_modelling_name=topic_modelling).values('id', 'name')
+
+        eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_*").keys()
+        criterions = EvalCriterion.objects.filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in eval_indices]).distinct().values('id', 'name')
+
+        return Response(
+            {
+                "status": 200,
+                "criterions": sorted(criterions, key=lambda x: x['id']),
+                "my_groups": sorted(my_groups, key=lambda x: x['id']),
+                "public_groups": sorted(public_groups, key=lambda x: x['id']),
             }
         )

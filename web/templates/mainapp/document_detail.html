@@ -4,7 +4,7 @@
 {% block heading %}Документ{% endblock %}
 
 {% block bc %}
-    <li class="breadcrumb-item"><a href="/">NLPMonitor</a></li>
+    <li class="breadcrumb-item"><a href="/">Media Analytics</a></li>
     <li class="breadcrumb-item active">Документ</li>
 {% endblock %}
 
@@ -15,15 +15,24 @@
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">{{ document.title }}</h5>
-                        <p class="card-text"><b>Дата публикации</b>: {{ document.datetime }}</p>
-                        <p class="card-text">
-                            {{ document.text }}
-                        </p>
-                        <p class="card-text">
-                            <b>JSON представление</b>
-                            {{ document.to_dict }}
-                        </p>
+                        {% if not error %}
+                            <h5 class="card-title">{{ document.title }}</h5>
+                            <p class="card-text"><b>Дата публикации</b>: {{ document.datetime }}</p>
+                            {% if document.url %}
+                                <p class="card-text"><b>URL</b>: <a href="{{ document.url }}">{{ document.url }}</a></p>
+                            {% endif %}
+                            <p class="card-text">
+                                {{ document.text }}
+                            </p>
+                            {% if request.user.is_superuser or request.user.expert %}
+                                <p class="card-text">
+                                    <b>JSON представление</b>
+                                    {{ document.to_dict }}
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <h1>{{ error }}</h1>
+                        {% endif %}
                     </div>
                 </div>
             </div>

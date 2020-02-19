@@ -4,6 +4,7 @@
 {% load staticfiles %}
 {% load l10n %}
 {% load serializers %}
+{% load custom_stuff %}
 
 {% block title %}
     {% if request.GET.topic_name %}
@@ -18,6 +19,7 @@
     {% else %}
         Список документов выбранной группы
     {% endif %}
+    <div>Количество документов - {{ number_of_documents }}</div>
 {% endblock %}
 
 {% block head %}
@@ -29,6 +31,11 @@
     <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
+    {% if request.user.is_superuser or request.user.expert %}
+        <!-- Clipboard.js -->
+        <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
+        <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
+    {% endif %}
     <style>
         .col-lg-2 {
             display: flex;
@@ -42,7 +49,7 @@
 {% endblock %}
 
 {% block bc %}
-    <li class="breadcrumb-item"><a href="/venv">NLPMonitor</a></li>
+    <li class="breadcrumb-item"><a href="/venv">Media Analytics</a></li>
     <li class="breadcrumb-item active">Список топиков</li>
 {% endblock %}
 
@@ -124,6 +131,18 @@
                 <div class="card-body">
                     <div id="dynamic_plots">
                         {# Абсолютная мощность #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="topic_dynamics_сopy">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#topic_dynamics_сopy', {
+                                    text: function (trigger) {
+                                        return get_time_series("topic_dynamics");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div class="dynamics-plot" id="topic_dynamics"></div>
                         <script>
                             var selectorOptions = {
@@ -180,6 +199,18 @@
                         </script>
 
                         {# Относительная мощность #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="topic_dynamics_normal_copy">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#topic_dynamics_normal_copy', {
+                                    text: function (trigger) {
+                                        return get_time_series("topic_dynamics_normal");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div class="dynamics-plot" id="topic_dynamics_normal"></div>
                         <script>
                             var data = [
@@ -210,6 +241,18 @@
                         </script>
 
                         {# Относительный удельный вес #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="topic_dynamics_weight_copy">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#topic_dynamics_weight_copy', {
+                                    text: function (trigger) {
+                                        return get_time_series("topic_dynamics_weight");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div class="dynamics-plot" id="topic_dynamics_weight"></div>
                         <script>
                             var data = [
@@ -253,11 +296,23 @@
                 </div>
                 <div class="card-body">
                     <div id="bar_plot">
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="source_distribution_copy">Значения в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#source_distribution_copy', {
+                                    text: function (trigger) {
+                                        return get_bar("source_distribution");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div id="source_distribution"></div>
                         <script>
                             var data = [
                                 {
-                                    x: [{% for source in source_weight %}'{{ source.key }}', {% endfor %}],
+                                    x: [{% for source in source_weight %}'{{ source.key|remove_http }}', {% endfor %}],
                                     y: [{% for source in source_weight %}{{ source.source_weight.value|round_fl:2|safe }}, {% endfor %}],
                                     type: 'bar'
                                 }
@@ -337,4 +392,9 @@
                                    {{ topic_weight_threshold|unlocalize }},
                                    true);
     </script>
+    {% if request.user.is_superuser or request.user.expert %}
+        <script>
+            $('.clipboard').show();
+        </script>
+    {% endif %}
 {% endblock %}
