@@ -3,20 +3,20 @@ import json
 import elasticsearch_dsl as es
 from django.utils import timezone
 from elasticsearch_dsl import Index, MetaField
-
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
-    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS
+    ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
+    ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
-    "match_mapping_type": "double",
-    "mapping": {
-        "type": "float",
-        "index": False
-    }
-}}]
+        "match_mapping_type": "double",
+        "mapping": {
+            "type": "float",
+            "index": False
+        }
+    }}]
 
 
 class Document(es.Document):
@@ -77,7 +77,7 @@ class Document(es.Document):
     class Index:
         name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
-    
+
     class Meta:
         dynamic_templates = MetaField(DYNAMIC_TEMPLATES)
 
@@ -151,7 +151,7 @@ class TopicDocument(es.Document):
     document_source = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_DOCUMENT # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
+        name = ES_INDEX_TOPIC_DOCUMENT  # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
         using = ES_CLIENT
 
         settings = {
@@ -184,11 +184,11 @@ class TopicDocumentUniqueIDs(es.Document):
     document_es_id = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS # f"{ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS}_{tm}"
+        name = ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS  # f"{ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS}_{tm}"
         using = ES_CLIENT
 
         settings = {
-            "number_of_shards": 3,
+            "number_of_shards": 2,
             "number_of_replicas": 1,
         }
         mappings = {
@@ -209,7 +209,7 @@ class DocumentEval(es.Document):
     topic_ids_bottom = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
+        name = ES_INDEX_DOCUMENT_EVAL  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
         using = ES_CLIENT
 
         settings = {
@@ -245,7 +245,7 @@ class DocumentEvalUniqueIDs(es.Document):
     document_es_id = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS # f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}"
+        name = ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS  # f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}"
         using = ES_CLIENT
 
         settings = {
@@ -298,6 +298,54 @@ class TopicModellingIndex(es.Document):
     class Index:
         name = ES_INDEX_TOPIC_MODELLING
         using = ES_CLIENT
+
+
+class DynamicTopicModellingIndex(TopicModellingIndex):
+    meta_dtm_name = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_DYNAMIC_TOPIC_MODELLING
+        using = ES_CLIENT
+
+
+class META_DTM(es.Document):
+    meta_name = es.Keyword()
+    volume_days = es.Float()
+    delta_days = es.Float()
+    reset_index = es.Boolean()
+    from_date = es.Date()
+    to_date = es.Date()
+
+    class Index:
+        name = ES_INDEX_META_DTM
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+        }
+        mappings = {
+            "properties": {
+                "meta_name": {
+                    "type": "keyword",
+                },
+                "volume_days": {
+                    "type": "float",
+                },
+                "delta_days": {
+                    "type": "float",
+                },
+                "reset_index": {
+                    "type": "boolean",
+                },
+                "from_date": {
+                    "type": "date"
+                },
+                "to_date": {
+                    "type": "date"
+                }
+            },
+        }
 
 
 # List of all TMs in the storage
@@ -372,3 +420,24 @@ class CustomDictionaryWord(es.Document):
     class Index:
         name = ES_INDEX_CUSTOM_DICTIONARY_WORD
         using = ES_CLIENT
+
+
+class Mappings(es.Document):
+    threshold = es.Keyword()
+    meta_dtm_name = es.Keyword()
+    topic_modelling_first = es.Keyword()
+    topic_modelling_second = es.Keyword()
+    mappings_dict = es.Text()
+    scores_list = es.Keyword()
+    delta_words_dict = es.Text()
+    delta_count_dict = es.Text()
+
+    class Index:
+        name = ES_INDEX_MAPPINGS
+        using = ES_CLIENT
+
+        settings = {
+            "index.mapping.total_fields.limit": 5000,
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+        }
