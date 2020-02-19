@@ -5,9 +5,8 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 from elasticsearch_dsl import Search
-
 from evaluation.models import EvalCriterion
-from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options
+from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
 from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
@@ -22,7 +21,8 @@ class TopicsListView(TemplateView):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_superuser or hasattr(self.request.user, "expert"):
             context['criterions'] = EvalCriterion.objects.all()
-        form = self.form_class(data=self.request.GET, is_superuser=self.request.user.is_superuser or hasattr(self.request.user, "expert"))
+        form = self.form_class(data=self.request.GET,
+                               is_superuser=self.request.user.is_superuser or hasattr(self.request.user, "expert"))
         context['form'] = form
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
@@ -40,7 +40,7 @@ class TopicsListView(TemplateView):
             .filter("range", topic_weight={"gte": context['topic_weight_threshold']}) \
             .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
             .filter("range", datetime={"lte": datetime.datetime.now().date()})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000)\
+        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000) \
             .metric("topic_weight", agg_type="sum", field="topic_weight")
         result = s.execute()
         topic_info_dict = dict(
@@ -66,8 +66,8 @@ class TopicsListView(TemplateView):
             max_word_weight = max((word.weight for word in topic.topic_words))
             for topic_word in topic.topic_words:
                 topic_word.weight /= max_word_weight
-                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:] # Stub - upper case
-            #Stub - topic name upper case
+                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:]  # Stub - upper case
+            # Stub - topic name upper case
             topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
 
         # Normalize topic weights by max
@@ -97,21 +97,25 @@ class TopicDocumentListView(TemplateView):
 
         # Forms Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
-        context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
-        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(self.request.user.is_superuser or hasattr(self.request.user, "expert"))
+        context['smooth'] = True if 'smooth' in self.request.GET else (
+            True if 'granularity' not in self.request.GET else False)
+        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(
+            self.request.user.is_superuser or hasattr(self.request.user, "expert"))
         context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
-                                                if 'topic_weight_threshold' in self.request.GET else \
-                                                0.05 # Initial
+            if 'topic_weight_threshold' in self.request.GET else \
+            0.05  # Initial
 
         key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
         if cache.get(key):
             return context
 
         # Total metrics
-        total_metrics_dict = get_total_metrics(kwargs['topic_modelling'], context['granularity'], context['topic_weight_threshold'])
+        total_metrics_dict = get_total_metrics(kwargs['topic_modelling'], context['granularity'],
+                                               context['topic_weight_threshold'])
 
         # Current topic metrics
-        topic_documents = get_current_topics_metrics(kwargs['topic_modelling'], topics, context['granularity'], context['topic_weight_threshold'])
+        topic_documents = get_current_topics_metrics(kwargs['topic_modelling'], topics, context['granularity'],
+                                                     context['topic_weight_threshold'])
 
         # Get documents, set weights
         documents = get_documents_with_weights(topic_documents)
@@ -137,6 +141,16 @@ class TopicDocumentListView(TemplateView):
         context['relative_power'] = relative_power
         context['relative_weight'] = relative_weight
         context['source_weight'] = sorted(topic_documents.aggregations.source.buckets,
-                                                            key=lambda x: x.source_weight.value,
-                                                            reverse=True)
+                                          key=lambda x: x.source_weight.value,
+                                          reverse=True)
+        return context
+
+
+class DynamicTMView(TemplateView):
+    template_name = "topicmodelling/dynamictm.html"
+    dynamictm_form = DynamicTMForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ###
         return context
