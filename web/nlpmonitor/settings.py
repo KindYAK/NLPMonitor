@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'afnhvy-!a93^^v(^0&$+b*+5vu+*l1w5ki7z&f0-2pvet=89gg'
 DEBUG = os.getenv('DJANGO_DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -84,7 +82,7 @@ if DEBUG:
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [os.path.join(BASE_DIR,'templates'),],
+            'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -142,7 +140,6 @@ else:
 
 WSGI_APPLICATION = 'nlpmonitor.wsgi.application'
 
-
 LOGIN_REDIRECT_URL = "/login_redirect/"
 
 # Database
@@ -177,7 +174,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -187,7 +183,6 @@ TIME_ZONE = 'Asia/Almaty'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -200,11 +195,15 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
-
 ES_INDEX_DOCUMENT = 'main'
 ES_INDEX_DASHOBARD = 'dashboard'
 ES_INDEX_EMBEDDING = 'embedding'
 ES_INDEX_TOPIC_MODELLING = 'topic_modelling'
+ES_INDEX_META_DTM = 'meta_dtm'
+ES_INDEX_DYNAMIC_TOPIC_MODELLING = 'dynamic_topic_modelling'
+ES_INDEX_DYNAMIC_TOPIC_DOCUMENT = 'dynamic_topic_document'
+ES_INDEX_DYNAMIC_TOPIC_DOCUMENT_UNIQUE_IDS = 'dynamic_topic_document_unique_ids'
+ES_INDEX_MAPPINGS = 'mappings'
 # ES_INDEX_TOPIC_DOCUMENT = 'topic_document'
 ES_INDEX_TOPIC_DOCUMENT = 'topic_document_sharded'
 ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS = 'unique_ids_topic_document_sharded'
@@ -219,12 +218,14 @@ ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
 from elasticsearch import Elasticsearch
+
 ES_CLIENT = Elasticsearch(
     hosts=[
         {'host': 'elasticsearch1'},
         {'host': 'elasticsearch2'},
         {'host': 'elasticsearch3'},
-    ],
+    ] if not DEBUG else
+        [{'host': 'elasticsearch1'}],
     timeout=60,
     max_retries=10,
     retry_on_timeout=True
@@ -239,17 +240,15 @@ if not DEBUG:
         integrations=[DjangoIntegration()]
     )
 
-
 MIN_DOCS_PER_TAG = 1000
 MIN_DOCS_PER_AUTHOR = 100
-
 
 SHELL_PLUS_PRE_IMPORTS = (
     ('nlpmonitor.settings', ('ES_CLIENT', 'ES_INDEX_DOCUMENT', 'ES_INDEX_DASHOBARD', 'ES_INDEX_EMBEDDING',
                              'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT', 'ES_INDEX_CLASSIFIER',
                              'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL',
                              'ES_INDEX_CUSTOM_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS',
-                             'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID', )),
+                             'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID',)),
     ('elasticsearch_dsl', ('Search', 'Index', 'Q')),
     'datetime',
 )
