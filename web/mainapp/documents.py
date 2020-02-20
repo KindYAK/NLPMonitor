@@ -307,6 +307,27 @@ class DynamicTopicModellingIndex(TopicModellingIndex):
         name = ES_INDEX_DYNAMIC_TOPIC_MODELLING
         using = ES_CLIENT
 
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+        }
+        mappings = {
+            "properties": {
+                "meta_dtm_name": {
+                    "type": "keyword",
+                },
+                "datetime_from": {
+                    "type": "date",
+                },
+                "datetime_to": {
+                    "type": "date",
+                },
+                "name": {
+                    "type": "keyword",
+                },
+            },
+        }
+
 
 class META_DTM(es.Document):
     meta_name = es.Keyword()
