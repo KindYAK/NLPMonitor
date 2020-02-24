@@ -220,20 +220,23 @@ http_auth = None
 es_username = os.getenv('DJANGO_ES_BASIC_AUTH_USERNAME', '')
 es_password = os.getenv('DJANGO_ES_BASIC_AUTH_PASSWORD', '')
 if es_username and es_password:
-    http_auth = (es_username, es_password)
+    http_auth = f"{es_username}:{es_password}"
 if not DEBUG:
     hosts = [
         {
             'host': os.getenv('ES_HOST', 'elasticsearch1'),
             'port': os.getenv('ES_PORT1', 9200),
+            'http_auth': http_auth,
         },
         {
             'host': os.getenv('ES_HOST', 'elasticsearch2'),
             'port': os.getenv('ES_PORT2', 9200),
+            'http_auth': http_auth,
         },
         {
             'host': os.getenv('ES_HOST', 'elasticsearch3'),
             'port': os.getenv('ES_PORT3', 9200),
+            'http_auth': http_auth,
         },
     ],
 else:
@@ -248,9 +251,7 @@ ES_CLIENT = Elasticsearch(
     hosts=hosts,
     timeout=60,
     max_retries=10,
-    retry_on_timeout=True,
-    http_auth=http_auth,
-)
+    retry_on_timeout=True,)
 
 if not DEBUG:
     import sentry_sdk
