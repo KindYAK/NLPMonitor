@@ -215,9 +215,6 @@ ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
 ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
 ES_INDEX_CUSTOM_DICTIONARY_WORD = 'custom_dictionary_word'
 
-ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
-ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
-
 from elasticsearch import Elasticsearch
 http_auth = None
 es_username = os.getenv('DJANGO_ES_BASIC_AUTH_USERNAME', '')
