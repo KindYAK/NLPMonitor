@@ -219,8 +219,13 @@ ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
 ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
 
 from elasticsearch import Elasticsearch
-ES_CLIENT = Elasticsearch(
-    hosts=[
+http_auth = None
+es_username = os.getenv('DJANGO_ES_BASIC_AUTH_USERNAME', '')
+es_password = os.getenv('DJANGO_ES_BASIC_AUTH_PASSWORD', '')
+if es_username and es_password:
+    http_auth = (es_username, es_password)
+if not DEBUG:
+    hosts = [
         {
             'host': os.getenv('ES_HOST', 'elasticsearch1'),
             'port': os.getenv('ES_PORT1', 9200),
@@ -234,9 +239,20 @@ ES_CLIENT = Elasticsearch(
             'port': os.getenv('ES_PORT3', 9200),
         },
     ],
+else:
+    hosts = [
+        {
+            'host': os.getenv('ES_HOST', 'elasticsearch1'),
+            'port': os.getenv('ES_PORT1', 9200),
+        },
+    ]
+
+ES_CLIENT = Elasticsearch(
+    hosts=hosts,
     timeout=60,
     max_retries=10,
-    retry_on_timeout=True
+    retry_on_timeout=True,
+    http_auth=http_auth,
 )
 
 if not DEBUG:
