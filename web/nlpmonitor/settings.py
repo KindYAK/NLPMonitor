@@ -238,7 +238,7 @@ if not DEBUG:
             'port': os.getenv('ES_PORT3', 9200),
             'http_auth': http_auth,
         },
-    ],
+    ]
 else:
     hosts = [
         {
