@@ -166,24 +166,6 @@
                                 </a>
                             </li>
                         {% endif %}
-                        {% if request.user.is_superuser %}
-                            <li class="nav-item">
-                                <a href="{% url 'mainapp:dashboard' %}" class="nav-link">
-                                    <i class="nav-icon fas fa-chart-line"></i>
-                                    <p>
-                                        Теги
-                                    </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'mainapp:kibana_dashboard' %}" class="nav-link">
-                                    <i class="nav-icon fab fa-dashcube"></i>
-                                    <p>
-                                        Dashboard (Demo)
-                                    </p>
-                                </a>
-                            </li>
-                        {% endif %}
                         {% if request.user.contentloader %}
                             <li class="nav-item">
                                 <a href="{% url 'mainapp:document_list' %}" class="nav-link">

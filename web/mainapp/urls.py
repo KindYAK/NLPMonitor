@@ -13,8 +13,6 @@ urlpatterns = [
     path('accounts/logout/', cache_page(60*60*8)(auth_views.LogoutView.as_view(next_page="/")), name='logout'),
 
     path('search/', SearchView.as_view(), name='search'),
-    path('dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('kibana_dashboard/', KibanaDashboardView.as_view(), name="kibana_dashboard"),
 
     path('document_view/<document_id>/', DocumentDetailView.as_view(), name='document_view'),
     path('document_create/', DocumentCreateView.as_view(), name='document_create'),
