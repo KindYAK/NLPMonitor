@@ -68,32 +68,3 @@ class TopicIDEval(models.Model):
 
     def __str__(self):
         return f"{self.topic_id} - {self.topics_eval}"
-
-
-# !!!!!!!!!!!!! POTENTIALLY DEPRICATED !!!!!!!!!!!!!!
-class EvalCorpus(models.Model):
-    class Meta:
-        verbose_name = "OLD? Корпус оценок"
-        verbose_name_plural = "OLD? Корпусы оценок"
-        unique_together = (('corpus', 'name'), )
-
-    corpus = models.ForeignKey('mainapp.Corpus', on_delete=models.CASCADE)
-    name = models.CharField(max_length=25)
-
-    def __str__(self):
-        return self.name
-
-
-class DocumentEval(models.Model):
-    class Meta:
-        verbose_name = "OLD? Оценка документа"
-        verbose_name_plural = "OLD? Оценки документов"
-        unique_together = (('corpus', 'document', 'evaluation_criterion'), )
-
-    corpus = models.ForeignKey('EvalCorpus', on_delete=models.CASCADE)
-    document = models.ForeignKey('mainapp.Document', on_delete=models.CASCADE)
-    evaluation_criterion = models.ForeignKey('EvalCriterion', on_delete=models.CASCADE)
-    value = models.FloatField()
-
-    def __str__(self):
-        return f"Оценка документа {self.document} по критерию {self.evaluation_criterion} - {self.value}"

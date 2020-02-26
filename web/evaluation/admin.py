@@ -37,20 +37,3 @@ admin.site.register(EvalCriterionGroup, EvalCriterionGroupAdmin)
 admin.site.register(CategoricalCriterionValue, CategoricalCriterionValueAdmin)
 admin.site.register(TopicsEval, TopicsEvalAdmin)
 admin.site.register(TopicIDEval, TopicIDEvalAdmin)
-
-
-# Potentially depricated
-class DocumentEvalAdmin(admin.ModelAdmin):
-    list_display = ('document', 'evaluation_criterion', 'corpus', 'value', )
-    list_filter = ('evaluation_criterion', 'corpus', )
-    search_fields = ('corpus__name', 'evaluation_criterion__name', 'document__name', )
-
-
-class EvalCorpusAdmin(admin.ModelAdmin):
-    list_display = ('name', 'corpus', )
-    list_filter = ('corpus', )
-    search_fields = ('name', 'corpus__name', )
-
-
-admin.site.register(EvalCorpus, EvalCorpusAdmin)
-admin.site.register(DocumentEval, DocumentEvalAdmin)
