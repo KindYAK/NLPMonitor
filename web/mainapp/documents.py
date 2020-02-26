@@ -3,6 +3,7 @@ import json
 import elasticsearch_dsl as es
 from django.utils import timezone
 from elasticsearch_dsl import Index, MetaField
+
 from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
@@ -448,6 +449,8 @@ class Mappings(es.Document):
     meta_dtm_name = es.Keyword()
     topic_modelling_first = es.Keyword()
     topic_modelling_second = es.Keyword()
+    topic_modelling_first_from = es.Date(),
+    topic_modelling_second_to = es.Date(),
     mappings_dict = es.Text()
     scores_list = es.Keyword()
     delta_words_dict = es.Text()
@@ -461,4 +464,21 @@ class Mappings(es.Document):
             "index.mapping.total_fields.limit": 5000,
             "number_of_shards": 1,
             "number_of_replicas": 1,
+        }
+
+        mappings = {
+            "properties": {
+                "threshold": {
+                    "type": "keyword",
+                },
+                "meta_dtm_name": {
+                    "type": "keyword",
+                },
+                "topic_modelling_first_from": {
+                    "type": "date"
+                },
+                "topic_modelling_second_to": {
+                    "type": "date"
+                }
+            },
         }
