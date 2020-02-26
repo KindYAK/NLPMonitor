@@ -130,6 +130,16 @@
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                     data-accordion="false">
                     {% if request.user.is_authenticated %}
+                        {% if request.user.is_superuser or request.user.expert %}
+                            <li class="nav-item">
+                                <a href="{% url 'dashboard:dashboard' 55 %}" class="nav-link">
+                                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                                    <p>
+                                        Дашборд <span style="font-size: 0.66rem;">(under construction)</span>
+                                    </p>
+                                </a>
+                            </li>
+                        {% endif %}
                         {% if request.user.is_superuser or request.user.viewer or request.user.expert %}
                             <li class="nav-item">
                                 <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link">

@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('mainapp.urls', namespace='mainapp')),
     path('topicmodelling/', include('topicmodelling.urls', namespace='topicmodelling')),
     path('evaluation/', include('evaluation.urls', namespace='evaluation')),
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
 
     path('jet/', include('jet.urls', namespace='jet')),
 
