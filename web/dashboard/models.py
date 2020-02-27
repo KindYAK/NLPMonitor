@@ -24,14 +24,8 @@ class Widget(models.Model):
         verbose_name_plural = "Виджеты"
 
     TYPES = (
-        (0, 'Overall positive-negative'),
-        (1, 'Dynamic'),
-        (2, 'Top news'),
-        (3, 'Top topics'),
-        (4, 'Source distribution'),
+        (key, value['name']) for key, value in TYPES_META_DICT.items()
     )
-
-    TYPES_DICT = dict(TYPES)
 
     type = models.SmallIntegerField(choices=TYPES, default=0)
     title = models.CharField(max_length=50, verbose_name="Заголовок")
