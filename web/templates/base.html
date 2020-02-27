@@ -132,7 +132,7 @@
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_superuser or request.user.expert %}
                             <li class="nav-item">
-                                <a href="{% url 'dashboard:dashboard' 55 %}" class="nav-link">
+                                <a href="{% url 'dashboard:dashboard' 1 %}" class="nav-link">
                                     <i class="nav-icon fas fa-tachometer-alt"></i>
                                     <p>
                                         Дашборд <span style="font-size: 0.66rem;">(under construction)</span>
