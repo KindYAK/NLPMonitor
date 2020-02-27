@@ -1,6 +1,8 @@
 from django.db import models
 from picklefield import PickledObjectField
 
+from dashboard.widgets_meta import TYPES_META_DICT
+
 
 class DashboardPreset(models.Model):
     class Meta:
@@ -34,9 +36,17 @@ class Widget(models.Model):
     type = models.SmallIntegerField(choices=TYPES, default=0)
     title = models.CharField(max_length=50, verbose_name="Заголовок")
     icon_class = models.CharField(max_length=50, verbose_name="Class иконки")
-    index = models.SmallIntegerField(default=0, verbose_name="Порядковый номер")
+    index = models.SmallIntegerField(default=5, verbose_name="Порядковый номер")
     criterion = models.ForeignKey("evaluation.EvalCriterion", on_delete=models.CASCADE)
     params = PickledObjectField(null=True, blank=True)
+
+    @property
+    def template_name(self):
+        return TYPES_META_DICT[self.type]['template_name']
+
+    @property
+    def callable(self):
+        return TYPES_META_DICT[self.type]['callable']
 
     def __str__(self):
         return f"Виджет -{self.title}"
