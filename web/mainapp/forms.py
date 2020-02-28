@@ -4,8 +4,12 @@ from django.forms.utils import ErrorList
 from elasticsearch_dsl import Search
 
 from mainapp.models import *
-from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING, \
-    ES_INDEX_META_DTM
+from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
+
+
+class ChoiceFieldNoValidation(forms.ChoiceField):
+    def validate(self, value):
+        pass
 
 
 def get_topic_weight_threshold_options(is_superuser):
@@ -118,17 +122,35 @@ class DocumentForm(forms.ModelForm):
 
 
 class DynamicTMForm(forms.Form):
-    meta_dtm = forms.MultipleChoiceField(label="META DTM", required=True)
-
-    dtms = forms.MultipleChoiceField(label="Topic Modellings", required=True)
+    meta_dtm = forms.ChoiceField(label="Meta DTM", required=True)
+    dtm_from = ChoiceFieldNoValidation(label="TM From", required=True)
+    dtm_to = ChoiceFieldNoValidation(label="TM To", required=True)
+    thresholds = forms.ChoiceField(label="TM threshold", required=True)
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
-                 renderer=None):
+                 renderer=None, meta_dtms=None):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted,
                          field_order,
                          use_required_attribute, renderer)
-        meta_dtms = Search(using=ES_CLIENT, index=ES_INDEX_META_DTM)[:10000]
         self.fields['meta_dtm'].choices = [
-            (m.name, f"{m.name} мета топик моделлинг") for m in meta_dtms.execute()
-        ]
+                                              (m, f"{m} мета топик моделлинг") for m in meta_dtms.keys()
+                                          ] + [('asd', f"{222} мета топик моделлинг")]
+        self.fields['thresholds'].choices = [
+                                                    (threshold, f"{threshold}") for threshold in
+                                             list(map(str, [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]))
+                                            ]
+
+    def clean(self):
+        super(DynamicTMForm, self).clean()
+
+        dtm_from = self.cleaned_data.get('dtm_from').split('_')[0]
+        dtm_to = self.cleaned_data.get('dtm_to').split('_')[0]
+
+        # conditions to be met for the username length
+        if dtm_from >= dtm_to:
+            self._errors['dtm_from'] = self.error_class([
+                'dtm_to is equal or lower than dtm_from'])
+
+        # return any errors if found
+        return self.cleaned_data
