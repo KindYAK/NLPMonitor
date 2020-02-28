@@ -1,6 +1,8 @@
 import datetime
 import json
+from collections import defaultdict
 
+import numpy as np
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
@@ -9,7 +11,8 @@ from elasticsearch_dsl import Search
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
+    ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS
 from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
     get_total_metrics
 
@@ -157,5 +160,87 @@ class DynamicTMView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ###
+        context['meta_dtm'] = {s.meta_dtm_name: s.to_dict() for s in Search(using=ES_CLIENT, index=ES_INDEX_META_DTM).
+                                                                         source(
+            ['meta_dtm_name', 'from_date', 'to_date', 'tm_volume_days', 'delta_days'])[:10000].
+            execute()}
+
+        form = self.dynamictm_form(data=self.request.GET, meta_dtms=context['meta_dtm'])
+
+        dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
+            'meta_dtm_name.keyword': list(context['meta_dtm'].keys())[0]})[:1000].execute()
+
+        choice = [(s.name[-21:], s.name[-21:]) for s in dynamic_tm]
+
+        form.fields['dtm_from'].choices = choice
+        form.fields['dtm_to'].choices = choice
+
+        if form.is_valid():
+            data = form.cleaned_data
+
+            threshold = data['thresholds']
+
+            topic_modelling_first_from = data['dtm_from'].split('_')[-2]
+            topic_modelling_second_to = data['dtm_to'].split('_')[-1]
+
+            mappings_list = Search(using=ES_CLIENT, index=ES_INDEX_MAPPINGS) \
+                .filter('range', topic_modelling_first_from={'gte': topic_modelling_first_from}) \
+                .filter('range', topic_modelling_second_to={'lte': topic_modelling_second_to}) \
+                .filter('term', **{'meta_dtm_name.keyword': data['meta_dtm']}) \
+                .filter('term', **{'threshold.keyword': threshold}) \
+                .sort("topic_modelling_first_from") \
+                .source(['mappings_dict', 'threshold', 'topic_modelling_first_from', 'topic_modelling_second_to']) \
+                .execute()
+
+            if mappings_list:
+                labels_list, source, target, y = list(), list(), list(), list()
+                topic_val_idx = dict()
+
+                for i, mappings in enumerate(mappings_list):
+                    for key in json.loads(mappings.mappings_dict).keys():
+                        labels_list.append(f'tm_{i}-{key}')
+                    for value in json.loads(mappings.mappings_dict).values():
+                        for val in value:
+                            labels_list.append(f'tm_{i+1}-{val}')
+
+                labels_list = sorted(list(set(labels_list)))
+
+                default_keys = list(map(str, range(len(mappings_list) + 1)))
+
+                class_count_dict = defaultdict(int, {k: 0 for k in default_keys})
+
+                for i, val in enumerate(labels_list):
+                    class_count_dict[val.split('-')[0].split('_')[1]] += 1
+                    topic_val_idx[val] = i
+
+                for i, mapping in enumerate(mappings_list):
+                    for key, value in json.loads(mapping.mappings_dict).items():
+                        for val in value:
+                            source.append(topic_val_idx[f'tm_{i}-{key}'])
+                            target.append(topic_val_idx[f'tm_{i+1}-{val}'])
+
+                values = list(np.ones(len(source), dtype='int32'))  # TODO fix this, with Kirills agg logic
+                step = 1 / len(mappings_list)  # 0.5
+
+                x = [int(label.split('-')[0].split('_')[1]) * step for i, label in enumerate(labels_list)]
+
+                for val in class_count_dict.values():
+                    y.extend(np.linspace(0.01, 0.99, val))
+
+                context['sankey_params'] = {
+                    'label': labels_list,
+                    'x': x,
+                    'y': y,
+                    'source': source,
+                    'target': target,
+                    'value': values
+                }
+            else:
+                print('!!! no such mappings')
+
+        else:
+            print("!! not valid")
+
+        context['form'] = form
+
         return context
