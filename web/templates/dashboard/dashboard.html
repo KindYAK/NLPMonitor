@@ -8,6 +8,8 @@
 {% block heading %}Дашборд - {{ dashboard_template.name }}{% endblock %}
 
 {% block head %}
+    <!-- Plotly.js -->
+    <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <style>
         @media (min-width: 1px) {
             .card-columns {

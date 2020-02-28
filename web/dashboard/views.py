@@ -30,5 +30,5 @@ class DashboardView(TemplateView):
         context['widgets'] = context['dashboard_template'].widgets.all().order_by('index')
         # Fill widget context
         for widget in context['widgets']:
-            context.update(widget.callable(widget))
+            context.update(widget.callable(context['dashboard_template'], widget))
         return context

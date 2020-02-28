@@ -151,7 +151,7 @@ class TopicDocument(es.Document):
     document_source = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_DOCUMENT # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
+        name = ES_INDEX_TOPIC_DOCUMENT # !!! f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
         using = ES_CLIENT
 
         settings = {
@@ -184,7 +184,7 @@ class TopicDocumentUniqueIDs(es.Document):
     document_es_id = es.Keyword()
 
     class Index:
-        name = ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS # f"{ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS}_{tm}"
+        name = ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS # !!! f"{ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS}_{tm}"
         using = ES_CLIENT
 
         settings = {
@@ -245,7 +245,7 @@ class DocumentEvalUniqueIDs(es.Document):
     document_es_id = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS # f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}"
+        name = ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS # !!! f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}_{criterion.id}"
         using = ES_CLIENT
 
         settings = {
