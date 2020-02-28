@@ -130,17 +130,17 @@
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                     data-accordion="false">
                     {% if request.user.is_authenticated %}
-                        {% if request.user.is_superuser or request.user.expert %}
-                            <li class="nav-item">
-                                <a href="{% url 'dashboard:dashboard' 1 %}" class="nav-link">
-                                    <i class="nav-icon fas fa-tachometer-alt"></i>
-                                    <p>
-                                        Дашборд <span style="font-size: 0.66rem;">(under construction)</span>
-                                    </p>
-                                </a>
-                            </li>
-                        {% endif %}
                         {% if request.user.is_superuser or request.user.viewer or request.user.expert %}
+                            {% if request.user.is_superuser or request.user.viewer.group.dashboard_presets.count > 0 or request.user.expert.group.dashboard_presets.count > 0 %}
+                                <li class="nav-item">
+                                    <a href="{% url 'dashboard:dashboard' %}" class="nav-link">
+                                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                                        <p>
+                                            Дашборд
+                                        </p>
+                                    </a>
+                                </li>
+                            {% endif %}
                             <li class="nav-item">
                                 <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link">
                                     <i class="nav-icon fas fa-drafting-compass"></i>
