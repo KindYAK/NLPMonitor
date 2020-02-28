@@ -9,16 +9,18 @@
     Dynamic TM
 {% endblock %}
 {% block heading %}
-    Hello World
 {% endblock %}
 
 {% block head %}
     <!-- data tables -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+    {#    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">#}
     <!-- daterange picker -->
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
     <!-- Tempusdominus Bbootstrap 4 -->
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
     <!-- Plotyly.js -->
     <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
     <style>
@@ -27,8 +29,152 @@
             align-items: center;
             justify-content: center;
         }
+
         .form-group {
             margin-bottom: 0;
         }
     </style>
+{% endblock %}
+{% block content %}
+    <div class="card-header">
+        <h1 class="m-0 text-dark">Визуализация динамики тематического моделирования</h1>
+    </div>
+    <form method="GET" action="" style="display: contents;">
+    {# Основная форма #}
+    !!! {{ form.errors }}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Выбор Мета Топик-Моделлинга</h3>
+                </div>
+                <div class="card-body">
+                    <div id="plotsMenu">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="col-md-4">{{ form.meta_dtm.label_tag }}</div>
+                                    <div class="col-md-8">{% render_field form.meta_dtm data-placeholder="Выберите META DTM" class="form-control select2 select2-single" %}</div>
+                                </div>
+                                <div class="card-footer" style="width: 200px; background-color: white">
+                                    <button class="btn-block btn-info" type="submit">Выбрать</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="col-md-4">{{ form.dtm_from.label_tag }} </div>
+                                    <div class="col-md-8">{% render_field form.dtm_from data-placeholder="Выберите TM для визуализации" class="form-control select2 select2-single" %}</div>
+                                </div>
+                                <div class="card-footer" style="width: 200px; background-color: white;">
+                                    <button class="btn-block btn-info" type="submit">Выбрать</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="col-md-4">{{ form.dtm_to.label_tag }} </div>
+                                    <div class="col-md-8">{% render_field form.dtm_to data-placeholder="Выберите TM для визуализации" class="form-control select2 select2-single" %}</div>
+                                </div>
+                                <div class="card-footer" style="width: 200px; background-color: white">
+                                    <button class="btn-block btn-info" type="submit">Выбрать</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <div class="col-md-4">{{ form.thresholds.label_tag }} </div>
+                                    <div class="col-md-8">{% render_field form.thresholds data-placeholder="Выберите степнь близости для ТМ" class="form-control select2 select2-single" %}</div>
+                                </div>
+                                <div class="card-footer" style="width: 200px; background-color: white">
+                                    <button class="btn-block btn-info" type="submit">Выбрать</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% cache 28800 topics_list request.GET %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Визуализация динамики</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="Asd" style="height: 1000px; width:1800px;"></div>
+                        <script>
+                            var data = [{
+                                type: "sankey",
+                                arrangement: "snap",
+                                node: {
+                                    label: {{ sankey_params.label|safe }},
+                                    x: {{ sankey_params.x|safe }},
+                                    y: {{ sankey_params.y|safe }},
+                                    pad: 10
+                                },
+                                link: {
+                                    source: {{ sankey_params.source|safe }},
+                                    target: {{ sankey_params.target|safe }},
+                                    value: {{ sankey_params.value|safe }}
+                                }
+                            }];
+
+                            var layout = {"title": "Dynamic Topic Modelling Visualization"};
+
+                            Plotly.newPlot('Asd', data, layout);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endcache %}
+
+    <script>
+        var meta_dtms_dict = {{ meta_dtm|safe }};
+        $('#id_meta_dtm').change(function (e) {
+
+                var my_hit = meta_dtms_dict[$("#id_meta_dtm").val()];
+                try {
+                    var date_from = moment(my_hit['from_date'], "YYYY-MM-DD");
+                } catch {
+                    return
+                }
+                var date_to = moment(my_hit['to_date'], "YYYY-MM-DD");
+                var delta_days = my_hit['delta_days'];
+                var tm_volume_days = my_hit['tm_volume_days'];
+
+                var iterations = parseInt((date_to.diff(date_from) / 86400000) / moment.duration(delta_days, 'days'));
+
+                control_html = '';
+                for (i = 0; i < iterations - 1; i++) {
+                    from_d = date_from;
+                    if (i === 0) {
+                        from_d = moment(from_d.add(delta_days * i, 'day').format(),);
+                    }
+                    if (i !== 0) {
+                        from_d = moment(from_d.add(delta_days, 'day').format(),);
+                    }
+                    to_d = moment(from_d.add(tm_volume_days, 'day').format(),);
+                    console.log('!!! i', i);
+                    if (i === iterations - 2) {
+                        to_d = date_to;
+                    }
+
+                    control_html += "<option value='" + from_d._i.slice(0, 10) + '_' + to_d._i.slice(0, 10) + "'>" + from_d._i.slice(0, 10) + "_" + to_d._i.slice(0, 10) + "</option>";
+
+                }
+
+                $('#id_dtm_from').html(control_html);
+                $('#id_dtm_from').select2({
+                    closeOnSelect: false,
+                });
+
+                $('#id_dtm_to').html(control_html);
+                $('#id_dtm_to').select2({
+                    closeOnSelect: false,
+                });
+
+            }
+        )
+    </script>
 {% endblock %}
