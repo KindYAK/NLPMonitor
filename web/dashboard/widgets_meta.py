@@ -8,8 +8,8 @@ TYPES_META_DICT = {
     },
     1: {
         "name": "Dynamic",
-        "callable": lambda x, y: {"test": 2},
-        "template_name": "dashboard/widgets/test2.html",
+        "callable": dynamics,
+        "template_name": "dashboard/widgets/dynamics.html",
     },
     2: {
         "name": "Top news",
@@ -19,7 +19,7 @@ TYPES_META_DICT = {
     3: {
         "name": "Top topics",
         "callable": lambda x, y: {"test": 4},
-        "template_name": "dashboard/widgets/test2.html",
+        "template_name": "dashboard/widgets/test1.html",
     },
     4: {
         "name": "Source distribution",

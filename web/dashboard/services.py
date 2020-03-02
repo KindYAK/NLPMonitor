@@ -7,5 +7,4 @@ def es_document_eval_search_factory(dashboard, widget, **kwargs):
     s = Search(using=ES_CLIENT,
                index=f"{ES_INDEX_DOCUMENT_EVAL}_{dashboard.topic_modelling_name}_{widget.criterion.id}"
     )
-    s = s.source(tuple())[:0]
     return s
