@@ -1,21 +1,30 @@
-<div id="bar_plot">
-    <div id="posneg_distribution_{{ criterion.id }}"></div>
-    <script>
-        var data = [
-            {
-                x: ["Негатив", "Нейтральные", "Позитив"],
-                y: [{% for bucket in overall_posneg %}{{ bucket }}, {% endfor %}],
-                marker: {
-                    color: ['#d3322b', '#fee42c', '#23964f']
-                },
-                type: 'bar'
-            }
-        ];
-        var layout = {
-            title: '{{ criterion.name }}',
-            showlegend: false,
-            bargap: 0.025,
-        };
-        Plotly.plot('posneg_distribution_{{ criterion.id }}', data, layout, {responsive: true});
-    </script>
-</div>
+{% load serializers %}
+{% load dictionary_getter %}
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "overall_posneg_"|add:widget_id as overall_posneg_name %}
+        {% get_by_name overall_posneg_name as overall_posneg %}
+
+        <div id="bar_plot">
+            <div id="posneg_distribution_{{ widget_id }}"></div>
+            <script>
+                var data = [
+                    {
+                        x: ["Негатив", "Нейтральные", "Позитив"],
+                        y: [{% for bucket in overall_posneg %}{{ bucket }}, {% endfor %}],
+                        marker: {
+                            color: ['#d3322b', '#fee42c', '#23964f']
+                        },
+                        type: 'bar'
+                    }
+                ];
+                var layout = {
+                    title: '{{ criterion.name }}',
+                    showlegend: false,
+                    bargap: 0.025,
+                };
+                Plotly.plot('posneg_distribution_{{ widget_id }}', data, layout, {responsive: true});
+            </script>
+        </div>
+    {% endwith %}
+{% endwith %}

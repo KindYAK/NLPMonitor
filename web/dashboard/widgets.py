@@ -24,7 +24,8 @@ def overall_positive_negative(dashboard, widget):
         ]
     )
     r = s.execute()
-    context_update['overall_posneg'] = [bucket.doc_count for bucket in r.aggregations.posneg.buckets]
+    context_update[f'overall_posneg_{widget.id}'] = [bucket.doc_count for bucket in r.aggregations.posneg.buckets]
+    context_update['widget'] = widget
     return context_update
 
 
