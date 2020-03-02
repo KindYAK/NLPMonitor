@@ -7,32 +7,6 @@
         <div id="dynamic_plots">
             <div class="dynamics-plot" id="valueDynamics_{{ widget.id }}"></div>
             <script>
-                var selectorOptions = {
-                    buttons: [{
-                        step: 'month',
-                        stepmode: 'backward',
-                        count: 1,
-                        label: '1m'
-                    }, {
-                        step: 'month',
-                        stepmode: 'backward',
-                        count: 6,
-                        label: '6m'
-                    }, {
-                        step: 'year',
-                        stepmode: 'todate',
-                        count: 1,
-                        label: 'YTD'
-                    }, {
-                        step: 'year',
-                        stepmode: 'backward',
-                        count: 1,
-                        label: '1y'
-                    }, {
-                        step: 'all',
-                    }],
-                };
-
                 var data = [
                     {
                         mode: 'lines',
@@ -44,15 +18,22 @@
                 var layout = {
                     title: '{{ widget.criterion.name }}',
                     xaxis: {
-                        rangeselector: selectorOptions,
                         fixedrange: true
                     },
                     yaxis: {
                         fixedrange: true,
                         range: [{{ widget.criterion.value_range_from|safe }}, {{ widget.criterion.value_range_to|safe }}]
+                    },
+                    height: 350,
+                    margin: {
+                        l: 45,
+                        r: 15,
+                        b: 35,
+                        t: 45,
+                        pad: 5
                     }
                 };
-                Plotly.newPlot('valueDynamics_{{ widget.id }}', data, layout, {responsive: true});
+                Plotly.newPlot('valueDynamics_{{ widget.id }}', data, layout, {responsive: true, displayModeBar: false});
             </script>
         </div>
     {% endwith %}

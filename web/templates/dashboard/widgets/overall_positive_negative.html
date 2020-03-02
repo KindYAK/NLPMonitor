@@ -19,11 +19,19 @@
                     }
                 ];
                 var layout = {
-                    title: '{{ criterion.name }}',
+                    title: '{{ widget.criterion.name }}',
                     showlegend: false,
                     bargap: 0.025,
+                    height: 300,
+                    margin: {
+                        l: 45,
+                        r: 15,
+                        b: 35,
+                        t: 25,
+                        pad: 5
+                    }
                 };
-                Plotly.plot('posneg_distribution_{{ widget_id }}', data, layout, {responsive: true});
+                Plotly.plot('posneg_distribution_{{ widget_id }}', data, layout, {responsive: true, displayModeBar: false});
             </script>
         </div>
     {% endwith %}
