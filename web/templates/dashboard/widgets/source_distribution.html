@@ -1,0 +1,62 @@
+{% load static %}
+{% load serializers %}
+{% load custom_stuff %}
+{% load dictionary_getter %}
+
+<script src="{% static 'js/range_plots_management_eval_v2.js' %}"></script>
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "source_distribution_"|add:widget_id as source_distribution_name %}
+        {% get_by_name source_distribution_name as source_distribution %}
+        <div id="source_distribution_{{ widget.id }}"></div>
+        <script>
+            {% if widget.criterion.value_range_from >= 0 %}
+                var data = [
+                    {
+                        x: [{% for bucket in source_distribution %}'{{ bucket.source|remove_http }}', {% endfor %}],
+                        y: [{% for bucket in source_distribution %}{{ bucket.value|round_fl:2|safe }}, {% endfor %}],
+                        type: 'bar'
+                    }
+                ];
+            {% else %}
+                var data = generate_plot_data_for_posneg_sources({{ source_distribution|safe }});
+            {% endif %}
+            {% if widget.criterion.value_range_from >= 0 %}
+                var layout = {
+                    title: '{{ widget.criterion.name }}',
+                    showlegend: false,
+                    bargap: 0.005,
+                    {% if widget.criterion.value_range_from < 0 %}
+                        barmode: 'stack',
+                    {% endif %}
+                    height: 275,
+                    margin: {
+                        l: 25,
+                        r: 30,
+                        b: 75,
+                        t: 25,
+                        pad: 0
+                    }
+                };
+            {% else %}
+                var layout = {
+                    title: '{{ widget.criterion.name }}',
+                    showlegend: false,
+                    bargap: 0.005,
+                    {% if widget.criterion.value_range_from < 0 %}
+                        barmode: 'stack',
+                    {% endif %}
+                    height: 325,
+                    margin: {
+                        l: 25,
+                        r: 30,
+                        b: 120,
+                        t: 25,
+                        pad: 0
+                    }
+                };
+            {% endif %}
+            Plotly.plot('source_distribution_{{ widget.id }}', data, layout, {responsive: true, displayModeBar: false});
+        </script>
+    {% endwith %}
+{% endwith %}

@@ -23,7 +23,7 @@ TYPES_META_DICT = {
     },
     4: {
         "name": "Source distribution",
-        "callable": lambda x, y: {"test": 5},
-        "template_name": "dashboard/widgets/test1.html",
+        "callable": source_distribution,
+        "template_name": "dashboard/widgets/source_distribution.html",
     }
 }

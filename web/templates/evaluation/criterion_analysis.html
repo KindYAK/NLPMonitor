@@ -29,7 +29,7 @@
     <!-- Chroma.js -->
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     {# Custom script #}
-    <script src="{% static 'js/range_plots_management_eval_v2.js' %} "></script>
+    <script src="{% static 'js/range_plots_management_eval_v2.js' %}"></script>
     {% if request.user.is_superuser or request.user.expert %}
         <!-- Clipboard.js -->
         <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
@@ -671,6 +671,7 @@
                         <div id="collapseBarPlots" class="collapse show" aria-labelledby="collapseBarPlots"
                              data-parent="#accordionBarPlots">
                             {% for criterion in criterions %}
+                                !!!{{ source_weight|get_item:criterion.id|safe }}!!!
                                 <div class="card-body">
                                     <div id="bar_plot">
                                         <div class="clipboard" style="display: none">

@@ -4,7 +4,6 @@
 {% with widget.id|stringformat:"s" as widget_id %}
     {% with "overall_posneg_"|add:widget_id as overall_posneg_name %}
         {% get_by_name overall_posneg_name as overall_posneg %}
-
         <div id="bar_plot">
             <div id="posneg_distribution_{{ widget_id }}"></div>
             <script>

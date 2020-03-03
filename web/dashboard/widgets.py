@@ -1,5 +1,5 @@
 from dashboard.services import es_document_eval_search_factory
-from evaluation.services import normalize_documents_eval_dynamics
+from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets
 
 
 def overall_positive_negative(dashboard, widget):
@@ -55,5 +55,57 @@ def dynamics(dashboard, widget):
             "value": bucket.dynamics_weight.value,
         } for bucket in r.aggregations.dynamics
     ]
+    context_update['widget'] = widget
+    return context_update
+
+
+def source_distribution(dashboard, widget):
+    context_update = {}
+    s = es_document_eval_search_factory(dashboard, widget)
+    s = s.source(tuple())[:0]
+
+    # Posneg distribution
+    if widget.criterion.value_range_from < 0:
+        range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
+        neutral_neighborhood = 0.1
+    else:
+        range_center = 0
+        neutral_neighborhood = 0.001
+    s.aggs.bucket(
+        name="posneg",
+        agg_type="range",
+        field="value",
+        ranges=
+        [
+            {"from": widget.criterion.value_range_from, "to": range_center - neutral_neighborhood},
+            {"from": range_center - neutral_neighborhood, "to": range_center + neutral_neighborhood},
+            {"from": range_center + neutral_neighborhood, "to": widget.criterion.value_range_to},
+        ]
+    )
+
+    # Source distribution
+    if widget.criterion.value_range_from < 0:
+        s.aggs['posneg'].bucket(name="source",
+                                  agg_type="terms",
+                                  field="document_source",
+                                  size=100)
+    else:
+        s.aggs.bucket(name="source", agg_type="terms", field="document_source")
+        s.aggs['source'].metric("source_value_sum", agg_type="sum", field="value")
+        s.aggs['source'].metric("source_value_average", agg_type="avg", field="value")
+    r = s.execute()
+
+    if widget.criterion.value_range_from < 0:
+        context_update[f'source_distribution_{widget.id}'] = divide_posneg_source_buckets(r.aggregations.posneg.buckets)
+    else:
+        r = calc_source_input(r)
+        context_update[f'source_distribution_{widget.id}'] = [
+            {
+                "source": bucket.key,
+                "value": bucket.value,
+            } for bucket in r.aggregations.source
+        ]
+        context_update[f'source_distribution_{widget.id}'] = \
+            sorted(context_update[f'source_distribution_{widget.id}'], key=lambda x: x['value'], reverse=True)
     context_update['widget'] = widget
     return context_update
