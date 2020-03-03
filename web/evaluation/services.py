@@ -15,7 +15,8 @@ def filter_analytical_query(topic_modelling, criterion_id, action, value):
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion_id}") \
               .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
               .filter("range", value={action: value}) \
-              .source(['document_es_id']).sort('-value')
+              .source(['document_es_id'])\
+              .sort('-value')
     return (d.document_es_id for d in s.scan())
 
 
@@ -23,8 +24,10 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
                                date_from=None, date_to=None, analytical_query=None, top_news_num=200):
     # Basic search object
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}") \
-              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
-              .source(['document_es_id'])
+              .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)})\
+              .filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
+              .source(['document_es_id']) \
+              .sort('-value')
 
     # Analytical querying
     if analytical_query:
