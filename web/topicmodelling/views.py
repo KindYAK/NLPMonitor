@@ -1,5 +1,7 @@
 import datetime
 import json
+import operator
+import re
 from collections import defaultdict
 
 import numpy as np
@@ -12,7 +14,7 @@ from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
-    ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS
+    ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT
 from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
     get_total_metrics
 
@@ -168,18 +170,16 @@ class DynamicTMView(TemplateView):
         form = self.dynamictm_form(data=self.request.GET, meta_dtms=context['meta_dtm'])
 
         dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
-            'meta_dtm_name.keyword': list(context['meta_dtm'].keys())[0]})[:1000].execute()
+            'meta_dtm_name.keyword': list(context['meta_dtm'].keys())[0]}).sort('datetime_from')[:1000].execute()
 
         choice = [(s.name[-21:], s.name[-21:]) for s in dynamic_tm]
-
+        topic_num = dynamic_tm[0].number_of_topics
         form.fields['dtm_from'].choices = choice
         form.fields['dtm_to'].choices = choice
 
         if form.is_valid():
             data = form.cleaned_data
-
             threshold = data['thresholds']
-
             topic_modelling_first_from = data['dtm_from'].split('_')[-2]
             topic_modelling_second_to = data['dtm_to'].split('_')[-1]
 
@@ -193,17 +193,25 @@ class DynamicTMView(TemplateView):
                 .execute()
 
             if mappings_list:
-                labels_list, source, target, y = list(), list(), list(), list()
+                draw_list, labels_list, source, target, y = list(), list(), list(), list(), list()
                 topic_val_idx = dict()
+                labels_dict = defaultdict(list)
 
                 for i, mappings in enumerate(mappings_list):
                     for key in json.loads(mappings.mappings_dict).keys():
                         labels_list.append(f'tm_{i}-{key}')
+
                     for value in json.loads(mappings.mappings_dict).values():
                         for val in value:
                             labels_list.append(f'tm_{i+1}-{val}')
 
+                matcher = re.compile(r'\-?\d{0,10}\.?\d{1,10}')
+
                 labels_list = sorted(list(set(labels_list)))
+                for label in labels_list:
+                    tm_idx, topic_idx = list(map(int, re.findall(matcher, label)))
+                    labels_dict[f'tm_{tm_idx}'] += [f'topic_{topic_idx}']
+                    draw_list.append('*'.join([w.word for w in dynamic_tm[tm_idx].topics[topic_idx].topic_words[:3]]))
 
                 default_keys = list(map(str, range(len(mappings_list) + 1)))
 
@@ -219,10 +227,23 @@ class DynamicTMView(TemplateView):
                             source.append(topic_val_idx[f'tm_{i}-{key}'])
                             target.append(topic_val_idx[f'tm_{i+1}-{val}'])
 
-                values = list(np.ones(len(source), dtype='int32'))  # TODO fix this, with Kirills agg logic
+                # values = [1] * len(source)
+
+                values = []  # TODO fix this, with Kirills agg logic
+                for i, tm in enumerate(dynamic_tm, start=0):
+                    s = Search(using=ES_CLIENT, index=f'{ES_INDEX_DYNAMIC_TOPIC_DOCUMENT}_{tm.name}')
+                    s.aggs.bucket(name="topic", agg_type="terms", field="topic_id", size=topic_num).metric("topic_weight", agg_type="sum", field="topic_weight")
+                    r = s.execute()
+                    values_dict = {}
+                    for bucket in r.aggregations.topic.buckets:
+                        if bucket.key in list(labels_dict[f'tm_{i}']):
+                            values_dict[bucket.key] = bucket.topic_weight.value
+                    sorted_values = [j for i, j in sorted(values_dict.items(), key=operator.itemgetter(0))]
+                    values.extend(sorted_values)
                 step = 1 / len(mappings_list)  # 0.5
 
-                x = [int(label.split('-')[0].split('_')[1]) * step for i, label in enumerate(labels_list)]
+                x = [int(key.split('_')[1]) * step + 0.01 if not int(key.split('_')[1]) else int(key.split('_')[1]) * step for
+                     key, label in labels_dict.items() for _ in label]
 
                 for val in class_count_dict.values():
                     y.extend(np.linspace(0.01, 0.99, val))
