@@ -1,0 +1,65 @@
+{% load dictionary_getter %}
+{% load l10n %}
+{% load static %}
+
+<!-- data tables -->
+<link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "top_news_"|add:widget_id as top_news_name %}
+        {% get_by_name top_news_name as top_news %}
+        <table id="search-results-table_{{ widget_id }}" class="table table-bordered table-hover">
+            <thead>
+            <tr role="row">
+                <th>{{ widget.criterion.name }}</th>
+                <th>Заголовок</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, document in top_news.items %}
+                <tr>
+                    <td>
+                        {% if document|get_item:widget.criterion.id %}
+                            {{ document|get_item:widget.criterion.id|floatformat:3|unlocalize }}
+                        {% else %}
+                            0,000
+                        {% endif %}
+                    </td>
+                    <td>{{ document|get_item:'document'|get_item:'title' }}</td>
+                    <td>
+                        <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}"
+                           class="nav-link nowrap">
+                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"
+                               data-toggle="tooltip" data-placement="top"
+                               title="Просмотреть новость"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endwith %}
+{% endwith %}
+
+<!-- DataTables -->
+<script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
+<script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
+
+
+<script>
+    var data_table_{{ widget.id }} = $('#search-results-table_{{ widget.id }}').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "order": [
+            [0, 'desc'],
+        ],
+        "info": false,
+        "autoWidth": true,
+        "pageLength": 15,
+        {#"lengthMenu": [10, 25, 50, 75, 100, 200].concat(length_additional_options)#}
+    });
+</script>

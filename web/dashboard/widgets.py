@@ -1,5 +1,6 @@
 from dashboard.services import es_document_eval_search_factory
-from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets
+from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
+    get_documents_with_values, get_criterions_values_for_normalization
 
 
 def overall_positive_negative(dashboard, widget):
@@ -107,5 +108,36 @@ def source_distribution(dashboard, widget):
         ]
         context_update[f'source_distribution_{widget.id}'] = \
             sorted(context_update[f'source_distribution_{widget.id}'], key=lambda x: x['value'], reverse=True)
+    context_update['widget'] = widget
+    return context_update
+
+
+def top_news(dashboard, widget):
+    context_update = {}
+    top_news_ids = set()
+    # Get top news
+    s = es_document_eval_search_factory(dashboard, widget)
+    s = s.source(['document_es_id'])[:500].sort('-value')
+    top_news_ids.update((d.document_es_id for d in s.scan()))
+
+    # Get bottom news
+    s = es_document_eval_search_factory(dashboard, widget)
+    s = s.source(['document_es_id'])[:500].sort('value')
+    top_news_ids.update((d.document_es_id for d in s.scan()))
+
+    max_criterion_value_dict, _ = \
+        get_criterions_values_for_normalization([widget.criterion],
+                                                dashboard.topic_modelling_name,
+                                                granularity=None,
+                                                analytical_query=None)
+
+    documents_eval_dict = get_documents_with_values(top_news_ids,
+                                                    [widget.criterion],
+                                                    dashboard.topic_modelling_name,
+                                                    max_criterion_value_dict,
+                                                    top_news_num=500)
+
+    context_update[f'top_news_{widget.id}'] = documents_eval_dict
+    print("!!!", list(context_update[f'top_news_{widget.id}'].values())[0])
     context_update['widget'] = widget
     return context_update

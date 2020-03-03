@@ -13,8 +13,8 @@ TYPES_META_DICT = {
     },
     2: {
         "name": "Top news",
-        "callable": lambda x, y: {"test": 3},
-        "template_name": "dashboard/widgets/test1.html",
+        "callable": top_news,
+        "template_name": "dashboard/widgets/top_news.html",
     },
     3: {
         "name": "Top topics",
