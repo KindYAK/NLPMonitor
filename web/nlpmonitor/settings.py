@@ -15,6 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -25,6 +26,7 @@ SECRET_KEY = 'afnhvy-!a93^^v(^0&$+b*+5vu+*l1w5ki7z&f0-2pvet=89gg'
 DEBUG = os.getenv('DJANGO_DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
@@ -41,9 +43,9 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'rest_framework',
     'mainapp',
-    'preprocessing',
     'topicmodelling',
     'evaluation',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -140,6 +142,7 @@ else:
 
 WSGI_APPLICATION = 'nlpmonitor.wsgi.application'
 
+
 LOGIN_REDIRECT_URL = "/login_redirect/"
 
 # Database
@@ -174,6 +177,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -183,6 +187,7 @@ TIME_ZONE = 'Asia/Almaty'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -214,31 +219,43 @@ ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
 ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
 ES_INDEX_CUSTOM_DICTIONARY_WORD = 'custom_dictionary_word'
 
-ES_HOST = os.getenv('DJANGO_ES_HOST', '127.0.0.1')
-ES_PORT = os.getenv('DJANGO_ES_PORT', '9200')
-
 from elasticsearch import Elasticsearch
-
-ES_CLIENT = Elasticsearch(
-    hosts=[
+http_auth = None
+es_username = os.getenv('DJANGO_ES_BASIC_AUTH_USERNAME', '')
+es_password = os.getenv('DJANGO_ES_BASIC_AUTH_PASSWORD', '')
+if es_username and es_password:
+    http_auth = f"{es_username}:{es_password}"
+if not DEBUG:
+    hosts = [
         {
             'host': os.getenv('ES_HOST', 'elasticsearch1'),
             'port': os.getenv('ES_PORT1', 9200),
+            'http_auth': http_auth,
         },
         {
             'host': os.getenv('ES_HOST', 'elasticsearch2'),
             'port': os.getenv('ES_PORT2', 9200),
+            'http_auth': http_auth,
         },
         {
             'host': os.getenv('ES_HOST', 'elasticsearch3'),
             'port': os.getenv('ES_PORT3', 9200),
+            'http_auth': http_auth,
         },
-    ] if not DEBUG else
-        [{'host': 'elasticsearch1'}],
+    ]
+else:
+    hosts = [
+        {
+            'host': os.getenv('ES_HOST', 'elasticsearch1'),
+            'port': os.getenv('ES_PORT1', 9200),
+        },
+    ]
+
+ES_CLIENT = Elasticsearch(
+    hosts=hosts,
     timeout=60,
     max_retries=10,
-    retry_on_timeout=True
-)
+    retry_on_timeout=True,)
 
 if not DEBUG:
     import sentry_sdk

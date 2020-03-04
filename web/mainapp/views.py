@@ -11,10 +11,8 @@ from elasticsearch_dsl import Search
 from mainapp.models import Document
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
-from .dashboard_types import *
 from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize
-from .services_es_dashboard import get_dashboard, get_kibana_dashboards
 from .services_es_documents import execute_search
 
 
@@ -26,22 +24,6 @@ def login_redirect(request):
     if hasattr(request.user, "contentloader"):
         return HttpResponseRedirect(reverse_lazy('mainapp:document_create'))
     return HttpResponseRedirect(reverse_lazy('mainapp:index'))
-
-
-class KibanaDashboardView(TemplateView):
-    template_name = "mainapp/kibana_dashboard.html"
-    form_class = KibanaSearchForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        dashbords = get_kibana_dashboards()
-        form = self.form_class(dashbords, data=self.request.GET)
-        if form.is_valid():
-            selected = form.cleaned_data
-            context['selected_dashboard'] = selected['dashboard']
-
-        context['form'] = form
-        return context
 
 
 class SearchView(TemplateView):
@@ -143,39 +125,6 @@ class SearchView(TemplateView):
         context['absolute_power'] = absolute_power
         context['relative_power'] = relative_power
         context['relative_weight'] = relative_weight
-        return context
-
-
-class DashboardView(TemplateView):
-    template_name = "mainapp/dashboard.html"
-    form_class = DashboardFilterForm
-
-    def parse_es_response(self, response):
-        return [
-            {
-                "x": [tick['datetime'] for tick in source['source']['values']],
-                "y": [tick['value'] for tick in source['source']['values']],
-                "tag": source['source']['tag'] if 'tag' in source['source'] else None
-            } for source in response['hits']
-        ]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        form = self.form_class(data=self.request.GET)
-        search_request = {}
-        if form.is_valid():
-            search_request = form.cleaned_data
-        context['plots'] = []
-        for dashboard_type in DASHBOARD_TYPES:
-            search_params = {"type": dashboard_type['type']}
-            if form.cleaned_data['tags'] and dashboard_type['filtering'] == FILTERING_TYPE_BY_TAG:
-                search_params = {**search_params, **search_request}
-            context['plots'].append({
-                "data": self.parse_es_response(get_dashboard(search_params)),
-                "name": dashboard_type['name'],
-                "id": dashboard_type['type'],
-            })
-        context['form'] = form
         return context
 
 

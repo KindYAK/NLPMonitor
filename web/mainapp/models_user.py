@@ -11,6 +11,7 @@ class UserGroup(models.Model):
     corpuses = models.ManyToManyField('mainapp.Corpus', blank=True, verbose_name="Корпусы")
     topic_modelling_names = models.TextField(null=True, blank=True, verbose_name="Названия тематических моделирований (через запятую без пробелов)")
     criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
+    dashboard_presets = models.ManyToManyField('dashboard.DashboardPreset', blank=True)
 
 
 class ContentLoader(models.Model):

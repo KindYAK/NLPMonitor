@@ -1,0 +1,40 @@
+{% load serializers %}
+{% load dictionary_getter %}
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "dynamics_"|add:widget_id as dynamics_name %}
+        {% get_by_name dynamics_name as dynamics %}
+        <div id="dynamic_plots">
+            <div class="dynamics-plot" id="valueDynamics_{{ widget.id }}"></div>
+            <script>
+                var data = [
+                    {
+                        mode: 'lines',
+                        x: [{% for tick in dynamics %}new Date('{{ tick.date }}'), {% endfor %}],
+                        y: [{% for tick in dynamics %}{{ tick.value|round_fl:5|safe }}, {% endfor %}],
+                        name: '{{ widget.criterion.name }}',
+                    },
+                ];
+                var layout = {
+                    title: '{{ widget.criterion.name }}',
+                    xaxis: {
+                        fixedrange: true
+                    },
+                    yaxis: {
+                        fixedrange: true,
+                        range: [{{ widget.criterion.value_range_from|safe }}, {{ widget.criterion.value_range_to|safe }}]
+                    },
+                    height: 350,
+                    margin: {
+                        l: 45,
+                        r: 15,
+                        b: 35,
+                        t: 45,
+                        pad: 5
+                    }
+                };
+                Plotly.newPlot('valueDynamics_{{ widget.id }}', data, layout, {responsive: true, displayModeBar: false});
+            </script>
+        </div>
+    {% endwith %}
+{% endwith %}

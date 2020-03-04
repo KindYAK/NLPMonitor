@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load cache %}
+{% load l10n %}
+
+{% block title %}Дашборд - {{ dashboard_template.name }}{% endblock %}
+{% block heading %}Дашборд - {{ dashboard_template.name }}{% endblock %}
+
+{% block head %}
+    <!-- Plotly.js -->
+    <script src="{% static 'js_vendor/plotly-1.48.3.min.js' %}"></script>
+    <style>
+        @media (min-width: 1px) {
+            .card-columns {
+                -webkit-column-count: 1;
+                -moz-column-count: 1;
+                column-count: 1;
+            }
+        }
+        @media (min-width: 768px) {
+            .card-columns {
+                -webkit-column-count: 2;
+                -moz-column-count: 2;
+                column-count: 2;
+            }
+        }
+        @media (min-width: 1920px) {
+            .card-columns {
+                -webkit-column-count: 3;
+                -moz-column-count: 3;
+                column-count: 3;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/venv">Media Analytics</a></li>
+    <li class="breadcrumb-item active">Дашборд</li>
+{% endblock %}
+
+{% block content %}
+    {# TM select #}
+    <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <form action="" method="GET">
+                    <div class="card-header">
+                        <h3>Выбор тематического моделирования</h3>
+                    </div>
+                    <div class="card-body" style="padding-bottom: 0;">
+                        <div id="search-form">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label for="dashboard">Дашборд</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="custom-select form-control select2 select2-single"
+                                                                name="dashboard" id="dashboard">
+                                                            {% for dashboard in dashboards %}
+                                                                <option value="{{ dashboard.id }}">{{ dashboard.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-block btn-info" type="submit">Поиск</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+    <div class="container-fluid">
+         {# TODO Small widgets #}
+{#        <div class="row">#}
+{#            <div class="col-lg-3 col-6">#}
+{#                <!-- small box -->#}
+{#                <div class="small-box bg-info">#}
+{#                    <div class="inner">#}
+{#                        <h3>150</h3>#}
+{##}
+{#                        <p>New Orders</p>#}
+{#                    </div>#}
+{#                    <div class="icon">#}
+{#                        <i class="ion ion-bag"></i>#}
+{#                    </div>#}
+{#                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+
+        {# Widgets#}
+        <div class="card-columns connectedSortable">
+            {% for widget in widgets %}
+                <!-- Widget -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="{{ widget.icon_class }} mr-1"></i>
+                                {{ widget.title }}
+                            </h3>
+                            <!-- card tools -->
+                            <div class="card-tools">
+                                <button type="button"
+                                        class="btn btn-default btn-sm"
+                                        data-card-widget="collapse"
+                                        data-toggle="tooltip"
+                                        title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% include widget.template_name %}
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block foot %}
+    <!-- jQuery UI 1.11.4 -->
+    <script src="{% static "adminlte/plugins/jquery-ui/jquery-ui.min.js" %}"></script>
+    <script>
+        // Make the dashboard widgets sortable Using jquery UI
+        $('.connectedSortable').sortable({
+            placeholder: 'sort-highlight',
+            connectWith: '.connectedSortable',
+            handle: '.card-header, .nav-tabs',
+            forcePlaceholderSize: true,
+            zIndex: 999999
+        });
+        $('.connectedSortable .card-header, .connectedSortable .nav-tabs-custom').css('cursor', 'move');
+    </script>
+{% endblock %}

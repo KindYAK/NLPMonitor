@@ -2,7 +2,6 @@ import hashlib
 
 from django.contrib.auth.models import User
 from django.db import models
-from topicmodelling.models import Topic, DocumentTopic
 from .models_user import TopicGroup, TopicID, ContentLoader, Expert, Viewer, UserGroup
 
 
@@ -103,8 +102,6 @@ class Document(models.Model):
 
     tags = models.ManyToManyField('Tag', verbose_name="Теги", blank=True)
     categories = models.ManyToManyField('Category', verbose_name="Категории", blank=True)
-
-    topics = models.ManyToManyField('topicmodelling.Topic', through='topicmodelling.DocumentTopic', verbose_name="Топики", blank=True)
 
     author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
     sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
