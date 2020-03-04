@@ -115,14 +115,15 @@ def source_distribution(dashboard, widget):
 def top_news(dashboard, widget):
     context_update = {}
     top_news_ids = set()
+    num_news = 100
     # Get top news
     s = es_document_eval_search_factory(dashboard, widget)
-    s = s.source(['document_es_id'])[:500].sort('-value')
+    s = s.source(['document_es_id'])[:num_news].sort('-value')
     top_news_ids.update((d.document_es_id for d in s.scan()))
 
     # Get bottom news
     s = es_document_eval_search_factory(dashboard, widget)
-    s = s.source(['document_es_id'])[:500].sort('value')
+    s = s.source(['document_es_id'])[:num_news].sort('value')
     top_news_ids.update((d.document_es_id for d in s.scan()))
 
     max_criterion_value_dict, _ = \
@@ -135,7 +136,7 @@ def top_news(dashboard, widget):
                                                     [widget.criterion],
                                                     dashboard.topic_modelling_name,
                                                     max_criterion_value_dict,
-                                                    top_news_num=500)
+                                                    top_news_num=num_news)
 
     context_update[f'top_news_{widget.id}'] = documents_eval_dict
     print("!!!", list(context_update[f'top_news_{widget.id}'].values())[0])
