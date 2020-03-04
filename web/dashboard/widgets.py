@@ -1,3 +1,5 @@
+import datetime
+
 from dashboard.services import es_document_eval_search_factory
 from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
     get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict
@@ -174,11 +176,14 @@ def top_topics(dashboard, widget):
                               agg_type="terms",
                               field="topic_ids_bottom",
                               size=num_topics)
+    s.aggs.metric('late_date', agg_type='max', field='document_datetime')
     r = s.execute()
     topics_dict, tm_dict = get_topic_dict(dashboard.topic_modelling_name)
-    last_date = datetime.datetime.strptime(absolute_value[-1].key_as_string[:10], "%Y-%m-%d").date()
+    last_date = r.aggregations.late_date.value_as_string
+    last_date = datetime.datetime.fromisoformat(last_date[:19])
     context_update[f'top_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[-1].top_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
     context_update[f'bottom_topics_{widget.id}'] = []
+    context_update['dashboard'] = dashboard
     context_update['widget'] = widget
     return context_update
