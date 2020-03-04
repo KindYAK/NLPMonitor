@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    {% cache 28800 topics_list request.GET %}
+{#    {% cache 28800 topics_list request.GET %}#}
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -127,7 +127,7 @@
                 </div>
             </div>
         </div>
-    {% endcache %}
+{#    {% endcache %}#}
 
     <script>
         var meta_dtms_dict = {{ meta_dtm|safe }};

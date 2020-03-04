@@ -1,0 +1,80 @@
+{% load dictionary_getter %}
+{% load l10n %}
+{% load static %}
+
+<!-- data tables -->
+<link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+<!-- Chroma.js -->
+<script src="{% static 'js_vendor/chroma.min.js' %}"></script>
+
+<script>
+    var colorScale = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-4, 1]);
+    var colorScaleNeg = chroma.scale(['#23964f', '#fee42c', '#d3322b']).mode('lch').domain([-2, 2]);
+</script>
+
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "top_topics_"|add:widget_id as top_topics_name %}
+        {% get_by_name top_topics_name as top_topics %}
+        <h4>{{ widget.criterion.name }} - главные топики по положительному влиянию</h4>
+        <table id="top_topics_table_{{ widget_id }}" class="table table-bordered table-hover">
+            <thead>
+            <tr role="row">
+                <th>Топик</th>
+                <th>Прогнозируемая резонансность</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for topic in top_topics %}
+                <tr>
+                    <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                    <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                        {% if topic.resonance_score %}
+                            {{ topic.resonance_score|floatformat:3|unlocalize }}
+                        {% else %}
+                            Фоновый топик
+                        {% endif %}
+                    </td>
+                    {% if topic.resonance_score %}
+                        <script>
+                            $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                        </script>
+                    {% endif %}
+                    <td>
+                        <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
+                           class="nav-link nowrap">
+                            <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                               data-toggle="tooltip" data-placement="top"
+                               title="Анализ по тематике"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if widget.criterion.value_range_from < 0 %}
+            <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
+        {% endif %}
+    {% endwith %}
+{% endwith %}
+
+<!-- DataTables -->
+<script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
+<script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
+
+<script>
+    var data_table_topics_{{ widget.id }} = $('#top_topics_table_{{ widget.id }}').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "order": [
+            [0, 'desc'],
+        ],
+        "info": false,
+        "autoWidth": true,
+        "pageLength": 15,
+    });
+</script>

@@ -70,6 +70,7 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
             {"from": range_center + neutral_neighborhood, "to": criterion.value_range_to},
         ]
     )
+    # Main topics
     std.aggs['posneg'].bucket(name="top_topics",
                               agg_type="terms",
                               field="topic_ids_top",

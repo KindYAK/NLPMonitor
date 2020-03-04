@@ -9,7 +9,7 @@
 {% with widget.id|stringformat:"s" as widget_id %}
     {% with "top_news_"|add:widget_id as top_news_name %}
         {% get_by_name top_news_name as top_news %}
-        <table id="search-results-table_{{ widget_id }}" class="table table-bordered table-hover">
+        <table id="top_news_table_{{ widget_id }}" class="table table-bordered table-hover">
             <thead>
             <tr role="row">
                 <th>{{ widget.criterion.name }}</th>
@@ -47,9 +47,8 @@
 <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
 <script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
 
-
 <script>
-    var data_table_{{ widget.id }} = $('#search-results-table_{{ widget.id }}').DataTable({
+    var data_table_news_{{ widget.id }} = $('#top_news_table_{{ widget.id }}').DataTable({
         "paging": true,
         "lengthChange": false,
         "searching": false,
@@ -60,6 +59,5 @@
         "info": false,
         "autoWidth": true,
         "pageLength": 15,
-        {#"lengthMenu": [10, 25, 50, 75, 100, 200].concat(length_additional_options)#}
     });
 </script>
