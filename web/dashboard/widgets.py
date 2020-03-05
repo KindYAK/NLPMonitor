@@ -121,7 +121,7 @@ def source_distribution(dashboard, widget):
 def top_news(dashboard, widget):
     context_update = {}
     top_news_ids = set()
-    num_news = 100
+    num_news = 50
     # Get top news
     s = es_document_eval_search_factory(dashboard, widget)
     s = s.source(['document_es_id'])[:num_news].sort('-value')
