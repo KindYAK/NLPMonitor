@@ -80,6 +80,9 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = 'nlpmonitor.urls'
 
+CUSTOM_CONTEXT_PROCESSORS = [
+    'mainapp.context_processors.dashboard_list.dashboard_list',
+]
 if DEBUG:
     TEMPLATES = [
         {
@@ -92,7 +95,7 @@ if DEBUG:
                     'django.template.context_processors.request',
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
-                ],
+                ] + CUSTOM_CONTEXT_PROCESSORS,
             },
         },
     ]
@@ -108,7 +111,7 @@ else:
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                     'django.template.context_processors.i18n',
-                ],
+                ] + CUSTOM_CONTEXT_PROCESSORS,
                 'loaders': [
                     ('django.template.loaders.cached.Loader', [
                         'django.template.loaders.filesystem.Loader',

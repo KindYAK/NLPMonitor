@@ -132,17 +132,27 @@
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_superuser or request.user.viewer or request.user.expert %}
                             {% if request.user.is_superuser or request.user.viewer.group.dashboard_presets.count > 0 or request.user.expert.group.dashboard_presets.count > 0 %}
-                                <li class="nav-item">
-                                    <a href="{% url 'dashboard:dashboard' %}" class="nav-link">
+                                <li class="nav-item has-treeview menu-close">
+                                    <a href="#" class="nav-link {% if request.resolver_match.url_name == "dashboard" %}active{% endif %}">
                                         <i class="nav-icon fas fa-tachometer-alt"></i>
                                         <p>
                                             Дашборд
                                         </p>
                                     </a>
+                                    <ul class="nav nav-treeview">
+                                        {% for dashboard in dashboards %}
+                                            <li class="nav-item">
+                                                <a href="{% url 'dashboard:dashboard' dashboard.id %}" class="nav-link {% if request.resolver_match.url_name == "dashboard" and dashboard.id == dashboard_template.id %}active{% endif %}">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>{{ dashboard.name }}</p>
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
                                 </li>
                             {% endif %}
                             <li class="nav-item">
-                                <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link">
+                                <a href="{% url 'evaluation:criterion_eval_analysis' %}" class="nav-link {% if request.resolver_match.url_name == "criterion_eval_analysis" %}active{% endif %}">
                                     <i class="nav-icon fas fa-drafting-compass"></i>
                                     <p>
                                         Аналитика
@@ -150,7 +160,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'topicmodelling:topics_list' %}" class="nav-link">
+                                <a href="{% url 'topicmodelling:topics_list' %}" class="nav-link {% if request.resolver_match.url_name == "topics_list" %}active{% endif %}">
                                     <i class="nav-icon fas fa-tags"></i>
                                     <p>
                                         Темы
@@ -158,7 +168,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'mainapp:search' %}" class="nav-link">
+                                <a href="{% url 'mainapp:search' %}" class="nav-link {% if request.resolver_match.url_name == "search" %}active{% endif %}">
                                     <i class="nav-icon fas fa-search-plus"></i>
                                     <p>
                                         Поиск
@@ -168,7 +178,7 @@
                         {% endif %}
                         {% if request.user.contentloader %}
                             <li class="nav-item">
-                                <a href="{% url 'mainapp:document_list' %}" class="nav-link">
+                                <a href="{% url 'mainapp:document_list' %}" class="nav-link {% if request.resolver_match.url_name == "document_list" %}active{% endif %}">
                                     <i class="nav-icon far fa-list-alt"></i>
                                     <p>
                                         Мои публикации
@@ -176,7 +186,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'mainapp:document_create' %}" class="nav-link">
+                                <a href="{% url 'mainapp:document_create' %}" class="nav-link {% if request.resolver_match.url_name == "document_create" %}active{% endif %}">
                                     <i class="nav-icon fas fa-file-import"></i>
                                     <p>
                                         Добавить публикацию
