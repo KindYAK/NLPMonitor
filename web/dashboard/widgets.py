@@ -125,12 +125,12 @@ def top_news(dashboard, widget):
     # Get top news
     s = es_document_eval_search_factory(dashboard, widget)
     s = s.source(['document_es_id'])[:num_news].sort('-value')
-    top_news_ids.update((d.document_es_id for d in s.scan()))
+    top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
     s = es_document_eval_search_factory(dashboard, widget)
     s = s.source(['document_es_id'])[:num_news].sort('value')
-    top_news_ids.update((d.document_es_id for d in s.scan()))
+    top_news_ids.update((d.document_es_id for d in s.execute()))
 
     max_criterion_value_dict, _ = \
         get_criterions_values_for_normalization([widget.criterion],
