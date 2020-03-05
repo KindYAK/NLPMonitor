@@ -53,9 +53,9 @@ def dynamics(dashboard, widget):
     else:
         normalize_documents_eval_dynamics_with_virt_negative(r, dashboard.topic_modelling_name, "1w", widget.criterion)
     buckets = r.aggregations.dynamics.buckets
-    smooth_buckets(buckets,
-                   is_posneg=False,
-                   granularity="1w")
+    # smooth_buckets(buckets,
+    #                is_posneg=False,
+    #                granularity="1w")
     context_update[f'dynamics_{widget.id}'] = buckets
     context_update['widget'] = widget
     return context_update
