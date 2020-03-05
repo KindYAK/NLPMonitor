@@ -107,7 +107,8 @@
         {# Widgets#}
         <div class="card-columns connectedSortable">
             {% for widget in widgets %}
-                <!-- Widget -->
+                {% cache widget 28800 dashboard_template.topic_modelling_name widget.id %}
+                    <!-- Widget -->
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -129,6 +130,7 @@
                             {% include widget.template_name %}
                         </div>
                     </div>
+                {% endcache %}
             {% endfor %}
         </div>
     </div>
