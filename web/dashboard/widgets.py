@@ -47,20 +47,20 @@ def dynamics(dashboard, widget):
     _, total_criterion_date_value_dict = \
         get_criterions_values_for_normalization([widget.criterion],
                                                 dashboard.topic_modelling_name,
-                                                granularity="1w",
-                                                analytical_query=None)
+                                                granularity="1w")
     if not widget.criterion.calc_virt_negative:
         normalize_documents_eval_dynamics(r, total_criterion_date_value_dict[widget.criterion.id])
     else:
         normalize_documents_eval_dynamics_with_virt_negative(r, dashboard.topic_modelling_name, "1w", widget.criterion)
-    smooth_buckets(r.aggregations.dynamics.buckets,
+    buckets = r.aggregations.dynamics.buckets
+    smooth_buckets(buckets,
                    is_posneg=False,
                    granularity="1w")
     context_update[f'dynamics_{widget.id}'] = [
         {
             "date": bucket.key_as_string,
             "value": bucket.dynamics_weight.value,
-        } for bucket in r.aggregations.dynamics
+        } for bucket in buckets
     ]
     context_update['widget'] = widget
     return context_update
@@ -135,8 +135,7 @@ def top_news(dashboard, widget):
     max_criterion_value_dict, _ = \
         get_criterions_values_for_normalization([widget.criterion],
                                                 dashboard.topic_modelling_name,
-                                                granularity=None,
-                                                analytical_query=None)
+                                                granularity=None)
 
     documents_eval_dict = get_documents_with_values(top_news_ids,
                                                     [widget.criterion],
