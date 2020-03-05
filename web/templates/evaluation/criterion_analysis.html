@@ -570,8 +570,7 @@
                                             {% for criterion in criterions %}
                                                 {
                                                     mode: 'lines',
-                                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date
-                                                        ('{{ tick.key_as_string }}'), {% endfor %}],
+                                                    x: [{% for tick in absolute_value|get_item:criterion.id %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
                                                     y: [{% for tick in absolute_value|get_item:criterion.id %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
                                                     name: '{{ criterion.name }}',
                                                     {% if criterions|length == 1 %}

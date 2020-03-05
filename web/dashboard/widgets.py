@@ -56,12 +56,7 @@ def dynamics(dashboard, widget):
     smooth_buckets(buckets,
                    is_posneg=False,
                    granularity="1w")
-    context_update[f'dynamics_{widget.id}'] = [
-        {
-            "date": bucket.key_as_string,
-            "value": bucket.dynamics_weight.value,
-        } for bucket in buckets
-    ]
+    context_update[f'dynamics_{widget.id}'] = buckets
     context_update['widget'] = widget
     return context_update
 
