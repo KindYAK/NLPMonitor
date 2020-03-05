@@ -2,7 +2,8 @@ import datetime
 
 from dashboard.services import es_document_eval_search_factory
 from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
-    get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict
+    get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict, \
+    smooth_buckets
 
 
 def overall_positive_negative(dashboard, widget):
@@ -42,16 +43,11 @@ def dynamics(dashboard, widget):
                   field="document_datetime",
                   calendar_interval="1w") \
         .metric("dynamics_weight", agg_type="avg", field="value")
-    # Positive-negative distribution
-    # if widget.criterion.value_range_from < 0:
-    #     # Positive/negative dynamics
-    #     s.aggs['posneg'].bucket(name="dynamics",
-    #                             agg_type="date_histogram",
-    #                             field="document_datetime",
-    #                             calendar_interval="1w") \
-    #         .metric("dynamics_weight", agg_type="avg", field="value")
     r = s.execute()
     normalize_documents_eval_dynamics(r, None)
+    smooth_buckets(r.aggregations.dynamics.buckets,
+                   is_posneg=False,
+                   granularity="1w")
     context_update[f'dynamics_{widget.id}'] = [
         {
             "date": bucket.key_as_string,

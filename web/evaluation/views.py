@@ -184,22 +184,16 @@ class CriterionEvalAnalysisView(TemplateView):
             positive = sorted(positive, key=lambda x: x.key_as_string)
             negative = sorted(negative, key=lambda x: x.key_as_string)
 
-        # Smooth
-        def smooth_buckets(buckets, is_posneg):
-            if is_posneg:
-                smoothed = apply_fir_filter([bucket.doc_count for bucket in buckets], granularity=context['granularity'], allow_negatives=True)
-            else:
-                smoothed = apply_fir_filter([bucket.dynamics_weight.value for bucket in buckets], granularity=context['granularity'], allow_negatives=True)
-            for bucket, val in zip(buckets, smoothed):
-                if is_posneg:
-                    bucket.doc_count = val
-                else:
-                    bucket.dynamics_weight.value = val
-
         if context['smooth']:
-            smooth_buckets(absolute_value, False)
-            smooth_buckets(positive, True)
-            smooth_buckets(negative, True)
+            smooth_buckets(absolute_value,
+                           is_posneg=False,
+                           granularity=context['granularity'])
+            smooth_buckets(positive,
+                           is_posneg=True,
+                           granularity=context['granularity'])
+            smooth_buckets(negative,
+                           is_posneg=True,
+                           granularity=context['granularity'])
 
         # Get topic dict
         self.topics_dict, self.tm_dict = get_topic_dict(context['topic_modelling'])
