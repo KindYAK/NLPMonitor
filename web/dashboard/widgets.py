@@ -187,7 +187,7 @@ def top_topics(dashboard, widget):
     last_date = datetime.datetime.fromisoformat(last_date[:19])
     context_update[f'top_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[-1].top_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
-    context_update[f'bottom_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[0].top_topics.buckets,
+    context_update[f'bottom_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[0].bottom_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
     context_update['dashboard'] = dashboard
     context_update['widget'] = widget
