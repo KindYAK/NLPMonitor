@@ -3,7 +3,7 @@ import datetime
 from dashboard.services import es_document_eval_search_factory
 from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
     get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict, \
-    smooth_buckets
+    smooth_buckets, normalize_documents_eval_dynamics_with_virt_negative
 
 
 def overall_positive_negative(dashboard, widget):
@@ -44,7 +44,15 @@ def dynamics(dashboard, widget):
                   calendar_interval="1w") \
         .metric("dynamics_weight", agg_type="avg", field="value")
     r = s.execute()
-    normalize_documents_eval_dynamics(r, None)
+    _, total_criterion_date_value_dict = \
+        get_criterions_values_for_normalization([widget.criterion],
+                                                dashboard.topic_modelling_name,
+                                                granularity="1w",
+                                                analytical_query=None)
+    if not widget.criterion.calc_virt_negative:
+        normalize_documents_eval_dynamics(r, total_criterion_date_value_dict[widget.criterion.id])
+    else:
+        normalize_documents_eval_dynamics_with_virt_negative(r, dashboard.topic_modelling_name, "1w", widget.criterion)
     smooth_buckets(r.aggregations.dynamics.buckets,
                    is_posneg=False,
                    granularity="1w")
