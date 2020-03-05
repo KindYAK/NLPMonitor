@@ -131,7 +131,7 @@
                     data-accordion="false">
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_superuser or request.user.viewer or request.user.expert %}
-                            {% if request.user.is_superuser or request.user.viewer.group.dashboard_presets.count > 0 or request.user.expert.group.dashboard_presets.count > 0 %}
+                            {% if dashboards.count > 0 %}
                                 <li class="nav-item has-treeview menu-close">
                                     <a href="#" class="nav-link {% if request.resolver_match.url_name == "dashboard" %}active{% endif %}">
                                         <i class="nav-icon fas fa-tachometer-alt"></i>
