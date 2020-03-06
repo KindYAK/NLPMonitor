@@ -11,7 +11,7 @@ from elasticsearch_dsl import Search
 from mainapp.models import Document
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
-from .forms import DocumentSearchForm, DashboardFilterForm, KibanaSearchForm, DocumentForm
+from .forms import DocumentSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize
 from .services_es_documents import execute_search
 
@@ -32,7 +32,7 @@ class SearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form = self.form_class(data=self.request.GET)
+        form = self.form_class(data=self.request.GET, user=self.request.user)
         context['form'] = form
         search_request = {}
         if form.is_valid():
