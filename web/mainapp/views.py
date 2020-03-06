@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, ListView, DeleteView
 from elasticsearch_dsl import Search
@@ -151,6 +151,8 @@ class DocumentCreateView(CreateView):
     success_url = reverse_lazy('mainapp:document_create_success')
 
     def form_valid(self, form):
+        if not hasattr(self.request.user, "contentloader"):
+            return HttpResponse("403 FORBIDDEN")
         self.object = form.save()
         self.object.author_loader = self.request.user
         self.object.save()
