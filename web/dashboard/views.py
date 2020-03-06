@@ -1,6 +1,7 @@
 from annoying.functions import get_object_or_None
 from django.views.generic import TemplateView
 
+from mainapp.services import get_user_group
 from .models import DashboardPreset
 
 
@@ -15,8 +16,7 @@ class DashboardView(TemplateView):
         else:
             context['dashboard_template'] = get_object_or_None(DashboardPreset, id=dashboard_id)
         if not self.request.user.is_superuser:
-            group = (hasattr(self.request.user, "expert") and self.request.user.expert.group) or \
-                    (hasattr(self.request.user, "viewer") and self.request.user.viewer.group)
+            group = get_user_group(self.request.user)
             if not group or context['dashboard_template'] not in group.dashboard_presets.all():
                 return context
         if not context['dashboard_template']:

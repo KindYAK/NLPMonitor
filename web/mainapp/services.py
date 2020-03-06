@@ -82,3 +82,9 @@ def unique_ize(list, key):
             results.append(obj)
             seen.add(key(obj))
     return results
+
+
+def get_user_group(user):
+    group = (hasattr(user, "expert") and user.expert.group) or \
+            (hasattr(user, "viewer") and user.viewer.group)
+    return group
