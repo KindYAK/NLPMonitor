@@ -138,7 +138,7 @@ class DynamicTMForm(forms.Form):
                                           ] + [('asd', f"{222} мета топик моделлинг")]
         self.fields['thresholds'].choices = [
                                                     (threshold, f"{threshold}") for threshold in
-                                             list(map(str, [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]))
+                                             list(map(str, [0.4, 0.5, 0.6, 0.7, 0.8]))
                                             ]
 
     def clean(self):
