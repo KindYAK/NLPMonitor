@@ -43,4 +43,4 @@ class Widget(models.Model):
         return TYPES_META_DICT[self.type]['callable']
 
     def __str__(self):
-        return f"Виджет -{self.title}"
+        return f"Виджет - {self.title}"
