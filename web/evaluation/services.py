@@ -461,3 +461,16 @@ def get_total_group_dynamics(absoulte_values_dict, criterions, granularity, is_s
         "ticks": ticks_sorted,
         "dynamics": dynamics,
     }
+
+
+# Smooth
+def smooth_buckets(buckets, is_posneg, granularity):
+    if is_posneg:
+        smoothed = apply_fir_filter([bucket.doc_count for bucket in buckets], granularity=granularity, allow_negatives=True)
+    else:
+        smoothed = apply_fir_filter([bucket.dynamics_weight.value for bucket in buckets], granularity=granularity, allow_negatives=True)
+    for bucket, val in zip(buckets, smoothed):
+        if is_posneg:
+            bucket.doc_count = val
+        else:
+            bucket.dynamics_weight.value = val

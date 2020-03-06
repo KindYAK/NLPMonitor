@@ -10,8 +10,8 @@
                 var data = [
                     {
                         mode: 'lines',
-                        x: [{% for tick in dynamics %}new Date('{{ tick.date }}'), {% endfor %}],
-                        y: [{% for tick in dynamics %}{{ tick.value|round_fl:5|safe }}, {% endfor %}],
+                        x: [{% for tick in dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                        y: [{% for tick in dynamics %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
                         name: '{{ widget.criterion.name }}',
                     },
                 ];
@@ -22,7 +22,6 @@
                     },
                     yaxis: {
                         fixedrange: true,
-                        range: [{{ widget.criterion.value_range_from|safe }}, {{ widget.criterion.value_range_to|safe }}]
                     },
                     height: 350,
                     margin: {

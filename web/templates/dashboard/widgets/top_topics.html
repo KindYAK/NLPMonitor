@@ -2,8 +2,6 @@
 {% load l10n %}
 {% load static %}
 
-<!-- data tables -->
-<link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
 <!-- Chroma.js -->
 <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
 
@@ -28,8 +26,8 @@
             <tbody>
             {% for topic in top_topics %}
                 <tr>
-                    <td id="name_{{ criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
-                    <td id="resonance_{{ criterion.id }}_{{ topic.info.id }}">
+                    <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                    <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
                         {% if topic.resonance_score %}
                             {{ topic.resonance_score|floatformat:3|unlocalize }}
                         {% else %}
@@ -38,11 +36,11 @@
                     </td>
                     {% if topic.resonance_score %}
                         <script>
-                            $('#resonance_{{ criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
+                            $('#resonance_{{ widget.criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
                         </script>
                     {% endif %}
                     <td>
-                        <a href="{% url 'topicmodelling:topic_document_list' topic_modelling topic.info.id %}?topic_name={{ topic.info.name }}&topic_weight_threshold={{ topic_weight_threshold|unlocalize }}"
+                        <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
                            class="nav-link nowrap">
                             <i class="nav-icon fas fa-eye" style="font-size: 24px;"
                                data-toggle="tooltip" data-placement="top"
@@ -53,28 +51,50 @@
             {% endfor %}
             </tbody>
         </table>
-
-        {% if widget.criterion.value_range_from < 0 %}
-            <h4>{{ criterion.name }} - главные топики по отрицательному влиянию</h4>
-        {% endif %}
     {% endwith %}
 {% endwith %}
 
-<!-- DataTables -->
-<script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
-<script src="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.js' %}"></script>
-
-<script>
-    var data_table_topics_{{ widget.id }} = $('#top_topics_table_{{ widget.id }}').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": false,
-        "ordering": true,
-        "order": [
-            [0, 'desc'],
-        ],
-        "info": false,
-        "autoWidth": true,
-        "pageLength": 15,
-    });
-</script>
+{% if widget.criterion.value_range_from < 0 %}
+    {% with widget.id|stringformat:"s" as widget_id %}
+        {% with "bottom_topics_"|add:widget_id as bottom_topics_name %}
+            {% get_by_name bottom_topics_name as bottom_topics %}
+            <h4>{{ widget.criterion.name }} - главные топики по отрицательному влиянию</h4>
+            <table id="bottom_topics_table_{{ widget_id }}" class="table table-bordered table-hover">
+                <thead>
+                <tr role="row">
+                    <th>Топик</th>
+                    <th>Прогнозируемая резонансность</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for topic in bottom_topics %}
+                    <tr>
+                        <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                        <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
+                            {% if topic.resonance_score %}
+                                {{ topic.resonance_score|floatformat:3|unlocalize }}
+                            {% else %}
+                                Фоновый топик
+                            {% endif %}
+                        </td>
+                        {% if topic.resonance_score %}
+                            <script>
+                                $('#resonance_{{ widget.criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
+                            </script>
+                        {% endif %}
+                        <td>
+                            <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
+                               class="nav-link nowrap">
+                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
+                                   data-toggle="tooltip" data-placement="top"
+                                   title="Анализ по тематике"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endwith %}
+    {% endwith %}
+{% endif %}
