@@ -12,7 +12,7 @@ from elasticsearch_dsl import Search
 
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
-from mainapp.services import apply_fir_filter, unique_ize
+from mainapp.services import apply_fir_filter, unique_ize, get_user_group
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
     ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT
 from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
@@ -27,8 +27,10 @@ class TopicsListView(TemplateView):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_superuser or hasattr(self.request.user, "expert"):
             context['criterions'] = EvalCriterion.objects.all()
-        form = self.form_class(data=self.request.GET,
-                               is_superuser=self.request.user.is_superuser or hasattr(self.request.user, "expert"))
+        form = self.form_class(data=self.request.GET, user=self.request.user)
+        if not form.fields['topic_modelling'].choices:
+            context['error'] = "403 FORBIDDEN"
+            return context
         context['form'] = form
         if form.is_valid():
             context['topic_modelling'] = form.cleaned_data['topic_modelling']
@@ -94,6 +96,12 @@ class TopicDocumentListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        if not self.request.user.is_superuser:
+            group = get_user_group(self.request.user)
+            if kwargs['topic_modelling'] not in group.topic_modelling_names.split(","):
+                context['error'] = "403 FORBIDDEN"
+                return context
 
         if 'topic_name' in kwargs:
             topics = [kwargs['topic_name']]

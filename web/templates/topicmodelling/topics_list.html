@@ -63,6 +63,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if not error %}
     {# TM select #}
     <div class="row">
         <div class="col-12">
@@ -276,6 +277,9 @@
             </div>
         </div>
     </div>
+    {% endif %}
+    {% else %}
+        <h1>{{ error }}</h1>
     {% endif %}
 {% endblock %}
 

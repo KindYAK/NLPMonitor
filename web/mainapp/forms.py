@@ -33,7 +33,7 @@ class TopicChooseForm(forms.Form):
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
-                 renderer=None, is_superuser=False):
+                 renderer=None, user=None):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
 
@@ -44,7 +44,10 @@ class TopicChooseForm(forms.Form):
                          # 'perplexity', 'purity', 'contrast', 'coherence',
                          # 'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
                          # 'tau_decorrelator_phi', 'tau_coherence_phi',
-                         ])[:100]
+                         ])[:500]
+        if not user.is_superuser:
+            group = get_user_group(user)
+            s = s.filter('terms', corpus=[corpus.name for corpus in group.corpuses.all()])
         topic_modellings = s.execute()
         topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
         topic_modellings = ((tm.name.lower(),
@@ -57,7 +60,7 @@ class TopicChooseForm(forms.Form):
         self.fields['topic_modelling'].choices = topic_modellings
 
         # Get topic_weight_thresholds
-        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(is_superuser)
+        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(user.is_superuser or hasattr(user, "expert"))
 
 
 class DocumentSearchForm(forms.Form):
