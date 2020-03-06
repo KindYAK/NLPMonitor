@@ -5,7 +5,7 @@ from django.utils import timezone
 from elasticsearch_dsl import Index, MetaField
 
 from mainapp.models import Document as ModelDocument
-from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_DASHOBARD, ES_INDEX_EMBEDDING, ES_INDEX_CLASSIFIER, \
+from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_EMBEDDING, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
     ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
     ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS
@@ -86,29 +86,6 @@ class Document(es.Document):
 class DashboardValue(es.InnerDoc):
     value = es.Integer()
     datetime = es.Date()
-
-
-dashboard_index = Index(ES_INDEX_DASHOBARD, ES_CLIENT)
-dashboard_index.settings(
-    **{"index.mapping.nested_objects.limit": 50000}
-)
-
-
-@dashboard_index.document
-class Dashboard(es.Document):
-    corpus = es.Keyword()
-    type = es.Keyword()
-    granularity = es.Keyword()  # 1d / 1h
-    datetime_started = es.Date()
-    datetime_generated = es.Date()
-    is_ready = es.Boolean()
-
-    tag = es.Keyword()
-
-    values = es.Nested(DashboardValue)
-
-    def add_value(self, value, datetime):
-        self.values.append(DashboardValue(value=value, datetime=datetime))
 
 
 # List of all Embeddings in the storage
@@ -373,26 +350,6 @@ class META_DTM(es.Document):
                 }
             },
         }
-
-
-# List of all TMs in the storage
-class ClassifierIndex(es.Document):
-    corpus = es.Keyword()
-    number_of_documents = es.Integer()
-    is_ready = es.Boolean()
-    name = es.Keyword()
-    description = es.Text()
-    datetime_created = es.Date()
-    datetime_finished = es.Date()
-
-    algorithm = es.Keyword()
-    target = es.Keyword()
-    quality = es.Object()  # Different quality metrics - F1, ROC, etc.
-    meta_parameters = es.Object()
-
-    class Index:
-        name = ES_INDEX_CLASSIFIER
-        using = ES_CLIENT
 
 
 class DictionaryWord(es.Document):
