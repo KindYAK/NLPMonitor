@@ -4,6 +4,7 @@ from django.forms.utils import ErrorList
 from elasticsearch_dsl import Search
 
 from mainapp.models import *
+from mainapp.services import get_user_group
 from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
 
 
@@ -32,7 +33,7 @@ class TopicChooseForm(forms.Form):
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
-                 renderer=None, is_superuser=False):
+                 renderer=None, user=None):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
 
@@ -43,7 +44,10 @@ class TopicChooseForm(forms.Form):
                          # 'perplexity', 'purity', 'contrast', 'coherence',
                          # 'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
                          # 'tau_decorrelator_phi', 'tau_coherence_phi',
-                         ])[:100]
+                         ])[:500]
+        if not user.is_superuser:
+            group = get_user_group(user)
+            s = s.filter('terms', corpus=[corpus.name for corpus in group.corpuses.all()])
         topic_modellings = s.execute()
         topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
         topic_modellings = ((tm.name.lower(),
@@ -56,13 +60,7 @@ class TopicChooseForm(forms.Form):
         self.fields['topic_modelling'].choices = topic_modellings
 
         # Get topic_weight_thresholds
-        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(is_superuser)
-
-
-class KibanaSearchForm(forms.Form):
-    def __init__(self, choices, *args, **kwargs):
-        super(KibanaSearchForm, self).__init__(*args, **kwargs)
-        self.fields["dashboard"] = forms.ChoiceField(choices=choices)
+        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(user.is_superuser or hasattr(user, "expert"))
 
 
 class DocumentSearchForm(forms.Form):
@@ -89,16 +87,16 @@ class DocumentSearchForm(forms.Form):
         required=False)
     categories = forms.ModelMultipleChoiceField(queryset=Category.objects.all(), label="Категории", required=False)
 
-
-class DashboardFilterForm(forms.Form):
-    corpus = forms.ModelChoiceField(queryset=Corpus.objects.all(), label="Корпус", required=True,
-                                    initial=Corpus.objects.first())
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.annotate(num_docs=Count('document')).filter(num_docs__gte=MIN_DOCS_PER_TAG), label="Теги",
-        required=False)
-
-    datetime_from = forms.DateField(label="Дата - Начало периода", input_formats=['%d-%m-%Y'], required=False)
-    datetime_to = forms.DateField(label="Дата - Конец периода", input_formats=['%d-%m-%Y'], required=False)
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
+                 label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
+                 renderer=None, user=None):
+        super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
+                         use_required_attribute, renderer)
+        if not user.is_superuser:
+            group = get_user_group(user)
+            self.fields['corpuses'].queryset = self.fields['corpuses'].queryset.filter(usergroup=group)
+            self.fields['sources'].queryset = self.fields['sources'].queryset.filter(corpus__usergroup=group)
+            self.fields['authors'].queryset = self.fields['authors'].queryset.filter(corpus__usergroup=group)
 
 
 class DocumentForm(forms.ModelForm):

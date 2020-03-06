@@ -54,6 +54,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if not error %}
     {# Управление графиками #}
     <form method="GET" action="" style="display: contents;">
     <div class="row">
@@ -371,6 +372,9 @@
         </div>
     </div>
     {% endcache %}
+    {% else %}
+        <h1>{{ error }}</h1>
+    {% endif %}
 {% endblock %}
 
 {% block foot %}

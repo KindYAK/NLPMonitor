@@ -204,7 +204,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
 ES_INDEX_DOCUMENT = 'main'
-ES_INDEX_DASHOBARD = 'dashboard'
 ES_INDEX_EMBEDDING = 'embedding'
 ES_INDEX_TOPIC_MODELLING = 'topic_modelling'
 ES_INDEX_META_DTM = 'meta_dtm'
@@ -212,12 +211,10 @@ ES_INDEX_DYNAMIC_TOPIC_MODELLING = 'dynamic_topic_modelling'
 ES_INDEX_DYNAMIC_TOPIC_DOCUMENT = 'dynamic_topic_document'
 ES_INDEX_DYNAMIC_TOPIC_DOCUMENT_UNIQUE_IDS = 'dynamic_topic_document_unique_ids'
 ES_INDEX_MAPPINGS = 'mappings'
-# ES_INDEX_TOPIC_DOCUMENT = 'topic_document'
 ES_INDEX_TOPIC_DOCUMENT = 'topic_document_sharded'
 ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS = 'unique_ids_topic_document_sharded'
 ES_INDEX_DOCUMENT_EVAL = 'document_eval'
 ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS = 'unique_ids_document_eval'
-ES_INDEX_CLASSIFIER = 'classifier'
 ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
 ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
 ES_INDEX_CUSTOM_DICTIONARY_WORD = 'custom_dictionary_word'
@@ -273,8 +270,8 @@ MIN_DOCS_PER_TAG = 1000
 MIN_DOCS_PER_AUTHOR = 100
 
 SHELL_PLUS_PRE_IMPORTS = (
-    ('nlpmonitor.settings', ('ES_CLIENT', 'ES_INDEX_DOCUMENT', 'ES_INDEX_DASHOBARD', 'ES_INDEX_EMBEDDING',
-                             'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT', 'ES_INDEX_CLASSIFIER',
+    ('nlpmonitor.settings', ('ES_CLIENT', 'ES_INDEX_DOCUMENT', 'ES_INDEX_EMBEDDING',
+                             'ES_INDEX_TOPIC_MODELLING', 'ES_INDEX_TOPIC_DOCUMENT',
                              'ES_INDEX_DICTIONARY_INDEX', 'ES_INDEX_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL',
                              'ES_INDEX_CUSTOM_DICTIONARY_WORD', 'ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS',
                              'ES_INDEX_TOPIC_DOCUMENT_UNIQUE_ID', )),

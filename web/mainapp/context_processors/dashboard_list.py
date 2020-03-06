@@ -1,12 +1,12 @@
 from dashboard.models import DashboardPreset
+from mainapp.services import get_user_group
 
 
 def dashboard_list(request):
     if request.user.is_superuser:
         dashboards = DashboardPreset.objects.all()
     else:
-        group = (hasattr(request.user, "expert") and request.user.expert.group) or \
-                (hasattr(request.user, "viewer") and request.user.viewer.group)
+        group = get_user_group(request.user)
         if not group:
             dashboards = DashboardPreset.objects.none()
         else:
