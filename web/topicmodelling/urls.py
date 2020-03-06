@@ -10,5 +10,5 @@ urlpatterns = [
          name="topic_document_list"),
     path('topic_documents_list/<topic_modelling>/', TopicDocumentListView.as_view(),
          name="topics_group_document_list"),
-    path('dynamic_tm/', DynamicTMView.as_view(), name="dynamic_tm_view")
+    path('dynamic_tm/', DynamicTMView.as_view(), name="dynamic_tm")
 ]
