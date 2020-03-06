@@ -160,6 +160,11 @@ class TopicDocument(es.Document):
             "number_of_replicas": 1,
             "max_result_window": 5000000,
         }
+        settings_dynamic = {
+            "number_of_shards": 2,
+            "number_of_replicas": 1,
+            "max_result_window": 5000000,
+        }
         mappings = {
             "properties": {
                 "datetime": {
