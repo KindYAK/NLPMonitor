@@ -60,7 +60,8 @@ class TopicChooseForm(forms.Form):
         self.fields['topic_modelling'].choices = topic_modellings
 
         # Get topic_weight_thresholds
-        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(user.is_superuser or hasattr(user, "expert"))
+        self.fields['topic_weight_threshold'].choices = get_topic_weight_threshold_options(
+            user.is_superuser or hasattr(user, "expert"))
 
 
 class DocumentSearchForm(forms.Form):
@@ -135,9 +136,9 @@ class DynamicTMForm(forms.Form):
                                               (m, f"{m} мета топик моделлинг") for m in meta_dtms.keys()
                                           ] + [('asd', f"{222} мета топик моделлинг")]
         self.fields['thresholds'].choices = [
-                                                    (threshold, f"{threshold}") for threshold in
-                                             list(map(str, [0.4, 0.5, 0.6, 0.7, 0.8]))
-                                            ]
+            (threshold, f"{threshold}") for threshold in
+            list(map(str, [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]))
+        ]
 
     def clean(self):
         super(DynamicTMForm, self).clean()
