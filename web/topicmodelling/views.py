@@ -1,6 +1,5 @@
 import datetime
 import json
-import operator
 import re
 from collections import defaultdict
 
@@ -193,7 +192,6 @@ class DynamicTMView(TemplateView):
 
             dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
                 'meta_dtm_name.keyword': meta_dtm}).sort('datetime_from')[:1000].execute()
-
             mappings_list = Search(using=ES_CLIENT, index=ES_INDEX_MAPPINGS) \
                 .filter('range', topic_modelling_first_from={'gte': topic_modelling_first_from}) \
                 .filter('range', topic_modelling_second_to={'lte': topic_modelling_second_to}) \
@@ -202,7 +200,6 @@ class DynamicTMView(TemplateView):
                 .sort("topic_modelling_first_from") \
                 .source(['mappings_dict', 'threshold', 'topic_modelling_first_from', 'topic_modelling_second_to']) \
                 .execute()
-
             if mappings_list:
                 draw_list, labels_list, source, target, y = list(), list(), list(), list(), list()
                 topic_val_idx = dict()
@@ -231,33 +228,33 @@ class DynamicTMView(TemplateView):
                     class_count_dict[val.split('-')[0].split('_')[1]] += 1
                     topic_val_idx[val] = i
 
+                source_dict = defaultdict(list)
                 for i, mapping in enumerate(mappings_list):
                     for key, value in json.loads(mapping.mappings_dict).items():
                         for val in value:
                             source.append(topic_val_idx[f'tm_{i}-{key}'])
+                            source_dict[f'tm_{i}'] += [key]
                             target.append(topic_val_idx[f'tm_{i+1}-{val}'])
-
-                values = []  # TODO fix this, with Kirills agg logic
-                for i, tm in enumerate(dynamic_tm, start=0):
+                values = []
+                for i, tm in enumerate(dynamic_tm[::-1], start=0):
                     s = Search(using=ES_CLIENT, index=f'{ES_INDEX_DYNAMIC_TOPIC_DOCUMENT}_{tm.name}')
                     s.aggs.bucket(name="topic", agg_type="terms", field="topic_id", size=topic_num).metric(
                         "topic_weight", agg_type="sum", field="topic_weight")
-                    r = s.execute()
-                    values_dict = {}
+                    r = s[0].execute()
+                    st_values_dict = {}
                     for bucket in r.aggregations.topic.buckets:
-                        if bucket.key in list(labels_dict[f'tm_{i}']):
-                            values_dict[bucket.key] = bucket.topic_weight.value
-                    sorted_values = [j for i, j in sorted(values_dict.items(), key=operator.itemgetter(0))]
-                    values.extend(sorted_values)
-                step = 1 / len(mappings_list)  # 0.5
+                        if bucket.key in source_dict[f'tm_{i}']:
+                            st_values_dict[bucket.key] = bucket.topic_weight.value
+                    values_to_extend = [st_values_dict[val] for val in source_dict[f'tm_{i}']]
+                    values.extend(values_to_extend)
+
+                step = 1 / len(dynamic_tm)  # 0.5
 
                 x = [int(key.split('_')[1]) * step + 0.01 if not int(key.split('_')[1]) else int(
-                    key.split('_')[1]) * step for
-                     key, label in labels_dict.items() for _ in label]
+                    key.split('_')[1]) * step for key, label in labels_dict.items() for _ in label]
 
                 for val in class_count_dict.values():
                     y.extend(np.linspace(0.01, 0.99, val))
-
                 context['sankey_params'] = {
                     'label': draw_list,
                     'x': x,
