@@ -18,6 +18,8 @@ services:
     image: 'elastichq/elasticsearch-hq'
     expose:
       - 5000
+    ports:
+      - "5000:5000"
     networks:
       - esnet
       - network
