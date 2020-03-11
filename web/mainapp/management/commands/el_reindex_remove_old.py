@@ -3,19 +3,9 @@ from django.core.management.base import BaseCommand
 from elasticsearch import Elasticsearch
 from time import sleep
 from django.conf import settings
+from . import shards_mapping, get_mapping, SETTINGS_BODY
 
 es = settings.ES_CLIENT
-
-def shards_mapping(doc_count: int) -> int:
-    if isinstance(doc_count, str):
-        doc_count = int(doc_count)
-
-    if doc_count > 10_000_000:
-        return 5
-    elif doc_count > 1_000_000:
-        return 3
-    else:
-        return 1
 
 
 class Command(BaseCommand):
@@ -32,14 +22,6 @@ class Command(BaseCommand):
         self.wr('---- finished')
 
     def list_of_indexes_and_shards_delete(self):
-
-        settings = {
-            "settings": {
-                "number_of_shards": None,
-                "number_of_replicas": 1
-            }
-        }
-
         result = es.cat.indices(format='json')
         self.wr('Indexes')
         self.wr(result)
@@ -62,8 +44,8 @@ class Command(BaseCommand):
                     self.er(f"{key} index docs_count is None")
                     continue
 
-                settings["settings"]["number_of_shards"] = shards_mapping(docs_count)
-
+                SETTINGS_BODY["settings"]["number_of_shards"] = shards_mapping(docs_count)
+                SETTINGS_BODY["mappings"] = get_mapping(key)
                 r = es.indices.create(index=old_index_name, body=settings)
         
                 task = es.reindex(

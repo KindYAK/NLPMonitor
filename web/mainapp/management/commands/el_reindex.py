@@ -3,19 +3,8 @@ from django.core.management.base import BaseCommand
 from elasticsearch import Elasticsearch
 from time import sleep
 from django.conf import settings
-
+from . import shards_mapping, get_mapping, SETTINGS_BODY
 es = settings.ES_CLIENT
-
-def shards_mapping(doc_count: int) -> int:
-    if isinstance(doc_count, str):
-        doc_count = int(doc_count)
-
-    if doc_count > 10_000_000:
-        return 5
-    elif doc_count > 1_000_000:
-        return 3
-    else:
-        return 1
 
 
 class Command(BaseCommand):
@@ -36,31 +25,7 @@ class Command(BaseCommand):
         self.list_of_indexes_and_shards(options['prefix'])
         self.wr('---- finished')
 
-    def first_check(self):
-        # ignore 400 cause by IndexAlreadyExistsException when creating an index
-        r = es.indices.create(index='test-index', ignore=400)
-        assert r['acknowledged'] == True
-        sleep(1)
-        r = es.indices.delete(index='test-index')
-        assert r['acknowledged'] == True 
-        # only wait for 1 second, regardless of the client's default
-        r = es.cluster.health(wait_for_status='green', request_timeout=1)
-        assert r['timed_out'] == False
-
-        print('-> Elasticsearch communication is successful 😃')
-
-        for key, value in r.items():
-            print(f'\t- {key}: {value}')
-
     def list_of_indexes_and_shards(self, search_pattern: str):
-
-        settings = {
-            "settings": {
-                "number_of_shards": None,
-                "number_of_replicas": 1
-            }
-        }
-
         result = es.cat.indices(format='json')
         self.wr('Indexes')
         self.wr(result)
@@ -82,7 +47,8 @@ class Command(BaseCommand):
                 if es.indices.exists(new_index):
                     es.indices.delete(index=new_index)
 
-                settings["settings"]["number_of_shards"] = shards_mapping(docs_count)
+                SETTINGS_BODY["settings"]["number_of_shards"] = shards_mapping(docs_count)
+                SETTINGS_BODY["mappings"] = get_mapping(key)
 
                 r = es.indices.create(index=new_index, body=settings)
         
