@@ -12,7 +12,7 @@ except:
 
 std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
     .filter("range", topic_weight={"gte": 0.05})[:0]
-std.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000) \
+std.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=500) \
             .metric("topic_weight", agg_type="sum", field="topic_weight")
 r = std.execute()
 
@@ -25,27 +25,39 @@ topic_info_dict = dict(
 
 output = []
 for topic in tm.topics:
-    words = list(sorted(topic.topic_words, key=lambda x: x.weight, reverse=True))[:10]
+    words = list(sorted(topic.topic_words, key=lambda x: x.weight, reverse=True))[:30]
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
-        .filter("term", topic_id=topic.id).sort('-topic_weight')[:3]
+        .filter("term", topic_id=topic.id).sort('-topic_weight')[:10]
     top_news_ids = [r.document_es_id for r in std.execute()]
-    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=top_news_ids).source(('title', 'url', ))[:3]
+    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=top_news_ids).source(('title', 'url', ))[:10]
     top_news = s.execute()
+    top_news_to_write = []
+    titles_seen = set()
+    for news in top_news:
+        title = news.title.strip()
+        if len(title) < 3:
+            continue
+        if title in titles_seen:
+            continue
+        top_news_to_write.append(news)
+        titles_seen.add(title)
+        if len(top_news_to_write) >= 3:
+            break
     output.append({
         "id": topic.id,
-        "words": ",".join([word.word for word in words]),
+        "words": ", ".join([word.word for word in words]),
         "volume": topic_info_dict[topic.id]['count'] if topic.id in topic_info_dict else "-",
         "weight": topic_info_dict[topic.id]['weight_sum'] if topic.id in topic_info_dict else "-",
-        "top_new_1_title": top_news[0].title,
-        "top_new_1_url": top_news[0].url if hasattr(top_news[0], 'url') else "",
-        "top_new_2_title": top_news[1].title,
-        "top_new_2_url": top_news[1].url if hasattr(top_news[1], 'url') else "",
-        "top_new_3_title": top_news[2].title,
-        "top_new_3_url": top_news[2].url if hasattr(top_news[2], 'url') else "",
+        "top_new_1_title": top_news_to_write[0].title,
+        "top_new_2_title": top_news_to_write[1].title,
+        "top_new_3_title": top_news_to_write[2].title,
+        "top_new_1_url": top_news_to_write[0].url if hasattr(top_news_to_write[0], 'url') else "",
+        "top_new_2_url": top_news_to_write[1].url if hasattr(top_news_to_write[1], 'url') else "",
+        "top_new_3_url": top_news_to_write[2].url if hasattr(top_news_to_write[2], 'url') else "",
     })
 
 keys = output[0].keys()
-with open(f'{tm_name}.csv', 'w') as output_file:
+with open(f'/{tm_name}.csv', 'w') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(output)
