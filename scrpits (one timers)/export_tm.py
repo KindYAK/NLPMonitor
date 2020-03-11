@@ -27,9 +27,9 @@ output = []
 for topic in tm.topics:
     words = list(sorted(topic.topic_words, key=lambda x: x.weight, reverse=True))[:30]
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
-        .filter("term", topic_id=topic.id).sort('-topic_weight')[:10]
+        .filter("term", topic_id=topic.id).sort('-topic_weight')[:25]
     top_news_ids = [r.document_es_id for r in std.execute()]
-    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=top_news_ids).source(('title', 'url', ))[:10]
+    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=top_news_ids).source(('title', 'url', ))[:25]
     top_news = s.execute()
     top_news_to_write = []
     titles_seen = set()

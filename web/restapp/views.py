@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
 from evaluation.services import *
+from mainapp.services import get_user_group
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .serializers import *
 
@@ -460,6 +461,13 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
 
         eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_*").keys()
         criterions = EvalCriterion.objects.filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in eval_indices]).distinct().values('id', 'name')
+        if not request.user.is_superuser:
+            group = get_user_group(request.user)
+            if topic_modelling not in group.topic_modelling_names.split(","):
+                return Response(
+                    {"status": 403}
+                )
+            criterions = criterions.filter(usergroup=group)
 
         return Response(
             {
