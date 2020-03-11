@@ -45,7 +45,7 @@ class Command(BaseCommand):
                     continue
 
                 SETTINGS_BODY["settings"]["number_of_shards"] = shards_mapping(docs_count)
-                SETTINGS_BODY["mappings"] = get_mapping(key)
+                SETTINGS_BODY["mappings"] = get_mapping(old_index_name)
                 r = es.indices.create(index=old_index_name, body=SETTINGS_BODY)
         
                 task = es.reindex(
