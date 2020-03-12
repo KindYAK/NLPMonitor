@@ -174,7 +174,7 @@ class DynamicTMView(TemplateView):
             ['meta_name', 'from_date', 'to_date', 'tm_volume_days', 'delta_days'])[:10000].execute()}
 
         form = self.dynamictm_form(data=self.request.GET, meta_dtms=context['meta_dtm'])
-
+        context['form'] = form
         dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
             'meta_dtm_name.keyword': list(context['meta_dtm'].keys())[-1]}).sort('datetime_from')[:1000].execute()
 
@@ -182,93 +182,93 @@ class DynamicTMView(TemplateView):
         topic_num = dynamic_tm[0].number_of_topics
         form.fields['dtm_from'].choices = choice
         form.fields['dtm_to'].choices = choice[::-1]
-
         if form.is_valid():
-            data = form.cleaned_data
-            threshold = data['thresholds']
-            topic_modelling_first_from = data['dtm_from'].split('_')[-2]
-            topic_modelling_second_to = data['dtm_to'].split('_')[-1]
-            meta_dtm = data['meta_dtm']
-
-            dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
-                'meta_dtm_name.keyword': meta_dtm}).sort('datetime_from')[:1000].execute()
-            mappings_list = Search(using=ES_CLIENT, index=ES_INDEX_MAPPINGS) \
-                .filter('range', topic_modelling_first_from={'gte': topic_modelling_first_from}) \
-                .filter('range', topic_modelling_second_to={'lte': topic_modelling_second_to}) \
-                .filter('term', **{'meta_dtm_name.keyword': meta_dtm}) \
-                .filter('term', **{'threshold.keyword': threshold}) \
-                .sort("topic_modelling_first_from") \
-                .source(['mappings_dict', 'threshold', 'topic_modelling_first_from', 'topic_modelling_second_to']) \
-                .execute()
-            if mappings_list:
-                draw_list, labels_list, source, target, y = list(), list(), list(), list(), list()
-                topic_val_idx = dict()
-                labels_dict = defaultdict(list)
-
-                for i, mappings in enumerate(mappings_list):
-                    for key in json.loads(mappings.mappings_dict).keys():
-                        labels_list.append(f'tm_{i}-{key}')
-
-                    for value in json.loads(mappings.mappings_dict).values():
-                        for val in value:
-                            labels_list.append(f'tm_{i+1}-{val}')
-
-                matcher = re.compile(r'\-?\d{0,10}\.?\d{1,10}')
-                labels_list = sorted(list(set(labels_list)))
-                for label in labels_list:
-                    tm_idx, topic_idx = list(map(int, re.findall(matcher, label)))
-                    labels_dict[f'tm_{tm_idx}'] += [f'topic_{topic_idx}']
-                    draw_list.append('*'.join([w.word for w in dynamic_tm[tm_idx].topics[topic_idx].topic_words[:3]]))
-
-                default_keys = list(map(str, range(len(mappings_list) + 1)))
-
-                class_count_dict = defaultdict(int, {k: 0 for k in default_keys})
-
-                for i, val in enumerate(labels_list):
-                    class_count_dict[val.split('-')[0].split('_')[1]] += 1
-                    topic_val_idx[val] = i
-
-                source_dict = defaultdict(list)
-                for i, mapping in enumerate(mappings_list):
-                    for key, value in json.loads(mapping.mappings_dict).items():
-                        for val in value:
-                            source.append(topic_val_idx[f'tm_{i}-{key}'])
-                            source_dict[f'tm_{i}'] += [key]
-                            target.append(topic_val_idx[f'tm_{i+1}-{val}'])
-                values = []
-                for i, tm in enumerate(dynamic_tm[::-1], start=0):
-                    s = Search(using=ES_CLIENT, index=f'{ES_INDEX_DYNAMIC_TOPIC_DOCUMENT}_{tm.name}')
-                    s.aggs.bucket(name="topic", agg_type="terms", field="topic_id", size=topic_num).metric(
-                        "topic_weight", agg_type="sum", field="topic_weight")
-                    r = s[0].execute()
-                    st_values_dict = {}
-                    for bucket in r.aggregations.topic.buckets:
-                        if bucket.key in source_dict[f'tm_{i}']:
-                            st_values_dict[bucket.key] = bucket.topic_weight.value
-                    values_to_extend = [st_values_dict[val] for val in source_dict[f'tm_{i}']]
-                    values.extend(values_to_extend)
-
-                step = 1 / len(dynamic_tm)  # 0.5
-
-                x = [int(key.split('_')[1]) * step + 0.01 if not int(key.split('_')[1]) else int(
-                    key.split('_')[1]) * step for key, label in labels_dict.items() for _ in label]
-
-                for val in class_count_dict.values():
-                    y.extend(np.linspace(0.01, 0.99, val))
-                context['sankey_params'] = {
-                    'label': draw_list,
-                    'x': x,
-                    'y': y,
-                    'source': source,
-                    'target': target,
-                    'value': values
-                }
+            if form.cleaned_data['meta_dtm']:
+                data = form.cleaned_data
+                threshold = data['thresholds']
+                topic_modelling_first_from = data['dtm_from'].split('_')[-2]
+                topic_modelling_second_to = data['dtm_to'].split('_')[-1]
+                meta_dtm = data['meta_dtm']
             else:
-                print('!!! no such mappings')
-
+                meta_dtm = form.fields['meta_dtm'].choices[0][0]
+                threshold = form.fields['thresholds'].choices[0][0]
+                topic_modelling_second_to = "2019-04-01"
+                topic_modelling_first_from = "2019-01-01"
         else:
-            print("!! not valid")
+            return context
 
-        context['form'] = form
+        dynamic_tm = Search(using=ES_CLIENT, index=ES_INDEX_DYNAMIC_TOPIC_MODELLING).filter('term', **{
+            'meta_dtm_name.keyword': meta_dtm}).sort('datetime_from')[:1000].execute()
+        mappings_list = Search(using=ES_CLIENT, index=ES_INDEX_MAPPINGS) \
+            .filter('range', topic_modelling_first_from={'gte': topic_modelling_first_from}) \
+            .filter('range', topic_modelling_second_to={'lte': topic_modelling_second_to}) \
+            .filter('term', **{'meta_dtm_name.keyword': meta_dtm}) \
+            .filter('term', **{'threshold.keyword': threshold}) \
+            .sort("topic_modelling_first_from") \
+            .source(['mappings_dict', 'threshold', 'topic_modelling_first_from', 'topic_modelling_second_to']) \
+            .execute()
+        if mappings_list:
+            draw_list, labels_list, source, target, y = list(), list(), list(), list(), list()
+            topic_val_idx = dict()
+            labels_dict = defaultdict(list)
+
+            for i, mappings in enumerate(mappings_list):
+                for key in json.loads(mappings.mappings_dict).keys():
+                    labels_list.append(f'tm_{i}-{key}')
+
+                for value in json.loads(mappings.mappings_dict).values():
+                    for val in value:
+                        labels_list.append(f'tm_{i+1}-{val}')
+
+            matcher = re.compile(r'\-?\d{0,10}\.?\d{1,10}')
+            labels_list = sorted(list(set(labels_list)))
+            for label in labels_list:
+                tm_idx, topic_idx = list(map(int, re.findall(matcher, label)))
+                labels_dict[f'tm_{tm_idx}'] += [f'topic_{topic_idx}']
+                draw_list.append('*'.join([w.word for w in dynamic_tm[tm_idx].topics[topic_idx].topic_words[:3]]))
+
+            default_keys = list(map(str, range(len(mappings_list) + 1)))
+
+            class_count_dict = defaultdict(int, {k: 0 for k in default_keys})
+
+            for i, val in enumerate(labels_list):
+                class_count_dict[val.split('-')[0].split('_')[1]] += 1
+                topic_val_idx[val] = i
+
+            source_dict = defaultdict(list)
+            for i, mapping in enumerate(mappings_list):
+                for key, value in json.loads(mapping.mappings_dict).items():
+                    for val in value:
+                        source.append(topic_val_idx[f'tm_{i}-{key}'])
+                        source_dict[f'tm_{i}'] += [key]
+                        target.append(topic_val_idx[f'tm_{i+1}-{val}'])
+            values = []
+            for i, tm in enumerate(dynamic_tm[::-1], start=0):
+                s = Search(using=ES_CLIENT, index=f'{ES_INDEX_DYNAMIC_TOPIC_DOCUMENT}_{tm.name}')
+                s.aggs.bucket(name="topic", agg_type="terms", field="topic_id", size=topic_num).metric(
+                    "topic_weight", agg_type="sum", field="topic_weight")
+                r = s[0].execute()
+                st_values_dict = {}
+                for bucket in r.aggregations.topic.buckets:
+                    if bucket.key in source_dict[f'tm_{i}']:
+                        st_values_dict[bucket.key] = bucket.topic_weight.value
+                values_to_extend = [st_values_dict[val] for val in source_dict[f'tm_{i}']]
+                values.extend(values_to_extend)
+
+            step = 1 / len(dynamic_tm)  # 0.5
+
+            x = [int(key.split('_')[1]) * step + 0.01 if not int(key.split('_')[1]) else int(
+                key.split('_')[1]) * step for key, label in labels_dict.items() for _ in label]
+
+            for val in class_count_dict.values():
+                y.extend(np.linspace(0.01, 0.99, val))
+            context['sankey_params'] = {
+                'label': draw_list,
+                'x': x,
+                'y': y,
+                'source': source,
+                'target': target,
+                'value': values
+            }
 
         return context
