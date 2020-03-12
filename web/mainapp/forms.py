@@ -27,7 +27,6 @@ def get_topic_weight_threshold_options(is_superuser):
         ]
 
 
-
 class TopicChooseForm(forms.Form):
     topic_modelling = forms.ChoiceField(label="Тематическое моделирование")
     topic_weight_threshold = forms.ChoiceField(label="Порог принадлежности к топику")

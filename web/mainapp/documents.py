@@ -127,6 +127,7 @@ class TopicDocument(es.Document):
     document_es_id = es.Keyword()
     datetime = es.Date()
     document_source = es.Keyword()
+    document_corpus = es.Keyword()
 
     class Index:
         name = ES_INDEX_TOPIC_DOCUMENT  # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
@@ -151,6 +152,9 @@ class TopicDocument(es.Document):
                     "type": "keyword",
                 },
                 "document_source": {
+                    "type": "keyword",
+                },
+                "document_corpus": {
                     "type": "keyword",
                 },
                 "topic_id": {
