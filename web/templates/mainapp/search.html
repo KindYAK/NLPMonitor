@@ -46,13 +46,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Поиск и фильтры
-                    {% if request.GET|get_item:'corpuses' %}
-                        "corpuses": "{{ request.GET|get_item:'corpuses'|safe }}",
-                    {% else %}
-                        "corpuses": $("#id_corpuses option:first").val(),
-                    {% endif %}
-                    </h3>
+                    <h3>Поиск и фильтры</h3>
                 </div>
                 <div class="card-body" style="padding-bottom: 0;">
                     <div id="search-form">
