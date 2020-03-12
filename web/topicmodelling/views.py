@@ -26,6 +26,9 @@ class TopicsListView(TemplateView):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_superuser or hasattr(self.request.user, "expert"):
             context['criterions'] = EvalCriterion.objects.all()
+            if not self.request.user.is_superuser:
+                group = get_user_group(self.request.user)
+                context['criterions'] = context['criterions'].filter(usergroup=group)
         form = self.form_class(data=self.request.GET, user=self.request.user)
         if not form.fields['topic_modelling'].choices:
             context['error'] = "403 FORBIDDEN"
