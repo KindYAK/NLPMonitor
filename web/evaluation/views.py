@@ -18,6 +18,10 @@ class EmptySearchException(Exception):
     pass
 
 
+class Forbidden(Exception):
+    pass
+
+
 class CriterionEvalAnalysisView(TemplateView):
     template_name = "evaluation/criterion_analysis.html"
 
@@ -26,6 +30,8 @@ class CriterionEvalAnalysisView(TemplateView):
         if self.request.user.is_superuser:
             context['criterions_list'] = EvalCriterion.objects.all()
         else:
+            if not self.group:
+                raise Forbidden("403")
             context['criterions_list'] = EvalCriterion.objects.filter(usergroup=self.group)
             eval_indices = filter(lambda x: "_".join(x.split("_")[2:-1]) in self.group.topic_modelling_names.split(","), eval_indices)
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
@@ -215,7 +221,11 @@ class CriterionEvalAnalysisView(TemplateView):
         self.group = get_user_group(self.request.user)
 
         # Form creation
-        self.form_creation(context)
+        try:
+            self.form_creation(context)
+        except Forbidden:
+            context['error'] = "FORBIDDEN 403"
+            return context
 
         # Forms Management
         try:

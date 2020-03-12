@@ -70,6 +70,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if not error %}
     <div class="card-header">
         <h1 class="m-0 text-dark">Формирование запроса</h1>
     </div>
@@ -1053,6 +1054,9 @@
             </div>
         </div>
     {% endcache %}
+    {% else %}
+        <h1>{{ error }}</h1>
+    {% endif %}
 {% endblock %}
 
 {% block foot %}
