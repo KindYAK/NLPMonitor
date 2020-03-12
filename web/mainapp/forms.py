@@ -121,10 +121,10 @@ class DocumentForm(forms.ModelForm):
 
 
 class DynamicTMForm(forms.Form):
-    meta_dtm = forms.ChoiceField(label="Meta DTM", required=True)
-    dtm_from = ChoiceFieldNoValidation(label="TM From", required=True)
-    dtm_to = ChoiceFieldNoValidation(label="TM To", required=True)
-    thresholds = forms.ChoiceField(label="TM threshold", required=True)
+    meta_dtm = forms.ChoiceField(label="Meta DTM", required=False)
+    dtm_from = ChoiceFieldNoValidation(label="TM From", required=False)
+    dtm_to = ChoiceFieldNoValidation(label="TM To", required=False)
+    thresholds = forms.ChoiceField(label="TM threshold", required=False)
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
@@ -145,9 +145,8 @@ class DynamicTMForm(forms.Form):
 
         dtm_from = self.cleaned_data.get('dtm_from').split('_')[0]
         dtm_to = self.cleaned_data.get('dtm_to').split('_')[0]
-
         # conditions to be met for the username length
-        if dtm_from >= dtm_to:
+        if dtm_from and dtm_to and dtm_from >= dtm_to:
             self._errors['dtm_from'] = self.error_class([
                 'dtm_to is equal or lower than dtm_from'])
 
