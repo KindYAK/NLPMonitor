@@ -47,7 +47,10 @@ class TopicChooseForm(forms.Form):
                          ])[:500]
         if not user.is_superuser:
             group = get_user_group(user)
-            s = s.filter('terms', corpus=[corpus.name for corpus in group.corpuses.all()])
+            if group:
+                s = s.filter('terms', corpus=[corpus.name for corpus in group.corpuses.all()])
+            else:
+                s = s.filter('terms', corpus=[])
         topic_modellings = s.execute()
         topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
         topic_modellings = ((tm.name.lower(),

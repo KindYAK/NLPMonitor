@@ -98,7 +98,7 @@ class TopicDocumentListView(TemplateView):
 
         if not self.request.user.is_superuser:
             group = get_user_group(self.request.user)
-            if kwargs['topic_modelling'] not in group.topic_modelling_names.split(","):
+            if not group or kwargs['topic_modelling'] not in group.topic_modelling_names.split(","):
                 context['error'] = "403 FORBIDDEN"
                 return context
 
