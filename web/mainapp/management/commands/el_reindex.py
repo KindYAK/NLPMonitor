@@ -1,24 +1,8 @@
-from time import sleep
-
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from . import shards_mapping, get_mapping, SETTINGS_BODY
 es = settings.ES_CLIENT
-
-
-def shards_mapping(doc_count: int) -> int:
-    if isinstance(doc_count, str):
-        doc_count = int(doc_count)
-
-    if doc_count > 10_000_000:
-        return 5
-    elif doc_count > 1_000_000:
-        return 3
-    elif doc_count > 100_000:
-        return 2
-    else:
-        return 1
 
 
 class Command(BaseCommand):

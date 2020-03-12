@@ -1,5 +1,3 @@
-
-
 SETTINGS_BODY = {
     "settings": {
         "number_of_shards": None,
@@ -9,6 +7,7 @@ SETTINGS_BODY = {
     "mappings": None
 }
 
+
 def shards_mapping(doc_count: int) -> int:
     if isinstance(doc_count, str):
         doc_count = int(doc_count)
@@ -17,6 +16,8 @@ def shards_mapping(doc_count: int) -> int:
         return 5
     elif doc_count > 1_000_000:
         return 3
+    elif doc_count > 100_000:
+        return 2
     else:
         return 1
 
