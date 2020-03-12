@@ -45,6 +45,7 @@ class TopicChooseForm(forms.Form):
                          # 'tau_smooth_sparse_theta', 'tau_smooth_sparse_phi',
                          # 'tau_decorrelator_phi', 'tau_coherence_phi',
                          ])[:500]
+        group = None
         if not user.is_superuser:
             group = get_user_group(user)
             if group:
@@ -59,7 +60,7 @@ class TopicChooseForm(forms.Form):
                              (f"С {tm.datetime_from[:10]} - " if hasattr(tm,
                                                                          'datetime_from') and tm.datetime_from else f"") +
                              (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
-                             ) for tm in topic_modellings)
+                             ) for tm in topic_modellings if user.is_superuser or (group and tm.name.lower() in group.topic_modelling_names.split(",")))
         self.fields['topic_modelling'].choices = topic_modellings
 
         # Get topic_weight_thresholds
