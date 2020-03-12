@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, ListView, DeleteView
 from elasticsearch_dsl import Search
 
-from mainapp.models import Document
+from mainapp.models import Document, Corpus
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .forms import DocumentSearchForm, DocumentForm
@@ -34,10 +34,13 @@ class SearchView(TemplateView):
         context = super().get_context_data(**kwargs)
         form = self.form_class(data=self.request.GET, user=self.request.user)
         context['form'] = form
-        search_request = {}
         if form.is_valid():
             search_request = form.cleaned_data
-
+        elif 'corpuses' in form.errors:
+            form.cleaned_data['corpuses'] = form.fields['corpuses'].queryset[:1]
+            search_request = form.cleaned_data
+        else:
+            return context
         # Form Management
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
         context['smooth'] = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)

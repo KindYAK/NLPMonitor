@@ -69,7 +69,7 @@ class TopicChooseForm(forms.Form):
 
 class DocumentSearchForm(forms.Form):
     id = forms.CharField(label="ID", required=False)
-    corpuses = forms.ModelMultipleChoiceField(queryset=Corpus.objects.all(), label="Корпусы", required=False)
+    corpuses = forms.ModelMultipleChoiceField(queryset=Corpus.objects.all(), label="Корпусы", required=True)
     sources = forms.ModelMultipleChoiceField(queryset=Source.objects.all(), label="Источники", required=False)
     authors = forms.ModelMultipleChoiceField(
         queryset=Author.objects.annotate(num_docs=Count('document')).filter(num_docs__gte=MIN_DOCS_PER_AUTHOR),
