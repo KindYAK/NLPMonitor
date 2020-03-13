@@ -1,15 +1,19 @@
-import pandas as pd
-import os, json, datetime, pytz, math
+import datetime
+import json
+import math
+import os
+import pytz
 
+import pandas as pd
 from annoying.functions import get_object_or_None
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
+
 from mainapp.models import *
 from nlpmonitor.settings import MEDIA_ROOT
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         self.parse_csv()
 
