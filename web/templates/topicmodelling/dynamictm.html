@@ -37,11 +37,20 @@
 {% endblock %}
 {% block content %}
     <div class="card-header">
-        <h1 class="m-0 text-dark">Визуализация динамики тематического моделирования</h1>
+        <h1 class="m-0 text-dark" style="text-align: center">Визуализация динамики тематического моделирования</h1>
     </div>
+
     <form method="GET" action="" style="display: contents;">
     {# Основная форма #}
-    !!! {{ form.errors }}
+    {% if form.errors %}
+    <br>
+    <ul>
+    {% for error in form.errors %}
+        <li style="font-size: 20px; display: inline; margin-left: 170px;">ПОЖАЛУЙСТА ЗАПОЛНИТЕ ПОЛЯ: <strong style="color: #990000">{{ error }}</strong></li>
+    {% endfor %}
+    </ul>
+    <br>
+{% endif %}
     <div class="row">
         <div class="col-12">
             <div class="card">
