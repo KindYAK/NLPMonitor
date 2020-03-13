@@ -60,6 +60,11 @@
                                                 <div class="col-md-4">{{ form.corpuses.label_tag }}</div>
                                                 <div class="col-md-8">{% render_field form.corpuses data-placeholder="Выберите корпусы"  class="form-control select2 select2-multi" multiple="multiple" %}</div>
                                             </div>
+                                            {% if not form.corpuses.value %}
+                                                <script>
+                                                    $('#id_corpuses').val([$("#id_corpuses option:first").val()]);
+                                                </script>
+                                            {% endif %}
                                             <div class="row">
                                                 <div class="col-md-4">{{ form.sources.label_tag }}</div>
                                                 <div class="col-md-8">{% render_field form.sources data-placeholder="Выберите источники"  class="form-control select2 select2-multi" multiple="multiple" %}</div>
@@ -350,8 +355,12 @@
                                    {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
                                   '{{ csrf_token }}', false, 0,
                                    {
-                                        "corpuses": "{{ request.GET|get_item:'corpuses'|safe }}",
                                         "sources": "{{ request.GET|get_item:'sources'|safe }}",
+                                        {% if request.GET|get_item:'corpuses' %}
+                                            "corpuses": "{{ request.GET|get_item:'corpuses'|safe }}",
+                                        {% else %}
+                                            "corpuses": "['" + $("#id_corpuses option:first").val() + "']",
+                                        {% endif %}
                                         "authors": "{{ request.GET|get_item:'authors'|safe }}",
                                         "title": '{{ request.GET.title }}',
                                         "text": '{{ request.GET.text }}',

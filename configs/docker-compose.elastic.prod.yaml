@@ -63,6 +63,48 @@ services:
       - ./es_backup.sh:/es_backup.sh
     restart: always
 
+  elasticsearch4:
+    image: "elasticsearch:${VERSION}"
+    env_file:
+      - elastic_configs/jack/es-data1.env
+      - elastic_configs/jvm.master.prod.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+      - 9300
+    networks:
+      - esnet
+      - network
+    volumes:
+      - /_DATA/elastic/esdata1/:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./es_backup.sh:/es_backup.sh
+    restart: always
+
+  elasticsearch5:
+    image: "elasticsearch:${VERSION}"
+    env_file:
+      - elastic_configs/jack/es-data2.env
+      - elastic_configs/jvm.master.prod.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+      - 9300
+    networks:
+      - esnet
+      - network
+    volumes:
+      - /_DATA/elastic/esdata2/:/usr/share/elasticsearch/data
+      - ../es_backup:/backup
+      - ./es_backup.sh:/es_backup.sh
+    restart: always
+
   kibana:
     environment:
       - SERVER_REWRITEBASEPATH=true

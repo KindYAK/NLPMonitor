@@ -21,10 +21,12 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'datetime', 'source', 'url', )
-    list_filter = ('source', )
+    list_display = ('title', 'datetime', 'source', 'corpus')
+    list_filter = ('source', 'source__corpus')
     search_fields = ('title', 'author__name', 'source__name', 'url', )
 
+    def corpus(self, doc):
+        return doc.source.corpus.name
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'corpus', )

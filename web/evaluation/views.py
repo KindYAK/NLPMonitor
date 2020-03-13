@@ -6,7 +6,7 @@ from evaluation.models import EvalCriterion, EvalCriterionGroup
 from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models import Source
 from mainapp.models_user import TopicGroup
-from mainapp.services import apply_fir_filter, unique_ize
+from mainapp.services import apply_fir_filter, unique_ize, get_user_group
 from .services import *
 
 
@@ -18,22 +18,29 @@ class EmptySearchException(Exception):
     pass
 
 
+class Forbidden(Exception):
+    pass
+
+
 class CriterionEvalAnalysisView(TemplateView):
     template_name = "evaluation/criterion_analysis.html"
 
     def form_creation(self, context):
-        tm_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_*").keys()
-        context['criterions_list'] = EvalCriterion.objects.all()
+        eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_*").keys()
+        if self.request.user.is_superuser:
+            context['criterions_list'] = EvalCriterion.objects.all()
+        else:
+            if not self.group:
+                raise Forbidden("403")
+            context['criterions_list'] = EvalCriterion.objects.filter(usergroup=self.group)
+            eval_indices = filter(lambda x: "_".join(x.split("_")[2:-1]) in self.group.topic_modelling_names.split(","), eval_indices)
         context['public_groups'] = TopicGroup.objects.filter(is_public=True)
         context['my_groups'] = TopicGroup.objects.filter(owner=self.request.user)
         context['topic_modellings'] = list(sorted(list(set(
-            [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in tm_indices if not tm.endswith("_neg")]
+            [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in eval_indices if not tm.endswith("_neg")]
         ))))
         context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
-        # TODO Complicated cache issues - maybe TODO later
-        # context['top_news_num'] = 5000 if (hasattr(self.request.user, "expert") or self.request.user.is_superuser) else 200
         context['top_news_num'] = 1000
-
 
     def form_management(self, context):
         context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
@@ -211,9 +218,14 @@ class CriterionEvalAnalysisView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        self.group = get_user_group(self.request.user)
 
         # Form creation
-        self.form_creation(context)
+        try:
+            self.form_creation(context)
+        except Forbidden:
+            context['error'] = "FORBIDDEN 403"
+            return context
 
         # Forms Management
         try:

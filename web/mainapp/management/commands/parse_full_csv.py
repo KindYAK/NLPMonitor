@@ -2,9 +2,9 @@ import datetime
 import json
 import math
 import os
+import pytz
 
 import pandas as pd
-import pytz
 from annoying.functions import get_object_or_None
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
@@ -64,6 +64,7 @@ class Command(BaseCommand):
                         except:
                             date = datetime.datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S.%f")
                     date = date.replace(tzinfo=pytz.timezone('Asia/Almaty'))
+
                 if not row['title'] or type(row['title']) != str:
                     continue
 
@@ -72,7 +73,6 @@ class Command(BaseCommand):
 
                 if Document.objects.filter(source=source, datetime=date, title=row['title']).exists() or not row['text'] or type(row['text']) != str:
                     continue
-
                 document = Document(source=source,
                                     author=author,
                                     datetime=date,
