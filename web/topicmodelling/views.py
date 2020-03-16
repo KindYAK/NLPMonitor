@@ -12,10 +12,9 @@ from elasticsearch_dsl import Search
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize, get_user_group
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
     ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT
-from topicmodelling.services import normalize_topic_documnets, get_documents_with_weights, get_current_topics_metrics, \
-    get_total_metrics
+from topicmodelling.services import *
 
 
 class TopicsListView(TemplateView):
@@ -45,47 +44,8 @@ class TopicsListView(TemplateView):
         if cache.get(key):
             return context
 
-        # Get topics aggregation
-        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{context['topic_modelling']}") \
-            .filter("range", topic_weight={"gte": context['topic_weight_threshold']}) \
-            .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
-            .filter("range", datetime={"lte": datetime.datetime.now().date()})
-        s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000) \
-            .metric("topic_weight", agg_type="sum", field="topic_weight")
-        result = s.execute()
-        topic_info_dict = dict(
-            (bucket.key, {
-                "count": bucket.doc_count,
-                "weight_sum": bucket.topic_weight.value
-            }) for bucket in result.aggregations.topics.buckets
-        )
-
-        # Get actual topics
-        topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
-            .filter("term", **{"name": context['topic_modelling']}) \
-            .filter("term", **{"is_ready": True}).execute()[0]['topics']
-        # Fill topic objects with meta data
-        for topic in topics:
-            if topic.id in topic_info_dict:
-                topic.size = topic_info_dict[topic.id]['count']
-                topic.weight = topic_info_dict[topic.id]['weight_sum']
-            else:
-                topic.size, topic.weight = 0, 0
-            if not topic.topic_words:
-                continue
-            max_word_weight = max((word.weight for word in topic.topic_words))
-            for topic_word in topic.topic_words:
-                topic_word.weight /= max_word_weight
-                topic_word.word = topic_word.word[0].upper() + topic_word.word[1:]  # Stub - upper case
-            # Stub - topic name upper case
-            topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
-
-        # Normalize topic weights by max
-        max_topic_weight = max((topic.weight for topic in topics))
-        if max_topic_weight != 0:
-            for topic in topics:
-                topic.weight /= max_topic_weight
-
+        topics = get_topics_with_meta(context['topic_modelling'],
+                                      context['topic_weight_threshold'])
         # Create context
         context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
                                    key=lambda x: x.weight, reverse=True)
