@@ -54,10 +54,6 @@ def execute_search(search_request, return_search_obj=False):
         q_to = Q("range", **{RANGE_TO_DATE_FIELD.replace("_to", ""): {"lte": search_request[RANGE_TO_DATE_FIELD]}})
         q_from = Q("range", **{RANGE_FROM_DATE_FIELD.replace("_from", ""): {"gte": search_request[RANGE_FROM_DATE_FIELD]}})
         q_empty = ~Q('exists', field="datetime")
-        q = Q(
-            'bool',
-            must=[q_to & q_from]
-        )
         s = s.query((q_to & q_from) | q_empty)
 
     if return_search_obj:

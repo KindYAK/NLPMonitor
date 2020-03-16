@@ -1,4 +1,3 @@
-import datetime
 import json
 import re
 from collections import defaultdict
@@ -7,12 +6,11 @@ import numpy as np
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
-from elasticsearch_dsl import Search
 
 from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize, get_user_group
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_META_DTM, \
+from nlpmonitor.settings import ES_INDEX_META_DTM, \
     ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT
 from topicmodelling.services import *
 
@@ -44,9 +42,25 @@ class TopicsListView(TemplateView):
         if cache.get(key):
             return context
 
+        tm_index = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
+                .filter("term", name=context['topic_modelling']).execute()[0]
+        is_multi_corpus = False
+        if hasattr(tm_index, "is_multi_corpus"):
+            is_multi_corpus = tm_index.is_multi_corpus
         topics = get_topics_with_meta(context['topic_modelling'],
-                                      context['topic_weight_threshold'])
+                                      context['topic_weight_threshold'],
+                                      is_multi_corpus)
+
         # Create context
+        context['is_multi_corpus'] = is_multi_corpus
+        if is_multi_corpus:
+            corpuses = set()
+            for topic in topics:
+                if not hasattr(topic, "corpus_weights"):
+                    continue
+                for corpus in topic.corpus_weights:
+                    corpuses.add(corpus)
+            context['corpuses'] = list(corpuses)
         context['topics'] = sorted([t for t in topics if len(t.topic_words) >= 5],
                                    key=lambda x: x.weight, reverse=True)
         context['rest_weight'] = sum([t.weight for t in topics[10:]])
