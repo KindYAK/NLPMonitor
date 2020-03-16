@@ -15,8 +15,8 @@ from nlpmonitor.settings import MEDIA_ROOT
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('corpus_name', type=str)
-        parser.add_argument('filename', type=str)
+        parser.add_argument('-c', '--corpus_name', type=str)
+        parser.add_argument('-f', '--filename', type=str)
 
     def handle(self, *args, **options):
         self.corpus_name = options['corpus_name']
