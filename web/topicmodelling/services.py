@@ -7,7 +7,6 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOC
 
 
 def get_topics_aggregations(topic_modelling, topic_weight_threshold, is_multi_corpus):
-
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
         .filter("range", topic_weight={"gte": topic_weight_threshold})
     s.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=10000) \
@@ -65,7 +64,7 @@ def get_topics_with_meta(topic_modelling, topic_weight_threshold, is_multi_corpu
         for topic in topics:
             topic.weight /= max_topic_weight
 
-    # Normalize corpus weights
+    # Normalize multi corpus weights
     if is_multi_corpus:
         corpus_total_weights = defaultdict(int)
         for topic in topics:

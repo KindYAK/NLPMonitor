@@ -186,7 +186,6 @@ class CriterionEvalViewSet(viewsets.ViewSet):
                 topics_eval=topics_eval,
                 weight=1
             )
-
         return Response(
             {
                 "status": 200,
