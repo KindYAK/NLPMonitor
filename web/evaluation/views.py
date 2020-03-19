@@ -83,7 +83,13 @@ class CriterionEvalAnalysisView(TemplateView):
             if 'topic_weight_threshold' in self.request.GET else \
             0.05
 
-        key = make_template_fragment_key('criterion_analysis', [self.request.GET])
+        key = make_template_fragment_key('criterion_analysis', [context['criterion_analysis'], context['topic_modelling'],
+                                                                context['topic_weight_threshold'], context['criterions'],
+                                                                context['sources'], context['keyword'],
+                                                                context['group'], context['granularity'],
+                                                                context['smooth'], context['action_q'],
+                                                                context['value_q'], context['criterion_q'],
+                                                                ])
         if cache.get(key):
             raise CacheHit()
 
