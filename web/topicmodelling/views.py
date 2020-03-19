@@ -1,6 +1,5 @@
 import json
 import re
-from collections import defaultdict
 
 import numpy as np
 from django.core.cache import cache
@@ -38,7 +37,7 @@ class TopicsListView(TemplateView):
             context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
             context['topic_weight_threshold'] = 0.05  # Initial
 
-        key = make_template_fragment_key('topics_list', [self.request.GET])
+        key = make_template_fragment_key('topics_list', [context['topic_modelling'], context['topic_weight_threshold']])
         if cache.get(key):
             return context
 

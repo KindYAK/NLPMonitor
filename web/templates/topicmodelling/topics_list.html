@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    {% cache 28800 topics_list request.GET %}
+    {% cache 28800 topics_list topic_modelling topic_weight_threshold %}
     {# Pie plot #}
     <div class="row">
         <div class="col-12">
