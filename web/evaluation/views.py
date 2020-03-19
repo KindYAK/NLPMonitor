@@ -39,6 +39,8 @@ class CriterionEvalAnalysisView(TemplateView):
         context['topic_modellings'] = list(sorted(list(set(
             [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in eval_indices if not tm.endswith("_neg")]
         ))))
+        if not context['topic_modellings']:
+            raise Forbidden("403")
         context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
         context['top_news_num'] = 1000
 
