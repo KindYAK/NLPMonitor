@@ -13,6 +13,9 @@ class UserGroup(models.Model):
     criterions = models.ManyToManyField('evaluation.EvalCriterion', blank=True)
     dashboard_presets = models.ManyToManyField('dashboard.DashboardPreset', blank=True)
 
+    def __str__(self):
+        return f"Группа {self.name}"
+
 
 class ContentLoader(models.Model):
     class Meta:
