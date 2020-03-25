@@ -12,13 +12,16 @@ from mainapp.models import Document, Corpus
 from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .forms import DocumentSearchForm, DocumentForm
-from .services import apply_fir_filter, unique_ize
+from .services import apply_fir_filter, unique_ize, get_user_group
 from .services_es_documents import execute_search
 
 
 def login_redirect(request):
     if request.user.is_superuser or hasattr(request.user, "viewer"):
-        return HttpResponseRedirect(reverse_lazy('evaluation:criterion_eval_analysis'))
+        group = get_user_group(request.user)
+        if not group or not group.dashboard_presets.exists():
+            return HttpResponseRedirect(reverse_lazy('evaluation:criterion_eval_analysis'))
+        return HttpResponseRedirect(reverse_lazy('dashboard:dashboard', kwargs={"dashboard_id": group.dashboard_presets.first().id}))
     if hasattr(request.user, "expert"):
         return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
     if hasattr(request.user, "contentloader"):
