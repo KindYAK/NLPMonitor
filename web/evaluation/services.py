@@ -282,7 +282,7 @@ def get_documents_ids_filter(topics, keyword, topic_modelling, topic_weight_thre
         )
         s = s.query(q)
         s = s.source(tuple())
-        search_lvl = "SEARCH_LVL_LIGHT"
+        search_lvl = "SEARCH_LVL_HARD"
         s = s[:SEARCH_CUTOFF_CONFIG[search_lvl]['ABS_MAX_RESULTS_CUTOFF']]
         r = s.execute()
         # cutoff = get_elscore_cutoff([d.meta.score for d in r], search_lvl)
