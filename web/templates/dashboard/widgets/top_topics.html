@@ -20,33 +20,32 @@
             <tr role="row">
                 <th>Топик</th>
                 <th>Прогнозируемая резонансность</th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for topic in top_topics %}
                 <tr>
-                    <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                    <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">
+                        <a target="_blank" rel="noopener noreferrer" class="nostyle"
+                           href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                            {{ topic.info.name }}
+                        </a>
+                    </td>
                     <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
-                        {% if topic.resonance_score %}
-                            {{ topic.resonance_score|floatformat:3|unlocalize }}
-                        {% else %}
-                            Фоновый топик
-                        {% endif %}
+                        <a target="_blank" rel="noopener noreferrer" class="nostyle"
+                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                            {% if topic.resonance_score %}
+                                {{ topic.resonance_score|floatformat:3|unlocalize }}
+                            {% else %}
+                                Фоновый топик
+                            {% endif %}
+                        </a>
                     </td>
                     {% if topic.resonance_score %}
                         <script>
                             $('#resonance_{{ widget.criterion.id }}_{{ topic.info.id }}').css('background-color', colorScale({{ topic.resonance_score|safe }}));
                         </script>
                     {% endif %}
-                    <td>
-                        <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
-                           class="nav-link nowrap">
-                            <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                               data-toggle="tooltip" data-placement="top"
-                               title="Анализ по тематике"></i>
-                        </a>
-                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -64,33 +63,32 @@
                 <tr role="row">
                     <th>Топик</th>
                     <th>Прогнозируемая резонансность</th>
-                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for topic in bottom_topics %}
                     <tr>
-                        <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">{{ topic.info.name }}</td>
+                        <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">
+                            <a target="_blank" rel="noopener noreferrer" class="nostyle"
+                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                                {{ topic.info.name }}
+                            </a>
+                        </td>
                         <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
-                            {% if topic.resonance_score %}
-                                {{ topic.resonance_score|floatformat:3|unlocalize }}
-                            {% else %}
-                                Фоновый топик
-                            {% endif %}
+                            <a target="_blank" rel="noopener noreferrer" class="nostyle"
+                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                                {% if topic.resonance_score %}
+                                    {{ topic.resonance_score|floatformat:3|unlocalize }}
+                                {% else %}
+                                    Фоновый топик
+                                {% endif %}
+                            </a>
                         </td>
                         {% if topic.resonance_score %}
                             <script>
                                 $('#resonance_{{ widget.criterion.id }}_{{ topic.info.id }}').css('background-color', colorScaleNeg({{ topic.resonance_score|safe }}));
                             </script>
                         {% endif %}
-                        <td>
-                            <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
-                               class="nav-link nowrap">
-                                <i class="nav-icon fas fa-eye" style="font-size: 24px;"
-                                   data-toggle="tooltip" data-placement="top"
-                                   title="Анализ по тематике"></i>
-                            </a>
-                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
