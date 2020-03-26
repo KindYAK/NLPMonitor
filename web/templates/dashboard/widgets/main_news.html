@@ -12,6 +12,8 @@
         var colorScale_{{ widget.type }} = chroma.scale(['#fee42c', '#23964f']).mode('lch').domain([0.5, 1]);
     {% elif widget.type == 5 %}
         var colorScale_{{ widget.type }} = chroma.scale(['#d3322b', '#fee42c']).mode('lch').domain([-1, -0.5]);
+    {% elif widget.type == 6 %}
+        var colorScale_{{ widget.type }} = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-0.9, 0.9]);
     {% endif %}
 </script>
 
@@ -29,7 +31,7 @@
             <tbody>
             {% for key, document in top_news.items %}
                 <tr>
-                    <td id="datetime_{{ key }}">
+                    <td id="datetime_{{ widget_id }}_{{ key }}">
                         {{ document|get_item:'document'|get_item:'datetime'|slice:':10' }}
                     </td>
                     <td>{{ document|get_item:'document'|get_item:'title' }}</td>
@@ -48,7 +50,7 @@
                     {% else %}
                         var value = 0;
                     {% endif %}
-                    $('#datetime_{{ key }}').css('background-color', colorScale_{{ widget.type }}(value));
+                    $('#datetime_{{ widget_id }}_{{ key }}').css('background-color', colorScale_{{ widget.type }}(value));
                 </script>
             {% endfor %}
             </tbody>

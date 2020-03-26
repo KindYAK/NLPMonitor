@@ -113,6 +113,10 @@ def source_distribution(dashboard, widget):
     return context_update
 
 
+def last_news(dashboard, widget):
+    return main_news(dashboard, widget, "last")
+
+
 def top_news(dashboard, widget):
     return main_news(dashboard, widget, "top")
 
@@ -121,18 +125,32 @@ def bottom_news(dashboard, widget):
     return main_news(dashboard, widget, "bottom")
 
 
-def main_news(dashboard, widget, top_bottom):
+def main_news(dashboard, widget, mode):
+    if mode not in ["bottom", "top", "last"]:
+        raise Exception("NOT IMPLEMENTED!")
+
     context_update = {}
     top_news_ids = set()
     num_news = 50
+    range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
+    neutrality_threshold = 0.1
+
     # Get top news
     s = es_document_eval_search_factory(dashboard, widget)
-    s = s.source(['document_es_id'])[:num_news].sort('-value')
+    if mode not in ["bottom", "top"]:
+        s = s.source(['document_es_id'])[:num_news].sort('-value')
+    else:
+        s = s.filter("range", value={"gte": range_center + neutrality_threshold})
+        s = s.source(['document_es_id'])[:num_news].sort('-document_datetime')
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
     s = es_document_eval_search_factory(dashboard, widget)
-    s = s.source(['document_es_id'])[:num_news].sort('value')
+    if mode not in ["bottom", "top"]:
+        s = s.source(['document_es_id'])[:num_news].sort('value')
+    else:
+        s = s.filter("range", value={"lte": range_center - neutrality_threshold})
+        s = s.source(['document_es_id'])[:num_news].sort('-document_datetime')
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     max_criterion_value_dict, _ = \
@@ -146,20 +164,23 @@ def main_news(dashboard, widget, top_bottom):
                                                     max_criterion_value_dict,
                                                     top_news_num=num_news)
 
-    range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
-    if top_bottom == "top":
+    if mode == "top":
         documents_eval_dict = dict(
             filter(lambda x: x[1][widget.criterion.id] >= range_center, documents_eval_dict.items())
         )
-    elif top_bottom == "bottom":
+    elif mode == "bottom":
         documents_eval_dict = dict(
             filter(lambda x: x[1][widget.criterion.id] < range_center, documents_eval_dict.items())
         )
-    else:
-        raise Exception("NOT IMPLEMENTED")
-    documents_eval_dict = dict(
-        sorted(documents_eval_dict.items(), key=lambda x: abs(x[1][widget.criterion.id]), reverse=True)
-    )
+
+    if mode in ["top", "bottom"]:
+        documents_eval_dict = dict(
+            sorted(documents_eval_dict.items(), key=lambda x: abs(x[1][widget.criterion.id]), reverse=True)
+        )
+    elif mode == "last":
+        documents_eval_dict = dict(
+            sorted(documents_eval_dict.items(), key=lambda x: x[1]["document"]["datetime"], reverse=True)
+        )
     context_update[f'top_news_{widget.id}'] = documents_eval_dict
     context_update['widget'] = widget
     return context_update
