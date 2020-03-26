@@ -1,4 +1,6 @@
 from annoying.functions import get_object_or_None
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.views.generic import TemplateView
 
 from mainapp.services import get_user_group
@@ -26,8 +28,14 @@ class DashboardView(TemplateView):
         if context['dashboard_template'] not in dashboards:
             return context
 
+        def widget_cache_hit_wrapper(dashboard_template, widget):
+            key = make_template_fragment_key('widget', [dashboard_template.topic_modelling_name, widget.id])
+            if cache.get(key):
+                return {}
+            return widget.callable(dashboard_template, widget)
+
         context['widgets'] = context['dashboard_template'].widgets.all().order_by('index')
         # Fill widget context
         for widget in context['widgets']:
-            context.update(widget.callable(context['dashboard_template'], widget))
+            context.update(widget_cache_hit_wrapper(context['dashboard_template'], widget))
         return context
