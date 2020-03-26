@@ -139,18 +139,18 @@ def main_news(dashboard, widget, mode):
     s = es_document_eval_search_factory(dashboard, widget)
     if mode not in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('-value')
-    else:
+    elif mode == "last":
         s = s.filter("range", value={"gte": range_center + neutrality_threshold})
-        s = s.source(['document_es_id'])[:num_news].sort('-document_datetime')
+        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
     s = es_document_eval_search_factory(dashboard, widget)
     if mode not in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('value')
-    else:
+    elif mode == "last":
         s = s.filter("range", value={"lte": range_center - neutrality_threshold})
-        s = s.source(['document_es_id'])[:num_news].sort('-document_datetime')
+        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     max_criterion_value_dict, _ = \
