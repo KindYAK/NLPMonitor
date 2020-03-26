@@ -114,6 +114,14 @@ def source_distribution(dashboard, widget):
 
 
 def top_news(dashboard, widget):
+    return main_news(dashboard, widget, "top")
+
+
+def bottom_news(dashboard, widget):
+    return main_news(dashboard, widget, "bottom")
+
+
+def main_news(dashboard, widget, top_bottom):
     context_update = {}
     top_news_ids = set()
     num_news = 50
@@ -138,6 +146,20 @@ def top_news(dashboard, widget):
                                                     max_criterion_value_dict,
                                                     top_news_num=num_news)
 
+    range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
+    if top_bottom == "top":
+        documents_eval_dict = dict(
+            filter(lambda x: x[1][widget.criterion.id] >= range_center, documents_eval_dict.items())
+        )
+    elif top_bottom == "bottom":
+        documents_eval_dict = dict(
+            filter(lambda x: x[1][widget.criterion.id] < range_center, documents_eval_dict.items())
+        )
+    else:
+        raise Exception("NOT IMPLEMENTED")
+    documents_eval_dict = dict(
+        sorted(documents_eval_dict.items(), key=lambda x: abs(x[1][widget.criterion.id]), reverse=True)
+    )
     context_update[f'top_news_{widget.id}'] = documents_eval_dict
     context_update['widget'] = widget
     return context_update

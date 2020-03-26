@@ -14,7 +14,12 @@ TYPES_META_DICT = {
     2: {
         "name": "Top news",
         "callable": top_news,
-        "template_name": "dashboard/widgets/top_news.html",
+        "template_name": "dashboard/widgets/main_news.html",
+    },
+    5: {
+        "name": "Bottom news",
+        "callable": bottom_news,
+        "template_name": "dashboard/widgets/main_news.html",
     },
     3: {
         "name": "Top topics",

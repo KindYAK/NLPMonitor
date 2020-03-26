@@ -4,7 +4,16 @@
 
 <!-- data tables -->
 <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables/dataTables.bootstrap4.css' %}">
+<!-- Chroma.js -->
+<script src="{% static 'js_vendor/chroma.min.js' %}"></script>
 
+<script>
+    {% if widget.type == 2 %}
+        var colorScale_{{ widget.type }} = chroma.scale(['#fee42c', '#23964f']).mode('lch').domain([0.5, 1]);
+    {% elif widget.type == 5 %}
+        var colorScale_{{ widget.type }} = chroma.scale(['#d3322b', '#fee42c']).mode('lch').domain([-1, -0.5]);
+    {% endif %}
+</script>
 
 {% with widget.id|stringformat:"s" as widget_id %}
     {% with "top_news_"|add:widget_id as top_news_name %}
@@ -12,7 +21,7 @@
         <table id="top_news_table_{{ widget_id }}" class="table table-bordered table-hover">
             <thead>
             <tr role="row">
-                <th>{{ widget.criterion.name }}</th>
+                <th>Дата</th>
                 <th>Заголовок</th>
                 <th></th>
             </tr>
@@ -20,12 +29,8 @@
             <tbody>
             {% for key, document in top_news.items %}
                 <tr>
-                    <td>
-                        {% if document|get_item:widget.criterion.id %}
-                            {{ document|get_item:widget.criterion.id|floatformat:3|unlocalize }}
-                        {% else %}
-                            0,000
-                        {% endif %}
+                    <td id="datetime_{{ key }}">
+                        {{ document|get_item:'document'|get_item:'datetime'|slice:':10' }}
                     </td>
                     <td>{{ document|get_item:'document'|get_item:'title' }}</td>
                     <td>
@@ -37,6 +42,14 @@
                         </a>
                     </td>
                 </tr>
+                <script>
+                    {% if document|get_item:widget.criterion.id %}
+                        var value = {{ document|get_item:widget.criterion.id|safe }};
+                    {% else %}
+                        var value = 0;
+                    {% endif %}
+                    $('#datetime_{{ key }}').css('background-color', colorScale_{{ widget.type }}(value));
+                </script>
             {% endfor %}
             </tbody>
         </table>
@@ -52,10 +65,7 @@
         "paging": true,
         "lengthChange": false,
         "searching": false,
-        "ordering": true,
-        "order": [
-            [0, 'desc'],
-        ],
+        "ordering": false,
         "info": false,
         "autoWidth": true,
         "pageLength": 10,
