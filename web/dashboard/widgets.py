@@ -137,7 +137,7 @@ def main_news(dashboard, widget, mode):
 
     # Get top news
     s = es_document_eval_search_factory(dashboard, widget)
-    if mode not in ["bottom", "top"]:
+    if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('-value')
     elif mode == "last":
         s = s.filter("range", value={"gte": range_center + neutrality_threshold})
@@ -146,7 +146,7 @@ def main_news(dashboard, widget, mode):
 
     # Get bottom news
     s = es_document_eval_search_factory(dashboard, widget)
-    if mode not in ["bottom", "top"]:
+    if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('value')
     elif mode == "last":
         s = s.filter("range", value={"lte": range_center - neutrality_threshold})
