@@ -12,6 +12,8 @@
         var colorScale_{{ widget.type }} = chroma.scale(['#fee42c', '#23964f']).mode('lch').domain([0.5, 1]);
     {% elif widget.type == 5 %}
         var colorScale_{{ widget.type }} = chroma.scale(['#d3322b', '#fee42c']).mode('lch').domain([-1, -0.5]);
+    {% elif widget.type == 6 %}
+        var colorScale_{{ widget.type }} = chroma.scale(['#d3322b', '#fee42c', '#23964f']).mode('lch').domain([-0.9, 0.9]);
     {% endif %}
 </script>
 
@@ -23,22 +25,20 @@
             <tr role="row">
                 <th>Дата</th>
                 <th>Заголовок</th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for key, document in top_news.items %}
                 <tr>
-                    <td id="datetime_{{ key }}">
-                        {{ document|get_item:'document'|get_item:'datetime'|slice:':10' }}
+                    <td id="datetime_{{ widget_id }}_{{ key }}">
+                        <a target="_blank" rel="noopener noreferrer" class="nostyle" href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}">
+                            <p style="margin: 0;">{{ document|get_item:'document'|get_item:'datetime'|slice:'8:10' }}.{{ document|get_item:'document'|get_item:'datetime'|slice:'5:7' }}.{{ document|get_item:'document'|get_item:'datetime'|slice:'2:4' }}</p>
+                            <p style="margin: 0;">{{ document|get_item:'document'|get_item:'datetime'|slice:'11:16' }}</p>
+                        </a>
                     </td>
-                    <td>{{ document|get_item:'document'|get_item:'title' }}</td>
                     <td>
-                        <a href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}"
-                           class="nav-link nowrap">
-                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"
-                               data-toggle="tooltip" data-placement="top"
-                               title="Просмотреть новость"></i>
+                        <a target="_blank" rel="noopener noreferrer" class="nostyle" href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}">
+                            {{ document|get_item:'document'|get_item:'title' }}
                         </a>
                     </td>
                 </tr>
@@ -48,7 +48,7 @@
                     {% else %}
                         var value = 0;
                     {% endif %}
-                    $('#datetime_{{ key }}').css('background-color', colorScale_{{ widget.type }}(value));
+                    $('#datetime_{{ widget_id }}_{{ key }}').css('background-color', colorScale_{{ widget.type }}(value));
                 </script>
             {% endfor %}
             </tbody>
