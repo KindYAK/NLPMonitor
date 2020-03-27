@@ -28,14 +28,14 @@ class DashboardView(TemplateView):
         if context['dashboard_template'] not in dashboards:
             return context
 
-        def widget_cache_hit_wrapper(dashboard_template, widget):
-            key = make_template_fragment_key('widget', [dashboard_template.topic_modelling_name, widget.id])
+        def widget_cache_hit_wrapper(widget):
+            key = make_template_fragment_key('widget', [widget.id])
             if cache.get(key):
                 return {}
-            return widget.callable(dashboard_template, widget)
+            return widget.callable(widget)
 
         context['widgets'] = context['dashboard_template'].widgets.all().order_by('index')
         # Fill widget context
         for widget in context['widgets']:
-            context.update(widget_cache_hit_wrapper(context['dashboard_template'], widget))
+            context.update(widget_cache_hit_wrapper(widget))
         return context

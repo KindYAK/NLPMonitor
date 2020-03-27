@@ -6,9 +6,9 @@ from evaluation.services import normalize_documents_eval_dynamics, calc_source_i
     smooth_buckets, normalize_documents_eval_dynamics_with_virt_negative
 
 
-def overall_positive_negative(dashboard, widget):
-    context_update = {}
-    s = es_document_eval_search_factory(dashboard, widget)
+def overall_positive_negative(widget):
+    context_update = dict()
+    s = es_document_eval_search_factory(widget)
     s = s.source(tuple())[:0]
     if widget.criterion.value_range_from < 0:
         range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
@@ -29,13 +29,12 @@ def overall_positive_negative(dashboard, widget):
     )
     r = s.execute()
     context_update[f'overall_posneg_{widget.id}'] = [bucket.doc_count for bucket in r.aggregations.posneg.buckets]
-    context_update['widget'] = widget
     return context_update
 
 
-def dynamics(dashboard, widget):
+def dynamics(widget):
     context_update = {}
-    s = es_document_eval_search_factory(dashboard, widget)
+    s = es_document_eval_search_factory(widget)
     s = s.source(tuple())[:0]
     # Average dynamics
     s.aggs.bucket(name="dynamics",
@@ -46,24 +45,23 @@ def dynamics(dashboard, widget):
     r = s.execute()
     _, total_criterion_date_value_dict = \
         get_criterions_values_for_normalization([widget.criterion],
-                                                dashboard.topic_modelling_name,
+                                                widget.topic_modelling_name,
                                                 granularity="1w")
     # if not widget.criterion.calc_virt_negative:
     #     normalize_documents_eval_dynamics(r, total_criterion_date_value_dict[widget.criterion.id])
     # else:
-    #     normalize_documents_eval_dynamics_with_virt_negative(r, dashboard.topic_modelling_name, "1w", widget.criterion)
+    #     normalize_documents_eval_dynamics_with_virt_negative(r, widget.topic_modelling_name, "1w", widget.criterion)
     buckets = r.aggregations.dynamics.buckets
     smooth_buckets(buckets,
                    is_posneg=False,
                    granularity="1w")
     context_update[f'dynamics_{widget.id}'] = buckets
-    context_update['widget'] = widget
     return context_update
 
 
-def source_distribution(dashboard, widget):
-    context_update = {}
-    s = es_document_eval_search_factory(dashboard, widget)
+def source_distribution(widget):
+    context_update = dict()
+    s = es_document_eval_search_factory(widget)
     s = s.source(tuple())[:0]
 
     # Posneg distribution
@@ -109,40 +107,39 @@ def source_distribution(dashboard, widget):
         ]
         context_update[f'source_distribution_{widget.id}'] = \
             sorted(context_update[f'source_distribution_{widget.id}'], key=lambda x: x['value'], reverse=True)
-    context_update['widget'] = widget
     return context_update
 
 
-def top_news(dashboard, widget):
-    return main_news(dashboard, widget, "top")
+def top_news(widget):
+    return main_news(widget, "top")
 
 
-def bottom_news(dashboard, widget):
-    return main_news(dashboard, widget, "bottom")
+def bottom_news(widget):
+    return main_news(widget, "bottom")
 
 
-def main_news(dashboard, widget, top_bottom):
-    context_update = {}
+def main_news(widget, top_bottom):
+    context_update = dict()
     top_news_ids = set()
     num_news = 50
     # Get top news
-    s = es_document_eval_search_factory(dashboard, widget)
+    s = es_document_eval_search_factory(widget)
     s = s.source(['document_es_id'])[:num_news].sort('-value')
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
-    s = es_document_eval_search_factory(dashboard, widget)
+    s = es_document_eval_search_factory(widget)
     s = s.source(['document_es_id'])[:num_news].sort('value')
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     max_criterion_value_dict, _ = \
         get_criterions_values_for_normalization([widget.criterion],
-                                                dashboard.topic_modelling_name,
+                                                widget.topic_modelling_name,
                                                 granularity=None)
 
     documents_eval_dict = get_documents_with_values(top_news_ids,
                                                     [widget.criterion],
-                                                    dashboard.topic_modelling_name,
+                                                    widget.topic_modelling_name,
                                                     max_criterion_value_dict,
                                                     top_news_num=num_news)
 
@@ -161,13 +158,12 @@ def main_news(dashboard, widget, top_bottom):
         sorted(documents_eval_dict.items(), key=lambda x: abs(x[1][widget.criterion.id]), reverse=True)
     )
     context_update[f'top_news_{widget.id}'] = documents_eval_dict
-    context_update['widget'] = widget
     return context_update
 
 
-def top_topics(dashboard, widget):
-    context_update = {}
-    s = es_document_eval_search_factory(dashboard, widget)
+def top_topics(widget):
+    context_update = dict()
+    s = es_document_eval_search_factory(widget)
     num_topics = 5
     # Posneg distribution
     if widget.criterion.value_range_from < 0:
@@ -198,13 +194,12 @@ def top_topics(dashboard, widget):
                               size=num_topics)
     s.aggs.metric('late_date', agg_type='max', field='document_datetime')
     r = s.execute()
-    topics_dict, tm_dict = get_topic_dict(dashboard.topic_modelling_name)
+    topics_dict, tm_dict = get_topic_dict(widget.topic_modelling_name)
     last_date = r.aggregations.late_date.value_as_string
     last_date = datetime.datetime.fromisoformat(last_date[:19])
     context_update[f'top_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[-1].top_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
     context_update[f'bottom_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[0].bottom_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
-    context_update['dashboard'] = dashboard
-    context_update['widget'] = widget
+
     return context_update

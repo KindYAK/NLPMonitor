@@ -40,7 +40,7 @@
                         </script>
                     {% endif %}
                     <td>
-                        <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
+                        <a href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
                            class="nav-link nowrap">
                             <i class="nav-icon fas fa-eye" style="font-size: 24px;"
                                data-toggle="tooltip" data-placement="top"
@@ -84,7 +84,7 @@
                             </script>
                         {% endif %}
                         <td>
-                            <a href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
+                            <a href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}"
                                class="nav-link nowrap">
                                 <i class="nav-icon fas fa-eye" style="font-size: 24px;"
                                    data-toggle="tooltip" data-placement="top"

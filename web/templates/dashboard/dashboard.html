@@ -63,7 +63,7 @@
         {# Widgets#}
         <div class="card-columns connectedSortable">
             {% for widget in widgets %}
-                {% cache 28800 widget dashboard_template.topic_modelling_name widget.id %}
+                {% cache 28800 widget widget.id %}
                     <!-- Widget -->
                     <div class="card">
                         <div class="card-header">
