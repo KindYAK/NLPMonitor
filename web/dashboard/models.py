@@ -35,6 +35,10 @@ class Widget(models.Model):
 
     # TODO filters list, data filter from to, filters from analyics, datatime_last (now - num_)
 
+    datetime_from = models.DateField(verbose_name='Отфильтровать с', null=True, blank=True)
+    datetime_to = models.DateField(verbose_name='Отфильтровать до', null=True, blank=True)
+    days_before_now = models.IntegerField(verbose_name='Дней назад', null=True, blank=True)
+
     params = PickledObjectField(null=True, blank=True)
 
     @property
