@@ -27,13 +27,13 @@
                 <tr>
                     <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">
                         <a target="_blank" rel="noopener noreferrer" class="nostyle"
-                           href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                           href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
                             {{ topic.info.name }}
                         </a>
                     </td>
                     <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
                         <a target="_blank" rel="noopener noreferrer" class="nostyle"
-                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                               href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
                             {% if topic.resonance_score %}
                                 {{ topic.resonance_score|floatformat:3|unlocalize }}
                             {% else %}
@@ -70,13 +70,13 @@
                     <tr>
                         <td id="name_{{ widget.criterion.id }}_{{ topic.info.id }}">
                             <a target="_blank" rel="noopener noreferrer" class="nostyle"
-                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                               href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
                                 {{ topic.info.name }}
                             </a>
                         </td>
                         <td id="resonance_{{ widget.criterion.id }}_{{ topic.info.id }}">
                             <a target="_blank" rel="noopener noreferrer" class="nostyle"
-                               href="{% url 'topicmodelling:topic_document_list' dashboard.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
+                               href="{% url 'topicmodelling:topic_document_list' widget.topic_modelling_name topic.info.id %}?topic_name={{ topic.info.name }}">
                                 {% if topic.resonance_score %}
                                     {{ topic.resonance_score|floatformat:3|unlocalize }}
                                 {% else %}
