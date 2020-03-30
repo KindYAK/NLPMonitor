@@ -122,6 +122,8 @@ else:
         },
     ]
 
+TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
+
 if DEBUG:
     CACHES = {
         'default': {
