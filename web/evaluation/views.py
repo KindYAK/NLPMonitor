@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.views.generic.base import View
@@ -18,7 +20,9 @@ class CriterionEvalAnalysisView(TemplateView):
 class CriterionEvalAnalysisReportView(View):
     def get(self, request):
         context = get_analytics_context(self.request, {}, skip_cache=True)
+        context['date'] = datetime.datetime.now().date()
+        context['request'] = request
         pdf = build_latex_pdf("reports/analytics.tex", context)
         response = HttpResponse(content=pdf.data, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename=1.pdf'
+        response['Content-Disposition'] = f'attachment; filename=report.pdf'
         return response

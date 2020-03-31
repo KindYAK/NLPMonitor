@@ -80,6 +80,8 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = 'nlpmonitor.urls'
 
+TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
+
 CUSTOM_CONTEXT_PROCESSORS = [
     'mainapp.context_processors.dashboard_list.dashboard_list',
 ]
@@ -87,7 +89,7 @@ if DEBUG:
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
+            'DIRS': [os.path.join(BASE_DIR, 'templates'), TEMPLATE_LATEX_DIR],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -103,7 +105,7 @@ else:
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
+            'DIRS': [os.path.join(BASE_DIR, 'templates'), TEMPLATE_LATEX_DIR],
             'OPTIONS': {
                 'context_processors': [
                     'django.template.context_processors.debug',
@@ -121,8 +123,6 @@ else:
             },
         },
     ]
-
-TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
 
 if DEBUG:
     CACHES = {
