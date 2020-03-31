@@ -13,5 +13,5 @@ def compile_jinja2_latex(template_name, context):
 
 def build_latex_pdf(template_name, context):
     latex_code = compile_jinja2_latex(template_name, context)
-    pdf = build_pdf(latex_code)
+    pdf = build_pdf(latex_code, builder="pdflatex")
     return pdf

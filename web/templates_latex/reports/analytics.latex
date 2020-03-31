@@ -1,6 +1,0 @@
-%- extends "base.latex"
-
-%- block body
-    Hello, \VAR{name|e}.
-    Привет, \VAR{name|e}.
-%- endblock

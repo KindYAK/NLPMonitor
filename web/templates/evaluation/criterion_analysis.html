@@ -127,9 +127,24 @@
                                 </div>
                                 <div class="col-lg-2">
                                     <div class="form-group">
-                                        <button type="submit" class="btn btn-primary float-right"
-                                                style="margin-top: 30px;">Применить
-                                        </button>
+                                        <div class="row">
+                                            <div class="col text-center">
+                                                <button type="submit" class="btn btn-primary" style="margin-top: 30px;">
+                                                    Применить
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% if request.user.is_superuser or request.user.expert %}
+                                            <div class="row">
+                                                <div class="col text-center">
+                                                    <a href="{% url 'evaluation:criterion_eval_analysis_report' %}?{{ request.GET.urlencode }}">
+                                                        <span class="btn btn-primary" style="margin-top: 30px;">
+                                                            Выгрузить в PDF
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
