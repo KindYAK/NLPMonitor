@@ -1,3 +1,5 @@
+import datetime
+
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from latex import build_pdf
@@ -23,5 +25,11 @@ def compile_jinja2_latex(template_name, context):
 
 def build_latex_pdf(template_name, context):
     latex_code = compile_jinja2_latex(template_name, context)
-    pdf = build_pdf(latex_code, builder="pdflatex")
+    try:
+        pdf = build_pdf(latex_code, builder="pdflatex")
+    except:
+        print("!!!!", "Error")
+        with open(f"/{datetime.datetime.now()}.tex", "w") as f:
+            f.write(latex_code)
+        raise Exception("Latex pdf build error")
     return pdf
