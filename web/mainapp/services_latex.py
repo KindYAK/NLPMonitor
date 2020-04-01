@@ -28,7 +28,6 @@ def build_latex_pdf(template_name, context):
     try:
         pdf = build_pdf(latex_code, builder="pdflatex")
     except:
-        print("!!!!", "Error")
         with open(f"/{datetime.datetime.now()}.tex", "w") as f:
             f.write(latex_code)
         raise Exception("Latex pdf build error")
