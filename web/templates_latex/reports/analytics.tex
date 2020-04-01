@@ -1,0 +1,29 @@
+%- extends "base.tex"
+
+%- block title
+    Отчёт
+%- endblock
+
+\BLOCK{block datetime}\VAR{date|str|e}\BLOCK{endblock}
+
+%- block body
+    \section{Ключевые новости}
+    \begin{longtable}{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
+        \hline
+        \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \\
+        \hline
+        \BLOCK{for document in documents[:100]}
+            \BLOCK{for criterion in criterions}
+                \BLOCK{if True}
+                    \VAR{document|get_item(criterion.id)|round(3)|str|e}
+                \BLOCK{else}
+                    0,000
+                \BLOCK{endif} &
+            \BLOCK{endfor}
+            \VAR{document.document.datetime|str|substr(0, 10)|e} &
+            \VAR{document.document.title|str|e} &
+            \VAR{document.document.source|remove_http(1)|str|e}
+            \\ \hline
+        \BLOCK{endfor}
+    \end{longtable}
+%- endblock
