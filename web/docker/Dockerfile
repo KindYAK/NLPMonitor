@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y gettext
 RUN apt-get install -y --fix-missing texlive-latex-extra
 RUN apt-get -y --fix-missing install biber texlive-lang-cyrillic \
              fonts-cmu texlive-xetex texlive-fonts-extra \
-             font-manager
+             font-manager cm-super
 
 COPY ./requirements-base.txt /tmp/requirements-base.txt
 RUN pip3 install -r /tmp/requirements-base.txt
