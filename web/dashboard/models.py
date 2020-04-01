@@ -33,11 +33,11 @@ class Widget(models.Model):
     icon_class = models.CharField(max_length=50, verbose_name="Class иконки")
     index = models.SmallIntegerField(default=5, verbose_name="Порядковый номер")
 
-    # TODO filters list, data filter from to, filters from analyics, datatime_last (now - num_)
-
     datetime_from = models.DateField(verbose_name='Отфильтровать с', null=True, blank=True)
     datetime_to = models.DateField(verbose_name='Отфильтровать до', null=True, blank=True)
     days_before_now = models.IntegerField(verbose_name='Дней назад', null=True, blank=True)
+    name_query = models.CharField(verbose_name='Предмет запроса', max_length=100, null=True, blank=True)
+    ner_query = models.CharField(verbose_name='Список сущностей', max_length=500, null=True, blank=True)
 
     params = PickledObjectField(null=True, blank=True)
 
