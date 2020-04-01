@@ -1,7 +1,7 @@
 def default_parser(widget_ner_query, datetime_from, datetime_to, parent_search):
     """
     name_query_example = 'Пандемия Короновируса в Казахстане'
-    ner_query_example = '1(|) AND 2(1(|||) | 3(||||||) | 4(|||||) | 3(||||||||||||)) AND 2(||)'
+    ner_query_example = '1(|) AND 2(1(|||) $ 3(||||||) $ 4(|||||) $ 3(||||||||||||)) AND 2(||)'
     :param widget_ner_query:
     :param datetime_from:
     :param datetime_to:
