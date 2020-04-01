@@ -18,7 +18,7 @@ class LatexMarkup(Markup):
         if hasattr(s, '__html__'):
             return s.__html__()
 
-        rv = escape(s).strip()
+        rv = escape(s).replace('\u200b', '').strip()
         if rv.__class__ is not cls:
             return cls(rv)
         return rv
