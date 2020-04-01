@@ -16,6 +16,18 @@ class DashboardPreset(models.Model):
         return f"Dashboard - {self.name}"
 
 
+class MonitoringObject(models.Model):
+    class Meta:
+        verbose_name = "Объекты мониторинга"
+        verbose_name_plural = "Объекты мониторинга"
+
+    name_query = models.CharField(verbose_name='Предмет запроса', max_length=100, null=True, blank=True)
+    ner_query = models.CharField(verbose_name='Список сущностей', max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f"Предмет запроса - {self.name_query}"
+
+
 class Widget(models.Model):
     class Meta:
         verbose_name = "Виджет"
@@ -33,11 +45,10 @@ class Widget(models.Model):
     icon_class = models.CharField(max_length=50, verbose_name="Class иконки")
     index = models.SmallIntegerField(default=5, verbose_name="Порядковый номер")
 
-    # TODO filters list, data filter from to, filters from analyics, datatime_last (now - num_)
-
     datetime_from = models.DateField(verbose_name='Отфильтровать с', null=True, blank=True)
     datetime_to = models.DateField(verbose_name='Отфильтровать до', null=True, blank=True)
     days_before_now = models.IntegerField(verbose_name='Дней назад', null=True, blank=True)
+    monitoring_object = models.ForeignKey(MonitoringObject, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Объект мониторинга')
 
     params = PickledObjectField(null=True, blank=True)
 

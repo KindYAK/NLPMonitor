@@ -1,9 +1,9 @@
-import datetime
 from datetime import datetime, timedelta
 
 from elasticsearch_dsl import Search
 
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
+from .util import default_parser
 
 
 def es_document_eval_search_factory(widget, **kwargs):
@@ -21,4 +21,17 @@ def es_document_eval_search_factory(widget, **kwargs):
 
     s = s.filter("range", document_datetime={"gte": datetime_from}) \
         .filter("range", document_datetime={"lte": datetime_to})
+
+    try:
+        widget_ner_query = widget.monitoring_object.ner_query
+    except AttributeError:
+        widget_ner_query = None
+
+    if widget_ner_query:
+        s = default_parser(
+            widget_ner_query=widget_ner_query,
+            datetime_from=datetime_from,
+            datetime_to=datetime_to,
+            parent_search=s
+        )
     return s
