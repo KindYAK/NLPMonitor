@@ -22,9 +22,14 @@ def es_document_eval_search_factory(widget, **kwargs):
     s = s.filter("range", document_datetime={"gte": datetime_from}) \
         .filter("range", document_datetime={"lte": datetime_to})
 
-    if widget.ner_query:
+    try:
+        widget_ner_query = widget.monitoring_object.ner_query
+    except AttributeError:
+        widget_ner_query = None
+
+    if widget_ner_query:
         s = default_parser(
-            widget_ner_query=widget.ner_query,
+            widget_ner_query=widget_ner_query,
             datetime_from=datetime_from,
             datetime_to=datetime_to,
             parent_search=s
