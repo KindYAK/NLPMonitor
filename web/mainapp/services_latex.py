@@ -1,17 +1,17 @@
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
 from latex import build_pdf
-from latex.jinja2 import ENV_ARGS, LatexMarkup
+from latex.jinja2 import ENV_ARGS
 
-from mainapp.templatetags.jinja2_styled import remove_http_env, get_item_env, substr_env
+from mainapp.templatetags.jinja2_styled import remove_http_env, get_item_env, substr_env, LatexMarkup
 from nlpmonitor.settings import TEMPLATE_LATEX_DIR
 
 
 def compile_jinja2_latex(template_name, context):
     ENV_ARGS['loader'] = FileSystemLoader(TEMPLATE_LATEX_DIR)
     env = Environment(**ENV_ARGS)
-    env.filters['e'] = LatexMarkup.escape
     env.filters.update({
+        'e': LatexMarkup.escape,
         'str': str,
         'get_item': get_item_env,
         'remove_http': remove_http_env,
