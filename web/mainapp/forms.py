@@ -46,12 +46,6 @@ class TopicChooseForm(forms.Form):
                          # 'tau_decorrelator_phi', 'tau_coherence_phi',
                          ])[:500]
         group = None
-        if not user.is_superuser:
-            group = get_user_group(user)
-            if group:
-                s = s.filter('terms', corpus=[corpus.name for corpus in group.corpuses.all()])
-            else:
-                s = s.filter('terms', corpus=[])
         topic_modellings = s.execute()
         topic_modellings = sorted(topic_modellings, key=lambda x: x.number_of_documents, reverse=True)
         topic_modellings = ((tm.name.lower(),
