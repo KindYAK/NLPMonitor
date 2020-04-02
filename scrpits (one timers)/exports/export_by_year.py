@@ -6,10 +6,10 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 from elasticsearch_dsl import Search
 
 books = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("range", datetime={
-                                                                            "gte": datetime.datetime(2019, 1, 1),
-                                                                            "lte": datetime.datetime(2020, 1, 1),
+                                                                            "gte": datetime.datetime(2017, 11, 1),
+                                                                            "lte": datetime.datetime(2020, 4, 1),
                                                                         }
-)[:500000].scan()
+)[:1000000].scan()
 
 output = []
 for book in books:
