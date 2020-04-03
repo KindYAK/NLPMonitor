@@ -1,30 +1,64 @@
 import csv
+from collections import defaultdict
 
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_TOPIC_DOCUMENT
 
 from elasticsearch_dsl import Search
 
-tm_name = "bigartm_two_years"
+tm_name = "bigartm_two_years_main_and_gos"
 try:
     tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", name=tm_name).execute()[0]
 except:
     tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", **{"name.keyword": tm_name}).execute()[0]
 
-std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
-    .filter("range", topic_weight={"gte": 0.05})[:0]
-std.aggs.bucket(name='topics', agg_type="terms", field='topic_id.keyword', size=500) \
+std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}")[:0]
+std.aggs.bucket(name='topics', agg_type="terms", field='topic_id', size=500) \
+            .metric("topic_weight", agg_type="sum", field="topic_weight")
+std.aggs['topics'].bucket(name="corpus", agg_type="terms", field="document_corpus", size=10000) \
             .metric("topic_weight", agg_type="sum", field="topic_weight")
 r = std.execute()
 
 topic_info_dict = dict(
-            (bucket.key, {
-                "count": bucket.doc_count,
-                "weight_sum": bucket.topic_weight.value
-            }) for bucket in r.aggregations.topics.buckets
-        )
+    (bucket.key, {
+        "count": bucket.doc_count,
+        "weight_sum": bucket.topic_weight.value,
+        "corpus_weights": dict((
+            (bucket_corpus.key,
+             {
+                 "count": bucket_corpus.doc_count,
+                 "weight_sum": bucket_corpus.topic_weight.value,
+             }) for bucket_corpus in bucket.corpus.buckets)
+        ),
+    }) for bucket in r.aggregations.topics.buckets
+)
+corpuses = set()
+for bucket in topic_info_dict.values():
+    for key in bucket['corpus_weights']:
+        corpuses.add(key)
+
+if corpuses:
+    corpus_total_weights = defaultdict(int)
+    for key in topic_info_dict.keys():
+        if not topic_info_dict[key]["corpus_weights"]:
+            continue
+        for key, value in topic_info_dict[key]["corpus_weights"].items():
+            corpus_total_weights[key] += value['weight_sum']
+    for key in topic_info_dict.keys():
+        if not topic_info_dict[key]["corpus_weights"]:
+            continue
+        total_weight = 0
+        for corpus in corpuses:
+            if corpus in topic_info_dict[key]["corpus_weights"]:
+                topic_info_dict[key]["corpus_weights"][corpus]['weight_sum'] /= corpus_total_weights[corpus]
+                total_weight += topic_info_dict[key]["corpus_weights"][corpus]['weight_sum']
+        for corpus in corpuses:
+            if corpus in topic_info_dict[key]["corpus_weights"]:
+                topic_info_dict[key]["corpus_weights"][corpus]['weight_sum'] /= total_weight
 
 output = []
 for topic in tm.topics:
+    if topic.id not in topic_info_dict:
+        continue
     words = list(sorted(topic.topic_words, key=lambda x: x.weight, reverse=True))[:30]
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
         .filter("term", topic_id=topic.id).sort('-topic_weight')[:25]
@@ -33,6 +67,7 @@ for topic in tm.topics:
     top_news = s.execute()
     top_news_to_write = []
     titles_seen = set()
+    news_to_export = 7
     for news in top_news:
         title = news.title.strip()
         if len(title) < 3:
@@ -41,20 +76,25 @@ for topic in tm.topics:
             continue
         top_news_to_write.append(news)
         titles_seen.add(title)
-        if len(top_news_to_write) >= 3:
+        if len(top_news_to_write) >= news_to_export:
             break
-    output.append({
+    doc = defaultdict(int)
+    doc.update({
         "id": topic.id,
         "words": ", ".join([word.word for word in words]),
         "volume": topic_info_dict[topic.id]['count'] if topic.id in topic_info_dict else "-",
         "weight": topic_info_dict[topic.id]['weight_sum'] if topic.id in topic_info_dict else "-",
-        "top_new_1_title": top_news_to_write[0].title,
-        "top_new_2_title": top_news_to_write[1].title,
-        "top_new_3_title": top_news_to_write[2].title,
-        "top_new_1_url": top_news_to_write[0].url if hasattr(top_news_to_write[0], 'url') else "",
-        "top_new_2_url": top_news_to_write[1].url if hasattr(top_news_to_write[1], 'url') else "",
-        "top_new_3_url": top_news_to_write[2].url if hasattr(top_news_to_write[2], 'url') else "",
     })
+    # Top news
+    for i, news in enumerate(top_news_to_write):
+        doc[f"top_new_{i}_title"] = news.title
+        doc[f"top_new_{i}_url"] = news.url if hasattr(news, 'url') else ""
+    # Multi corpus
+    corpus_weights = topic_info_dict[topic.id]['corpus_weights']
+    if corpus_weights:
+        for corpus in corpuses:
+            doc[f"corpus_weight_{corpus}"] = corpus_weights[corpus]['weight_sum'] if corpus in corpus_weights else 0
+    output.append(doc)
 
 keys = output[0].keys()
 with open(f'/{tm_name}.csv', 'w') as output_file:
