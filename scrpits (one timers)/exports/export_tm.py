@@ -86,9 +86,13 @@ for topic in tm.topics:
         "weight": topic_info_dict[topic.id]['weight_sum'] if topic.id in topic_info_dict else "-",
     })
     # Top news
-    for i, news in enumerate(top_news_to_write):
-        doc[f"top_new_{i}_title"] = news.title
-        doc[f"top_new_{i}_url"] = news.url if hasattr(news, 'url') else ""
+    for i in range(news_to_export):
+        if i >= len(top_news_to_write):
+            doc[f"top_new_{i}_title"] = ""
+            doc[f"top_new_{i}_url"] = ""
+        else:
+            doc[f"top_new_{i}_title"] = top_news_to_write[i].title
+            doc[f"top_new_{i}_url"] = top_news_to_write[i].url if hasattr(top_news_to_write[i], 'url') else ""
     # Multi corpus
     corpus_weights = topic_info_dict[topic.id]['corpus_weights']
     if corpus_weights:
