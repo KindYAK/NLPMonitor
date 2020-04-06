@@ -1,0 +1,1 @@
+pdflatex -interaction=batchmode -halt-on-error -no-shell-escape -file-line-error

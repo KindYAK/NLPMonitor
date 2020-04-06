@@ -1,13 +1,14 @@
-%- extends "base.tex"
+%- extends "base/main.tex"
 
 %- block title
-    Отчёт
+    \VAR{title|str|e}
 %- endblock
 
-\BLOCK{block datetime}\VAR{date|str|e}\BLOCK{endblock}
-
 %- block body
+    \chapterimage{/opt/app/templates_latex/base/static/chapter_head_2.pdf} % Chapter heading image
+    \chapter{Аналитика}
     \section{Ключевые новости}
+
     \begin{longtable}{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
         \hline
         \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \\
