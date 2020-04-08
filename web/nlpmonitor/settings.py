@@ -81,6 +81,7 @@ REST_FRAMEWORK = {
 ROOT_URLCONF = 'nlpmonitor.urls'
 
 TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
+REPORT_IMAGE_DIR = os.path.join("/", 'report_images')
 
 CUSTOM_CONTEXT_PROCESSORS = [
     'mainapp.context_processors.dashboard_list.dashboard_list',
