@@ -41,13 +41,8 @@
 \begingroup
 \thispagestyle{empty} % Suppress headers and footers on the title page
 \begin{tikzpicture}[remember picture,overlay]
-\node[inner sep=0pt] (background) at (current page.center) {\includegraphics[width=\paperwidth]{/opt/app/templates_latex/base/static/background.pdf}};
-% Book titles
-\BLOCK{endraw}
-\draw (current page.center) node [fill=ocre!30!white,fill opacity=0.6,text opacity=1,inner sep=1cm]{\Huge\centering\bfseries\sffamily\parbox[c][][t]{\paperwidth}{\centering Отчёт\\[15pt]
-{\Large \BLOCK{block title}\BLOCK{endblock}}\\[20pt]
-{\huge }}}; % Author name
-\BLOCK{raw}
+	\node[inner sep=0pt] (background) at (current page.center) {\includegraphics[width=\paperwidth]{/opt/app/templates_latex/base/static/background.pdf}};
+	\node at (2.8,-13.2) {\fontsize{13cm}{15cm}\selectfont\centering\bfseries\sffamily\parbox[c][][t]{\paperwidth}{\centering Отчет\\[5pt]}};
 \end{tikzpicture}
 \vfill
 \endgroup
@@ -58,7 +53,7 @@
 
 %\usechapterimagefalse % If you don't want to include a chapter image, use this to toggle images off - it can be enabled later with \usechapterimagetrue
 
-\chapterimage{/opt/app/templates_latex/base/static/chapter_head_1.pdf} % Table of contents heading image
+\chapterimage{/opt/app/templates_latex/base/static/papers.jpg} % Table of contents heading image
 
 \pagestyle{empty} % Disable headers and footers for the following pages
 
