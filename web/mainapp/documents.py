@@ -233,7 +233,8 @@ class DocumentLocation(es.Document):
     document_datetime = es.Date()
     document_source = es.Keyword()
     location_name = es.Keyword()
-    location_weight = es.Keyword()
+    location_level = es.Keyword()
+    location_weight = es.Float()
     criterion = es.Keyword()
 
     class Index:
@@ -256,13 +257,16 @@ class DocumentLocation(es.Document):
                 "document_source": {
                     "type": "keyword"
                 },
-                "value": {
-                    "type": "float"
-                },
-                "topic_ids_top": {
+                "location_level": {
                     "type": "keyword"
                 },
-                "topic_ids_bottom": {
+                "location_name": {
+                    "type": "keyword"
+                },
+                "location_weight": {
+                    "type": "float"
+                },
+                "criterion": {
                     "type": "keyword"
                 },
             }
