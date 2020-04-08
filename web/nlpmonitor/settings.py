@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'topicmodelling',
     'evaluation',
     'dashboard',
+    'geo',
 ]
 
 MIDDLEWARE = [
