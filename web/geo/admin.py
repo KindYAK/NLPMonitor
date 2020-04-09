@@ -4,21 +4,21 @@ from geo.models import Locality, District, Area
 
 
 class AreaAdmin(admin.ModelAdmin):
-    list_display = ('area_name',)
+    list_display = ('name',)
     list_filter = ()
-    search_fields = ('area_name',)
+    search_fields = ('name',)
 
 
 class DistrictAdmin(admin.ModelAdmin):
-    list_display = ('district_name',)
+    list_display = ('name',)
     list_filter = ()
-    search_fields = ('district_name',)
+    search_fields = ('name',)
 
 
 class LocalityAdmin(admin.ModelAdmin):
-    list_display = ('locality_name', 'kato_code', 'district', 'latitude', 'longitude')
+    list_display = ('name', 'kato_code', 'district', 'latitude', 'longitude')
     list_filter = ()
-    search_fields = ('locality_name',)
+    search_fields = ('name',)
 
 
 admin.site.register(Area, AreaAdmin)
