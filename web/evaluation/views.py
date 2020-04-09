@@ -19,8 +19,17 @@ class CriterionEvalAnalysisView(TemplateView):
 
 
 class CriterionEvalAnalysisReportView(View):
+    NEWS_TO_EXPORT = 25
+
     def preprocess_context(self, context):
-        pass
+        context['criterion'] = context['criterions'][0]
+        context['top_documents'] = sorted(context['documents'],
+                                          key=lambda x: x[context['criterion'].id],
+                                          reverse=True)[:self.NEWS_TO_EXPORT]
+        if context['criterion'].value_range_from < 0:
+            context['bottom_documents'] = sorted(context['documents'],
+                                                 key=lambda x: x[context['criterion'].id],
+                                                 reverse=False)[:self.NEWS_TO_EXPORT]
 
     def get(self, request):
         context = get_analytics_context(self.request, {}, skip_cache=True)
