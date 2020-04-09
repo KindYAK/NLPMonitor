@@ -30,7 +30,8 @@ class Command(BaseCommand):
         print('Parsing Localities:')
         for row in df.iterrows():
             longitude, latitude = None, None
-            if isinstance(row[1]['Координаты'], str): longitude, latitude = row[1]['Координаты'].split(', ')
+            if isinstance(row[1]['Координаты'], str):
+                longitude, latitude = row[1]['Координаты'].split(', ')
 
             localities_list.append(
                 Locality(name=row[1]['Населенный пункт'],
