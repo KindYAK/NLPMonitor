@@ -5,11 +5,20 @@
     %%%%%%%%%%%%%%%%%%%%%%%%% Глава 1 - аналитика %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \chapter{Аналитика}
 
+    %%%%%%%%%%%%%%%%%%%%%%%%% Распределение позитив/негатив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \BLOCK{if criterion.value_range_from < 0}
+        \section{Позитив-негатив}
+        \newcommand{\pathbaroverall}{\VAR{bar_overall}}
+        \begin{figure}[h]
+            \centering\includegraphics[scale=0.6]{\pathbaroverall}
+        \end{figure}
+    \BLOCK{endif}
+
     %%%%%%%%%%%%%%%%%%%%%%%%% Динамика критериев %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Динамика}
-    \newcommand{\patha}{\VAR{dynamics}}
+    \newcommand{\pathdynamics}{\VAR{dynamics}}
     \begin{figure}[h]
-    \centering\includegraphics[scale=0.5]{\patha}
+        \centering\includegraphics[scale=0.6]{\pathdynamics}
     \end{figure}
 
 

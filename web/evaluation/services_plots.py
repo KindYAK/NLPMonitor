@@ -3,7 +3,7 @@ import os
 
 from plotly import graph_objects as go
 
-from dashboard.services_pyplot import dynamics_data_layout
+from dashboard.services_pyplot import *
 from nlpmonitor.settings import REPORT_IMAGE_DIR
 
 
@@ -15,13 +15,25 @@ def save_plot(filename, data, layout):
     fig = go.Figure(data=data, layout=layout)
     if not os.path.exists(os.path.join("/", REPORT_IMAGE_DIR)):
         os.mkdir(os.path.join("/", REPORT_IMAGE_DIR))
+    print("! start", datetime.datetime.now())
     fig.write_image(os.path.join("/", REPORT_IMAGE_DIR, filename))
+    print("! end", datetime.datetime.now())
+
+
+def bar_positive_negative_plot(context, user_id):
+    data, layout = bar_positive_negative_data_layout(
+        context=context,
+        criterion=context['criterion'],
+    )
+    filename = get_filename("baroverall", user_id)
+    save_plot(filename, data, layout)
+    return os.path.join(REPORT_IMAGE_DIR, filename)
 
 
 def dynamics_plot(context, user_id):
     data, layout = dynamics_data_layout(
-        x=[tick.key_as_string for tick in context['absolute_value'][context['criterions'][0].id]],
-        y=[round(tick.dynamics_weight.value, 5) for tick in context['absolute_value'][context['criterions'][0].id]]
+        context=context,
+        criterion=context['criterion'],
     )
     filename = get_filename("dynamics", user_id)
     save_plot(filename, data, layout)

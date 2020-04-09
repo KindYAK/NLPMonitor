@@ -6,7 +6,7 @@ from django.views.generic.base import View
 
 from mainapp.services_latex import build_latex_pdf
 from .services_context import get_analytics_context
-from .services_plots import dynamics_plot
+from .services_plots import *
 
 
 class CriterionEvalAnalysisView(TemplateView):
@@ -39,6 +39,7 @@ class CriterionEvalAnalysisReportView(View):
 
         # Plots
         context["dynamics"] = dynamics_plot(context, request.user.id)
+        context["bar_overall"] = bar_positive_negative_plot(context, request.user.id)
 
         pdf = build_latex_pdf("reports/analytics.tex", context)
         response = HttpResponse(content=pdf.data, content_type='application/pdf')
