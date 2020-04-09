@@ -16,7 +16,7 @@ def save_plot(filename, data, layout):
     if not os.path.exists(os.path.join("/", REPORT_IMAGE_DIR)):
         os.mkdir(os.path.join("/", REPORT_IMAGE_DIR))
     print("! start", datetime.datetime.now())
-    fig.write_image(os.path.join("/", REPORT_IMAGE_DIR, filename))
+    fig.write_image(os.path.join("/", REPORT_IMAGE_DIR, filename), scale=2)
     print("! end", datetime.datetime.now())
 
 
