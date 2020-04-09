@@ -1,14 +1,15 @@
-%- extends "base/main.tex"
-
-%- block title
-    \VAR{title|str|e}
-%- endblock
+%- extends "base/base.tex"
 
 %- block body
-    \chapterimage{/opt/app/templates_latex/base/static/chapter_head_2.pdf} % Chapter heading image
+    \chapterimage{/opt/app/templates_latex/base/static/lens.jpg} % Chapter heading image
     \chapter{Аналитика}
-    \section{Ключевые новости}
+    \section{Динамика}
+    \newcommand{\patha}{\VAR{dynamics}}
+    \begin{figure}[h]
+    \centering\includegraphics[scale=0.5]{\patha}
+    \end{figure}
 
+    \section{Ключевые новости}
     \begin{longtable}{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
         \hline
         \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \\

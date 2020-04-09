@@ -79,12 +79,12 @@ for group_id, topics in topic_groups.items():
     top_news_ids = []
     for topic_id in topics:
         std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}") \
-                  .filter("term", topic_id=f"topic_{topic_id}").sort('-topic_weight')[:news_to_export*2]
+                  .filter("term", topic_id=f"topic_{topic_id}").sort('-topic_weight')[:news_to_export*3]
         top_news_ids += [{"id": r.document_es_id, "weight": r.topic_weight} for r in std.execute()]
-    top_news_ids = sorted(top_news_ids, key=lambda x: x['weight'], reverse=True)[:news_to_export*3]
+    top_news_ids = sorted(top_news_ids, key=lambda x: x['weight'], reverse=True)[:news_to_export*5]
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)\
         .filter("terms", _id=[id['id'] for id in top_news_ids])\
-        .source(('title', 'url',))
+        .source(('title', 'url',))[:news_to_export*5]
     top_news = s.execute()
     titles_seen = set()
     top_news_to_write = []

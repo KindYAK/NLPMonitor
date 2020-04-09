@@ -1,3 +1,4 @@
 #!/bin/bash
+xvfb-run -l -a /usr/local/bin/orca serve --request-limit 100 --keep-alive --graph-only &
 python manage.py collectstatic --noinput
 gunicorn nlpmonitor.wsgi -b 0.0.0.0:8000 --timeout=30 --workers=4 --limit-request-line 16000
