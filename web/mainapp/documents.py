@@ -8,7 +8,7 @@ from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_EMBEDDING, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
     ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
-    ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS
+    ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DOCUMENT_LOCATION
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -222,6 +222,51 @@ class DocumentEval(es.Document):
                     "type": "keyword"
                 },
                 "topic_ids_bottom": {
+                    "type": "keyword"
+                },
+            }
+        }
+
+
+class DocumentLocation(es.Document):
+    document_es_id = es.Keyword()
+    document_datetime = es.Date()
+    document_source = es.Keyword()
+    location_name = es.Keyword()
+    location_level = es.Keyword()
+    location_weight = es.Float()
+    criterion = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_DOCUMENT_LOCATION  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 3,
+            "number_of_replicas": 1,
+            "max_result_window": 5000000,
+        }
+        mappings = {
+            "properties": {
+                "document_datetime": {
+                    "type": "date"
+                },
+                "document_es_id": {
+                    "type": "keyword"
+                },
+                "document_source": {
+                    "type": "keyword"
+                },
+                "location_level": {
+                    "type": "keyword"
+                },
+                "location_name": {
+                    "type": "keyword"
+                },
+                "location_weight": {
+                    "type": "float"
+                },
+                "criterion": {
                     "type": "keyword"
                 },
             }
