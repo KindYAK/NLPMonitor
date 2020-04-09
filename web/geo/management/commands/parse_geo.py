@@ -16,30 +16,31 @@ class Command(BaseCommand):
         df = pd.read_excel(os.path.join(MEDIA_ROOT, 'geo.xlsx'))
 
         print('Parsing Areas ...')
-        areas_dict = {area: Area(area_name=area) for area in df['Область'].unique().tolist()}
+        areas_dict = {area: Area(name=area) for area in df['Область'].unique().tolist()}
         Area.objects.bulk_create(areas_dict.values())
 
         print('Parsing Districts ...')
-        districts_dict = {district: District(district_name=district,
-                                             area=areas_dict[df[df['Район'] == district]['Область'].unique()[0]])
-                          for district in df['Район'].unique().tolist()}
+        districts_dict = {
+            district: District(name=district, area=areas_dict[df[df['Район'] == district]['Область'].unique()[0]])
+            for district in df['Район'].unique().tolist()
+        }
         District.objects.bulk_create(districts_dict.values())
 
         localities_list = list()
         print('Parsing Localities:')
         for row in df.iterrows():
             longitude, latitude = None, None
-            if isinstance(row[1]['Координаты'], str):
-                longitude, latitude = row[1]['Координаты'].split(', ')
+            if isinstance(row[1]['Координаты'], str): longitude, latitude = row[1]['Координаты'].split(', ')
 
             localities_list.append(
-                Locality(locality_name=row[1]['Населенный пункт'],
+                Locality(name=row[1]['Населенный пункт'],
                          kato_code=row[1]['Код КАТО'],
                          longitude=longitude,
                          latitude=latitude,
                          district=districts_dict[row[1]['Район']])
             )
+
             if row[0] % 1000 == 0:
-                print(f'    Parsed - {row[0]} rows')
+                print(f'  Parsed - {row[0]} rows')
 
         Locality.objects.bulk_create(localities_list, ignore_conflicts=True)
