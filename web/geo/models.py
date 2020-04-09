@@ -37,4 +37,4 @@ class Locality(models.Model):
     district = models.ForeignKey(District, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'Населенный пункт {self.locality_name}'
+        return f'Населенный пункт - {self.locality_name}'
