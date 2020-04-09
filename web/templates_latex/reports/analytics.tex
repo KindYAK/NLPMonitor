@@ -40,7 +40,7 @@
                 \BLOCK{endif} &
             \BLOCK{endfor}
             \VAR{document.document.datetime|str|substr(0, 10)|e} &
-            \VAR{document.document.title|str|e} &
+            \href{\VAR{document.document.url|str|e}}{\VAR{document.document.title|str|e}} &
             \VAR{document.document.source|remove_http(1)|str|e}
             \\ \hline
         \BLOCK{endfor}
@@ -63,7 +63,7 @@
                     \BLOCK{endif} &
                 \BLOCK{endfor}
                 \VAR{document.document.datetime|str|substr(0, 10)|e} &
-                \VAR{document.document.title|str|e} &
+                \href{\VAR{document.document.url|str|e}}{\VAR{document.document.title|str|e}} &
                 \VAR{document.document.source|remove_http(1)|str|e}
                 \\ \hline
             \BLOCK{endfor}
