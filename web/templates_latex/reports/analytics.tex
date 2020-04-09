@@ -9,26 +9,27 @@
     \BLOCK{if criterion.value_range_from < 0}
         \section{Позитив-негатив}
         \newcommand{\pathbaroverall}{\VAR{bar_overall}}
-        \begin{figure}[h]
-            \centering\includegraphics[scale=0.33]{\pathbaroverall}
+        \begin{figure}[H]
+            \centering\includegraphics[width=0.9\textwidth,keepaspectratio]{\pathbaroverall}
         \end{figure}
     \BLOCK{endif}
 
     %%%%%%%%%%%%%%%%%%%%%%%%% Динамика критериев %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Динамика}
     \newcommand{\pathdynamics}{\VAR{dynamics}}
-    \begin{figure}[h]
-        \centering\includegraphics[scale=0.33]{\pathdynamics}
+    \begin{figure}[H]
+        \centering\includegraphics[width=0.9\textwidth,keepaspectratio]{\pathdynamics}
     \end{figure}
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%% Глава 2 - детализация %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \chapter{Детализация}
     %%%%%%%%%%%%%%%%%%%%%%%%% Ключевые новости - позитив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \Needspace*{10\baselineskip}
     \section{Ключевые новости (Позитив)}
-    \begin{longtable}{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
+    \begin{longtable}[H]{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
         \hline
-        \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \\
+        \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
         \hline
         \BLOCK{for document in top_documents}
             \BLOCK{for criterion in criterions}
@@ -47,10 +48,11 @@
 
     %%%%%%%%%%%%%%%%%%%%%%%%% Ключевые новости - негатив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \BLOCK{if bottom_documents}
+        \Needspace*{10\baselineskip}
         \section{Ключевые новости (Негатив)}
-        \begin{longtable}{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
+        \begin{longtable}[H]{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
             \hline
-            \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \\
+            \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
             \hline
             \BLOCK{for document in bottom_documents}
                 \BLOCK{for criterion in criterions}
