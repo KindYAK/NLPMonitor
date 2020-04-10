@@ -27,6 +27,8 @@ def handle_plotting(f_data_layout, context, user_id):
         context=context,
         criterion=context['criterion'],
     )
+    if not data:
+        return None
     if DEBUG:
         print("!!!", f_data_layout.__name__)
     filename = get_filename(f_data_layout.__name__, user_id)
@@ -49,5 +51,9 @@ def dynamics_plot(context, user_id):
             context=context,
             user_id=user_id
         ),
-        "dynamics_posneg": None
+        "dynamics_posneg": handle_plotting(
+            f_data_layout=dynamics_posneg_data_layout,
+            context=context,
+            user_id=user_id
+        ),
     }
