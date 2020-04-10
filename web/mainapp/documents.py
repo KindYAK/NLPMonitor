@@ -237,6 +237,7 @@ class DocumentLocation(es.Document):
     location_weight = es.Float()
     criterion_value = es.Float()
     topic_modelling = es.Keyword()
+    location_id = es.Integer()
 
     class Index:
         name = ES_INDEX_DOCUMENT_LOCATION  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
@@ -272,7 +273,10 @@ class DocumentLocation(es.Document):
                 },
                 "topic_modelling": {
                     "type": "keyword"
-                }
+                },
+                "location_id": {
+                    "type": "integer"
+                },
             }
         }
 
