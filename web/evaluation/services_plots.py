@@ -4,7 +4,7 @@ import os
 from plotly import graph_objects as go
 
 from dashboard.services_pyplot import *
-from nlpmonitor.settings import REPORT_IMAGE_DIR, DEBUG
+from nlpmonitor.settings import REPORT_IMAGE_DIR
 
 
 def get_filename(prefix, user_id):
@@ -15,11 +15,8 @@ def save_plot(filename, data, layout):
     fig = go.Figure(data=data, layout=layout)
     if not os.path.exists(os.path.join("/", REPORT_IMAGE_DIR)):
         os.mkdir(os.path.join("/", REPORT_IMAGE_DIR))
-    if DEBUG:
-        print("! start", datetime.datetime.now())
     fig.write_image(os.path.join("/", REPORT_IMAGE_DIR, filename), scale=2)
-    if DEBUG:
-        print("! end", datetime.datetime.now())
+    return os.path.join("/", REPORT_IMAGE_DIR, filename)
 
 
 def handle_plotting(f_data_layout, context, user_id):
@@ -29,11 +26,8 @@ def handle_plotting(f_data_layout, context, user_id):
     )
     if not data:
         return None
-    if DEBUG:
-        print("!!!", f_data_layout.__name__)
     filename = get_filename(f_data_layout.__name__, user_id)
-    save_plot(filename, data, layout)
-    return os.path.join(REPORT_IMAGE_DIR, filename)
+    return save_plot(filename, data, layout)
 
 
 def bar_positive_negative_plot(context, user_id):
@@ -57,3 +51,11 @@ def dynamics_plot(context, user_id):
             user_id=user_id
         ),
     }
+
+
+def bar_source_plot(context, user_id):
+    return handle_plotting(
+            f_data_layout=bar_source_data_layout,
+            context=context,
+            user_id=user_id
+        )

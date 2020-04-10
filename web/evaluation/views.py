@@ -1,5 +1,3 @@
-import datetime
-
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.views.generic.base import View
@@ -36,11 +34,10 @@ class CriterionEvalAnalysisReportView(View):
         self.preprocess_context(context)
         context['title'] = datetime.datetime.now().date()
         context['request'] = request
-
         # Plots
         context["dynamics"] = dynamics_plot(context, request.user.id)
         context["bar_overall"] = bar_positive_negative_plot(context, request.user.id)
-
+        context["bar_source"] = bar_source_plot(context, request.user.id)
         pdf = build_latex_pdf("reports/analytics.tex", context)
         response = HttpResponse(content=pdf.data, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename=report.pdf'
