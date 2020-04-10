@@ -1,5 +1,6 @@
 import datetime
 import os
+import plotly
 
 from plotly import graph_objects as go
 
@@ -12,6 +13,8 @@ def get_filename(prefix, user_id):
 
 
 def save_plot(filename, data, layout):
+    plotly.io.orca.config.server_url = "http://orca:9091"
+    plotly.io.orca.config.save()
     fig = go.Figure(data=data, layout=layout)
     if not os.path.exists(os.path.join("/", REPORT_IMAGE_DIR)):
         os.mkdir(os.path.join("/", REPORT_IMAGE_DIR))
