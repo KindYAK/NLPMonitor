@@ -48,7 +48,7 @@ class Command(BaseCommand):
                     source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
 
                 author = None
-                if author in row:
+                if "author" in row:
                     author_name = row['author'][:200]
                     if author_name and type(author_name) == str:
                         author = get_object_or_None(Author, name=author_name, corpus=corpus)
