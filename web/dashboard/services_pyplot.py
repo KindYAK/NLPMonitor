@@ -1,4 +1,9 @@
+from mainapp.templatetags.custom_stuff import remove_http
+
+
 def bar_positive_negative_data_layout(context, criterion):
+    if criterion.value_range_from >= 0:
+        return None, None
     data = [
         {
             'x': ["Негатив", "Нейтральные", "Позитив"],
@@ -93,4 +98,72 @@ def dynamics_posneg_data_layout(context, criterion):
             'pad': 5
         }
     }
+    return data, layout
+
+
+def bar_source_data_layout(context, criterion):
+    if criterion.value_range_from >= 0:
+        data = [
+            {
+                'x': [remove_http(source['key']) for source in context['source_weight'][criterion.id]],
+                'y': [round(source['value'], 2) for source in context['source_weight'][criterion.id]],
+                'type': 'bar'
+            }
+        ]
+    else:
+        sources = context['source_weight'][criterion.id]
+        for source in sources:
+            total_source = source['negative'] + source['neutral'] + source['positive']
+            source['negative_percent'] = round(source['negative'] / total_source * 100, 2)
+            source['neutral_percent'] = round(source['neutral'] / total_source * 100, 2)
+            source['positive_percent'] = round(source['positive'] / total_source * 100, 2)
+        sources = sorted(sources, key=lambda x: x['negative_percent'], reverse=True)
+        keys = []
+        negatives_by_source_percents = []
+        neutrals_by_source_percents = []
+        positives_by_source_percents = []
+        for source in sources:
+            key = source['key'].replace("https://", "").replace("http://", "")
+            if key.endswith("/"):
+                key = key[:-1]
+            keys.append(key)
+            negatives_by_source_percents.append(source['negative_percent'])
+            neutrals_by_source_percents.append(source['neutral_percent'])
+            positives_by_source_percents.append(source['positive_percent'])
+        data = [
+            {
+                'x': keys,
+                'y': negatives_by_source_percents,
+                'type': 'bar',
+                'name': 'Негативные',
+                'marker': {
+                    'color': '#d3322b',
+                },
+            },
+            {
+                'x': keys,
+                'y': neutrals_by_source_percents,
+                'type': 'bar',
+                'name': 'Нейтральные',
+                'marker': {
+                    'color': '#fee42c',
+                },
+            },
+            {
+                'x': keys,
+                'y': positives_by_source_percents,
+                'type': 'bar',
+                'name': 'Позитивные',
+                'marker': {
+                    'color': '#23964f',
+                }
+            }
+        ]
+    layout = {
+        'title': f'{criterion.name}',
+        'showlegend': False,
+        'bargap': 0.025,
+    }
+    if criterion.value_range_from < 0:
+        layout['barmode'] = 'stack'
     return data, layout

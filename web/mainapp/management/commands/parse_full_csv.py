@@ -47,12 +47,14 @@ class Command(BaseCommand):
                 if not source:
                     source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
 
-                author_name = row['author'][:200]
                 author = None
-                if author_name and type(author_name) == str:
-                    author = get_object_or_None(Author, name=author_name, corpus=corpus)
-                    if not author:
-                        author = Author.objects.create(name=author_name, corpus=corpus)
+                if "author" in row:
+                    author_name = row['author']
+                    if author_name and type(author_name) == str:
+                        author_name = author_name[:200]
+                        author = get_object_or_None(Author, name=author_name, corpus=corpus)
+                        if not author:
+                            author = Author.objects.create(name=author_name, corpus=corpus)
 
                 date = None
                 if row['date'] and type(row['date']) == str:

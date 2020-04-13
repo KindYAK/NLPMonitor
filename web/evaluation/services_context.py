@@ -139,7 +139,7 @@ def get_analytics_context(request, context, skip_cache=False):
     # Info by criterion
     top_news_total = set()
     for criterion in context['criterions']:
-        topics_dict, tm_dict = get_criterion_evals(context, top_news_total, criterion, documents_ids_to_filter, analytical_query, total_criterion_date_value_dict)
+        get_criterion_evals(context, top_news_total, criterion, documents_ids_to_filter, analytical_query, total_criterion_date_value_dict)
 
     # Info by group
     context['groups'] = [
@@ -158,8 +158,8 @@ def get_analytics_context(request, context, skip_cache=False):
                                                     context['topic_modelling'],
                                                     max_criterion_value_dict,
                                                     top_news_num=context['top_news_num'])
-    context['documents'] = unique_ize(documents_eval_dict.values(), key=lambda x: x['document'].id)[
-                           :context['top_news_num']]
+    context['documents'] = unique_ize(documents_eval_dict.values(),
+                                      key=lambda x: x['document'].id)[:context['top_news_num']]
     return context
 
 
