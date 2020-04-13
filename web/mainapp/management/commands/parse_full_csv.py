@@ -49,8 +49,9 @@ class Command(BaseCommand):
 
                 author = None
                 if "author" in row:
-                    author_name = row['author'][:200]
+                    author_name = row['author']
                     if author_name and type(author_name) == str:
+                        author_name = author_name[:200]
                         author = get_object_or_None(Author, name=author_name, corpus=corpus)
                         if not author:
                             author = Author.objects.create(name=author_name, corpus=corpus)
