@@ -40,14 +40,14 @@
     %%%%%%%%%%%%%%%%%%%%%%%%% Ключевые новости - позитив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \Needspace*{10\baselineskip}
     \section{Ключевые новости (Позитив)}
-    \begin{longtable}[H]{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
+    \begin{longtable}[H]{ | \BLOCK{for criterionv in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
         \hline
-        \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
+        \BLOCK{for criterionv in criterions}\hspace{0pt}\VAR{criterionv.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
         \hline
         \BLOCK{for document in top_documents}
-            \BLOCK{for criterion in criterions}
+            \BLOCK{for criterionv in criterions}
                 \BLOCK{if True}
-                    \VAR{document|get_item(criterion.id)|round(3)|str|e}
+                    \VAR{document|get_item(criterionv.id)|round(3)|str|e}
                 \BLOCK{else}
                     0,000
                 \BLOCK{endif} &
@@ -63,14 +63,14 @@
     \BLOCK{if bottom_documents}
         \Needspace*{10\baselineskip}
         \section{Ключевые новости (Негатив)}
-        \begin{longtable}[H]{ | \BLOCK{for criterion in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
+        \begin{longtable}[H]{ | \BLOCK{for criterionv in criterions} p{1.5cm} | \BLOCK{endfor} p{3cm} | p{6cm} | p{3cm} | }
             \hline
-            \BLOCK{for criterion in criterions}\hspace{0pt}\VAR{criterion.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
+            \BLOCK{for criterionv in criterions}\hspace{0pt}\VAR{criterionv.name|e}\BLOCK{endfor} & Дата & Заголовок & Источник \endhead
             \hline
             \BLOCK{for document in bottom_documents}
-                \BLOCK{for criterion in criterions}
+                \BLOCK{for criterionv in criterions}
                     \BLOCK{if True}
-                        \VAR{document|get_item(criterion.id)|round(3)|str|e}
+                        \VAR{document|get_item(criterionv.id)|round(3)|str|e}
                     \BLOCK{else}
                         0,000
                     \BLOCK{endif} &
@@ -78,6 +78,88 @@
                 \VAR{document.document.datetime|str|substr(0, 10)|e} &
                 \href{\VAR{document.document.url|str|e}}{\VAR{document.document.title|str|e}} &
                 \VAR{document.document.source|remove_http(1)|str|e}
+                \\ \hline
+            \BLOCK{endfor}
+        \end{longtable}
+    \BLOCK{endif}
+
+    %%%%%%%%%%%%%%%%%%%%%%%%% Ключевые топики - позитив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \section{\VAR{criterion.name|e} - главные топики по положительному влиянию}
+    \begin{longtable}[H]{ | p{5cm} | p{3cm} | p{3cm} | p{1.5cm} | p{1.5cm} | }
+        \hline
+        \hspace{0pt}Топик &
+        \hspace{0pt}Прогнозируемая резонансность &
+        \hspace{0pt}Прогнозируемая продолжительность &
+        \hspace{0pt}Тренд &
+        \hspace{0pt}Вес
+        \endhead
+        \hline
+        \BLOCK{for topic in posneg_top_topics|get_item(criterion.id)}
+            \VAR{topic.info.name|e} &
+
+            \BLOCK{if topic.resonance_score}
+                \VAR{topic.resonance_score|round(3)|str|e}
+            \BLOCK{else}
+                Фоновый топик
+            \BLOCK{endif} &
+
+            \BLOCK{if topic.period_days}
+                \VAR{topic.period_days|round(1)|str|e} дней\newline(Score: \VAR{topic.period_score|round(3)|str|e})
+            \BLOCK{else}
+                Фоновый топик
+            \BLOCK{endif}  &
+
+            \BLOCK{if topic.trend_score and topic.trend_score != 0}
+                \VAR{topic.trend_score|round(3)|str|e}
+                \BLOCK{if topic.score > 0}
+                    \faArrowUp
+                \BLOCK{else}
+                    \faArrowDown
+                \BLOCK{endif}
+            \BLOCK{endif} &
+
+            \VAR{topic.weight|round(3)|str|e}
+            \\ \hline
+        \BLOCK{endfor}
+    \end{longtable}
+
+    %%%%%%%%%%%%%%%%%%%%%%%%% Ключевые топики - негатив %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \BLOCK{if criterion.value_range_from < 0}
+        \section{\VAR{criterion.name|e} - главные топики по отрицательному влиянию}
+        \begin{longtable}[H]{ | p{5cm} | p{3cm} | p{3cm} | p{1.5cm} | p{1.5cm} | }
+            \hline
+            \hspace{0pt}Топик &
+            \hspace{0pt}Прогнозируемая резонансность &
+            \hspace{0pt}Прогнозируемая продолжительность &
+            \hspace{0pt}Тренд &
+            \hspace{0pt}Вес
+            \endhead
+            \hline
+            \BLOCK{for topic in posneg_bottom_topics|get_item(criterion.id)}
+                \VAR{topic.info.name|e} &
+
+                \BLOCK{if topic.resonance_score}
+                    \VAR{topic.resonance_score|round(3)|str|e}
+                \BLOCK{else}
+                    Фоновый топик
+                \BLOCK{endif} &
+
+                \BLOCK{if topic.period_days}
+                    \VAR{topic.period_days|round(1)|str|e} дней\newline(Score: \VAR{topic.period_score|round(3)|str|e})
+                \BLOCK{else}
+                    Фоновый топик
+                \BLOCK{endif}  &
+
+                \BLOCK{if topic.trend_score and topic.trend_score != 0}
+                    \VAR{topic.trend_score|round(3)|str|e}
+                    \BLOCK{if topic.score > 0}
+                        \faArrowUp
+                    \BLOCK{else}
+                        \faArrowDown
+                    \BLOCK{endif}
+                \BLOCK{endif} &
+
+                \VAR{topic.weight|round(3)|str|e}
                 \\ \hline
             \BLOCK{endfor}
         \end{longtable}
