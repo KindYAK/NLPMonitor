@@ -1,3 +1,4 @@
+from dashboard.util_pyplot import get_title_layout_update, get_axis_title_layout_update
 from mainapp.templatetags.custom_stuff import remove_http
 
 
@@ -15,10 +16,11 @@ def bar_positive_negative_data_layout(context, criterion):
         }
     ]
     layout = {
-        'title': f'{criterion.name}',
         'showlegend': False,
         'bargap': 0.025,
     }
+    layout.update(get_title_layout_update(criterion.name))
+    layout.update(get_axis_title_layout_update(ytitle="Количество документов"))
     return data, layout
 
 
@@ -34,22 +36,23 @@ def dynamics_data_layout(context, criterion):
         },
     ]
     layout = {
-        'title': f'Динамика - {criterion.name}',
         'xaxis': {
             'fixedrange': True
         },
         'yaxis': {
             'fixedrange': True,
         },
-        'height': 350,
+        'height': 370,
         'margin': {
             'l': 45,
             'r': 15,
             'b': 35,
-            't': 45,
+            't': 65,
             'pad': 5
         }
     }
+    layout.update(get_title_layout_update(f'Динамика - {criterion.name}'))
+    layout.update(get_axis_title_layout_update(xtitle="Дата (по неделям)", ytitle="Среднее значение"))
     return data, layout
 
 
@@ -81,7 +84,6 @@ def dynamics_posneg_data_layout(context, criterion):
         },
     ]
     layout = {
-        'title': f'Динамика - {criterion.name}',
         'legend': {'orientation': 'h'},
         'xaxis': {
             'fixedrange': True
@@ -89,15 +91,17 @@ def dynamics_posneg_data_layout(context, criterion):
         'yaxis': {
             'fixedrange': True,
         },
-        'height': 350,
+        'height': 370,
         'margin': {
             'l': 45,
             'r': 15,
             'b': 35,
-            't': 45,
+            't': 65,
             'pad': 5
         }
     }
+    layout.update(get_title_layout_update(f'Динамика - {criterion.name}'))
+    layout.update(get_axis_title_layout_update(xtitle="Дата (по неделям)", ytitle="Количество новостей"))
     return data, layout
 
 
@@ -159,11 +163,13 @@ def bar_source_data_layout(context, criterion):
                 }
             }
         ]
+
     layout = {
-        'title': f'{criterion.name}',
         'showlegend': False,
         'bargap': 0.025,
     }
+    layout.update(get_title_layout_update(f'{criterion.name}'))
+    layout.update(get_axis_title_layout_update(xtitle="Источник", ytitle="Количество новостей"))
     if criterion.value_range_from < 0:
         layout['barmode'] = 'stack'
     return data, layout
