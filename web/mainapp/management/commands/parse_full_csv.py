@@ -87,8 +87,9 @@ class Command(BaseCommand):
                                     num_views=self.row_int_parser(row, 'num_views'),
                                     )
 
-                if ('tags' not in row) or (not (row['tags'] and type(row['tags']) == str) and not (
-                        row['topic'] and type(row['topic']) == str)):
+                if ('tags' not in row) or ('topic' not in row)  \
+                        or not (row['tags'] and type(row['tags']) == str) \
+                        or not (row['topic'] and type(row['topic']) == str):
                     documents.append(document)
                     if len(documents) % db_chunksize == 0:
                         Document.objects.bulk_create(documents, ignore_conflicts=True)
