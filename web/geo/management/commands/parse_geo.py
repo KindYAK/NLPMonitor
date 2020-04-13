@@ -26,10 +26,11 @@ class Command(BaseCommand):
         }
         District.objects.bulk_create(districts_dict.values())
 
-        localities_list = list()
         print('Parsing Localities:')
+        localities_list = list()
+        longitude, latitude = df['Координаты'][0].split(', ')
         for row in df.iterrows():
-            longitude, latitude = None, None
+
             if isinstance(row[1]['Координаты'], str):
                 longitude, latitude = row[1]['Координаты'].split(', ')
 
