@@ -8,7 +8,8 @@ from mainapp.models import Document as ModelDocument
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_EMBEDDING, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
     ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
-    ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DOCUMENT_LOCATION
+    ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DOCUMENT_LOCATION, \
+    ES_INDEX_TOPIC_COMBOS
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -167,6 +168,35 @@ class TopicDocument(es.Document):
         }
 
 
+class TopicCombo(es.Document):
+    topic_ids = es.Keyword()
+    common_docs_ids = es.Keyword()
+    common_docs_num = es.Integer()
+
+    class Index:
+        name = ES_INDEX_TOPIC_COMBOS  # f"{ES_INDEX_TOPIC_COMBOS}_{tm}"
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 2,
+            "number_of_replicas": 1,
+            "max_result_window": 5000000,
+        }
+        mappings = {
+            "properties": {
+                "topic_ids": {
+                    "type": "keyword"
+                },
+                "common_docs_ids": {
+                    "type": "keyword",
+                },
+                "common_docs_num": {
+                    "type": "integer",
+                },
+            }
+        }
+
+
 class TopicDocumentUniqueIDs(es.Document):
     document_es_id = es.Keyword()
 
@@ -196,7 +226,7 @@ class DocumentEval(es.Document):
     topic_ids_bottom = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
+        name = ES_INDEX_DOCUMENT_EVAL  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}{_neg}"
         using = ES_CLIENT
 
         settings = {
