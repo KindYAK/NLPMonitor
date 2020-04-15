@@ -18,7 +18,13 @@ def es_document_location_search_factory(widget, **kwargs):
     params = widget.params_obj
     if params:
         for key, value in params.items():
-            s = s.filter('term', **{key: value})
+            if not value:
+                continue
+            if any(key.endswith(range_selector) for range_selector in ['__gte', '__lte', '__gt', '__lt']):
+                range_selector = key.split("__")[-1]
+                s = s.filter('range', **{key.replace(f"__{range_selector}", ""): {range_selector: value}})
+            else:
+                s = s.filter('term', **{key: value})
     return s
 
 
