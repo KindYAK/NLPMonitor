@@ -96,19 +96,6 @@ class SearchView(TemplateView):
         } for document in results[:relevant_count*2]]
         context['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
 
-        # TODO Temporary minister stub
-        sde = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_bigartm_test_1") \
-                .filter("terms", document_es_id=[d['document_es_id'] for d in context['documents']]) \
-                .source(("document_es_id", "value"))[:100]
-        r = sde.execute()
-        document_eval_dict = defaultdict(
-            int,
-            ((d.document_es_id, d.value) for d in r)
-        )
-        for document in context['documents']:
-            document['sentiment'] = document_eval_dict[document['document_es_id']]
-        # TODO END TEMP
-
         # Normalize dynamics
         for bucket in results.aggregations.dynamics.buckets:
             total_size = total_metrics_dict[bucket.key_as_string]['size']

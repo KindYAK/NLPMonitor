@@ -303,7 +303,6 @@
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
-                                <th>Тональность</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -317,7 +316,6 @@
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>
-                                    <td id="sentiment_{{ document.id }}">{{ document.sentiment|floatformat:3|unlocalize }}</td>
                                     <td>
                                         <a href="{% url 'mainapp:document_view' document.id %}" class="nav-link">
                                             <i class="nav-icon fas fa-eye nowrap" style="font-size: 36px;"
