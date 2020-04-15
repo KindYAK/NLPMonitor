@@ -1,19 +1,21 @@
 import csv
-import itertools
-import numpy as np
 
 from collections import defaultdict
 
 from elasticsearch_dsl import Search
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MODELLING
+from nlpmonitor.settings import (
+    ES_CLIENT,
+    ES_INDEX_TOPIC_DOCUMENT,
+    ES_INDEX_DOCUMENT,
+    ES_INDEX_TOPIC_MODELLING,
+    ES_INDEX_TOPIC_COMBOS
+)
 
 # #################### INIT ##########################################
-def geometrical_mean(data):
-    a = np.log(data)
-    return np.exp(a.sum() / len(a))
-
 topic_modelling = "bigartm_two_years"
 topic_weight_threshold = 0.05
+MAX_L = 3
+news_to_export = 5
 try:
     tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", name=topic_modelling).execute()[0]
 except:
@@ -44,71 +46,29 @@ for topic_id in topic_info_dict.keys():
     topic_info_dict[topic_id]['words'] = list(sorted(topic_words, key=lambda x: x.weight, reverse=True))[:30]
 
 # #################### COMBINATIONS ##########################################
-std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
-    .filter("range", topic_weight={"gte": topic_weight_threshold}).source(('topic_id', 'document_es_id'))
-n = std.count()
-
-topic_docs_dict = defaultdict(set)
-overall_docs = set()
-overall_topic_ids = set()
-for i, td in enumerate(std.scan()):
-    topic_docs_dict[td.topic_id].add(td.document_es_id)
-    overall_docs.add(td.document_es_id)
-    overall_topic_ids.add(td.topic_id)
-    if i % 10000 == 0:
-        print(f"{i}/{n} processed")
-
-topic_combinations = []
-# average_topic_len = sum((len(docs) for docs in topic_docs_dict.values())) / len(topic_docs_dict.keys())
-# average_topic_len = geometrical_mean([len(docs) for docs in topic_docs_dict.values()])
-MAX_L = 3
-MIN_VOLUME = 1 / len(overall_topic_ids)
-average_topic_len = len(overall_docs) * MIN_VOLUME
-for L in range(2, MAX_L + 1):
-    print(f"L = {L}")
-    for topics in itertools.combinations(topic_docs_dict.items(), L):
-        if L >= 3 and not any(any(topic_id in c['topics'] for c in topic_combinations) for topic_id, _ in topics):
-            continue
-        common_docs = None
-        topic_ids = set()
-        for topic_id, docs in topics:
-            if common_docs is None:
-                common_docs = set(docs)
-            else:
-                common_docs = common_docs.intersection(docs)
-            topic_ids.add(topic_id)
-        if len(common_docs) > average_topic_len / L:
-            topic_combinations.append(
-                {
-                    "topics": topic_ids,
-                    "common_docs": common_docs,
-                }
-            )
-            if len(topic_combinations) % 100 == 0:
-                print(f"{len(topic_combinations)} in list")
+stc = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_COMBOS}_{topic_modelling}")
 
 # #################### OUTPUT ##########################################
 output = []
-for topic_combo in topic_combinations:
-    topics = list(topic_combo['topics'])
-    if any(topic not in topic_info_dict for topic in topics):
+for topic_combo in stc.scan():
+    if any(topic not in topic_info_dict for topic in topic_combo.topic_ids):
         continue
     doc = defaultdict(int)
     doc.update({
-        "volume": len(topic_combo['common_docs'])
+        "volume": len(topic_combo.common_docs_ids)
     })
     # Topics in combo
     for i in range(MAX_L):
-        if i >= len(topics):
+        if i >= len(topic_combo.topic_ids):
             doc[f"topic_{i}_id"] = ""
             doc[f"topic_{i}_words"] = ""
         else:
-            doc[f"topic_{i}_id"] = topics[i]
-            doc[f"topic_{i}_words"] = ", ".join([word['word'] for word in topic_info_dict[topics[i]]['words']])
+            doc[f"topic_{i}_id"] = topic_combo.topic_ids[i]
+            doc[f"topic_{i}_words"] = ", ".join([word['word']
+                                                 for word in topic_info_dict[topic_combo.topic_ids[i]]['words']])
     # Top news
-    news_to_export = 5
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
-            .filter("terms", _id=list(topic_combo['common_docs'])) \
+            .filter("terms", _id=list(topic_combo.common_docs_ids)) \
             .source(('title', 'url',))[:news_to_export*5]
     top_news = s.execute()
     top_news_to_write = []
