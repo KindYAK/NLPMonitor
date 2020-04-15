@@ -14,7 +14,7 @@ from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .forms import DocumentSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize, get_user_group
-from .services_es_documents import execute_search
+from .services_es_documents import execute_search, es_filter
 
 
 def login_redirect(request):
@@ -57,6 +57,7 @@ class SearchView(TemplateView):
 
         # Total metrics
         sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
+        sd_total = es_filter(sd_total, "corpuses", search_request['corpuses'])
         sd_total.aggs.bucket(name="dynamics",
                              agg_type="date_histogram",
                              field="datetime",
