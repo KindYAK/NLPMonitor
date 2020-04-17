@@ -134,6 +134,7 @@ class DocumentDetailView(TemplateView):
         if cache.get(key):
             return context
         r = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", **{"id": kwargs['document_id']})[:1].execute()
+        # TODO Get user group
         if len(r) > 0:
             context['document'] = r[0]
         else:

@@ -12,9 +12,9 @@ from nlpmonitor.settings import (
 )
 
 # #################### INIT ##########################################
-topic_modelling = "bigartm_two_years"
+topic_modelling = "bigartm_education_two_years"
 topic_weight_threshold = 0.05
-MAX_L = 3
+MAX_L = 4
 news_to_export = 5
 try:
     tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", name=topic_modelling).execute()[0]
