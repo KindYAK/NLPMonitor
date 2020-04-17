@@ -5,7 +5,7 @@ from elasticsearch_dsl import Search
 
 from mainapp.models import *
 from mainapp.services import get_user_group
-from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING
+from nlpmonitor.settings import MIN_DOCS_PER_AUTHOR, MIN_DOCS_PER_TAG, ES_CLIENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_TOPIC_COMBOS
 
 
 class ChoiceFieldNoValidation(forms.ChoiceField):
@@ -33,7 +33,7 @@ class TopicChooseForm(forms.Form):
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, field_order=None, use_required_attribute=None,
-                 renderer=None, user=None):
+                 renderer=None, user=None, has_combo=False):
         super().__init__(data, files, auto_id, prefix, initial, error_class, label_suffix, empty_permitted, field_order,
                          use_required_attribute, renderer)
 
@@ -57,6 +57,11 @@ class TopicChooseForm(forms.Form):
                                                                          'datetime_from') and tm.datetime_from else f"") +
                              (f"По {tm.datetime_to[:10]} - " if hasattr(tm, 'datetime_to') and tm.datetime_to else f"")
                              ) for tm in topic_modellings if user.is_superuser or (group and tm.name.lower() in group.topic_modelling_names.split(",")))
+        if has_combo:
+            combo_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_TOPIC_COMBOS}_*").keys()
+            tms_with_combo = [ind.replace(f"{ES_INDEX_TOPIC_COMBOS}_", "").lower() for ind in combo_indices]
+            topic_modellings = filter(lambda x: x[0] in tms_with_combo, topic_modellings)
+            self.fields['topic_weight_threshold'].required = False
         self.fields['topic_modelling'].choices = topic_modellings
 
         # Get topic_weight_thresholds

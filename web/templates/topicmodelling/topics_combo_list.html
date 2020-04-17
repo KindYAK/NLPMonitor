@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load cache %}
+{% load l10n %}
+{% load dictionary_getter %}
+
+{% block title %}Список сочетаний топиков{% endblock %}
+{% block heading %}Список сочетаний топиков{% endblock %}
+
+{% block head %}
+    <!-- data tables -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.css' %}">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- Tempusdominus Bbootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- select2-bootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+    <!-- iCheck Bootstrap -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+    <style>
+        .form-group .row {
+            margin-bottom: 15px;
+        }
+        .form-group-intervals .row {
+            margin-bottom: 0;
+        }
+        .group-list {
+            list-style-type: none;
+        }
+        .remove-topic {
+            cursor: pointer;
+            color: red;
+        }
+        #evalValue {
+            width: 99%;
+            margin-top: 5px;
+        }
+        #evalTooltip {
+            padding: 5px;
+            margin-top: -3px;
+            display: inline-block;
+        }
+        .hide {
+            display: none;
+        }
+        #evalControl.col-md-12 {
+            padding: 0;
+        }
+        .is-evaluated {
+            color: #00ff84 !important;
+        }
+    </style>
+    <!-- List.js -->
+    <script src="{% static 'js_vendor/list.min.js' %}"></script>
+{% endblock %}
+
+{% block bc %}
+    <li class="breadcrumb-item"><a href="/venv">Media Analytics</a></li>
+    <li class="breadcrumb-item active">Список сочетаний топиков</li>
+{% endblock %}
+
+{% block content %}
+    {% if not error %}
+    {# TM select #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <form action="" method="GET">
+                <div class="card-header">
+                    <h3>Выбор тематического моделирования</h3>
+                </div>
+                <div class="card-body" style="padding-bottom: 0;">
+                    <div id="search-form">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4">{{ form.topic_modelling.label_tag }}</div>
+                                                <div class="col-md-8">{% render_field form.topic_modelling placeholder="ID" class="form-control select2 select2-single" %}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-block btn-info" type="submit">Поиск</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% cache 28800 topics_combo_list topic_modelling %}
+    {# Topics #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Топики</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <input class="form-control" type="text" id="topicSearchInput" placeholder="Поиск...">
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                    <div id="search-results">
+                        <table id="search-results-table" class="table table-bordered table-hover">
+                            <thead>
+                            <tr role="row">
+                                <th>Топик 1</th>
+                                <th>Топик 2</th>
+                                <th>Слова топика 1</th>
+                                <th>Слова топика 2</th>
+                                <th>Общий объём</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody  class="list" id="tableBody">
+                            {% for topic_combo in topic_combos %}
+                                <tr>
+                                    <td class="topic-name">
+                                        {{ topic_combo.topics.0.name }}
+                                    </td>
+                                    <td class="topic-name">
+                                        {{ topic_combo.topics.1.name }}
+                                    </td>
+                                    <td class="topic-words">{% for word in topic_combo.topics.0.words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2|unlocalize }}); {% endfor %}</td>
+                                    <td class="topic-words">{% for word in topic_combo.topics.1.words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2|unlocalize }}); {% endfor %}</td>
+                                    <td class="topic-size">{{ topic_combo.common_docs_len }}</td>
+                                    <td class="topic-actions">
+                                        <a href='{% url 'topicmodelling:topics_group_document_list' topic_modelling %}?topics=["{{ topic_combo.topics.0.id }}", "{{ topic_combo.topics.1.id }}"]' class="nav-link nowrap">
+                                            <i class="nav-icon fas fa-eye" style="font-size: 36px;"
+                                            data-toggle="tooltip" data-placement="top" title="Анализ по тематике"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endcache %}
+    {% else %}
+        <h1>{{ error }}</h1>
+    {% endif %}
+{% endblock %}
+
+{% block foot %}
+    <!-- DataTables -->
+    <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.js' %}"></script>
+    <!-- InputMask -->
+    <script src="{% static 'adminlte/plugins/inputmask/jquery.inputmask.bundle.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
+
+    <script src="{% static 'js/topics_combo_list_search_filter.js' %}"></script>
+{% endblock %}

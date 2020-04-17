@@ -10,7 +10,7 @@ from evaluation.models import EvalCriterion
 from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize, get_user_group
 from nlpmonitor.settings import ES_INDEX_META_DTM, \
-    ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT
+    ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT, ES_INDEX_TOPIC_COMBOS
 from topicmodelling.services import *
 
 
@@ -247,4 +247,33 @@ class DynamicTMView(TemplateView):
                 'value': values
             }
 
+        return context
+
+
+class TopicsComboListView(TemplateView):
+    template_name = "topicmodelling/topics_combo_list.html"
+    form_class = TopicChooseForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = self.form_class(data=self.request.GET, user=self.request.user, has_combo=True)
+        if not form.fields['topic_modelling'].choices:
+            context['error'] = "403 FORBIDDEN"
+            return context
+        context['form'] = form
+        if form.is_valid():
+            context['topic_modelling'] = form.cleaned_data['topic_modelling']
+        else:
+            context['topic_modelling'] = form.fields['topic_modelling'].choices[0][0]
+
+        key = make_template_fragment_key('topics_combo_list', [context['topic_modelling']])
+        if cache.get(key):
+            return context
+
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_COMBOS}_{context['topic_modelling']}") \
+                .source(('topics', 'common_docs_len'))[:10000]
+        topic_combos = s.execute()
+
+        # Create context
+        context['topic_combos'] = sorted([t for t in topic_combos], key=lambda x: x.common_docs_len, reverse=True)
         return context
