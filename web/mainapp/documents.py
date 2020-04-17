@@ -169,7 +169,7 @@ class TopicDocument(es.Document):
 
 
 class TopicCombo(es.Document):
-    topic_ids = es.Keyword()
+    topics = es.Object()
     common_docs_ids = es.Keyword()
     common_docs_num = es.Integer()
 
@@ -184,8 +184,8 @@ class TopicCombo(es.Document):
         }
         mappings = {
             "properties": {
-                "topic_ids": {
-                    "type": "keyword"
+                "topics": {
+                    "type": "object"
                 },
                 "common_docs_ids": {
                     "type": "keyword",

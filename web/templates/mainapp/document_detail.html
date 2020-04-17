@@ -9,7 +9,6 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 28800 document_detail view.kwargs %}
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-10 offset-lg-1">
@@ -39,5 +38,4 @@
         </div>
         <!-- /.row -->
     </div><!-- /.container-fluid -->
-    {% endcache %}
 {% endblock %}
