@@ -139,6 +139,12 @@ class DocumentDetailView(TemplateView):
             context['document'] = r[0]
         else:
             context['error'] = "Документ не найден - возможно он ещё не обработан в хранилище"
+            return context
+        group = get_user_group(self.request.user)
+        if not self.request.user.is_superuser and (not group or not group.corpuses.filter(name=r[0].corpus).exists()):
+            context['error'] = "403 FORBIDDEN"
+            return context
+        context['document'] = r[0]
         return context
 
 
