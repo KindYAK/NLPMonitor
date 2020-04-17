@@ -1,5 +1,6 @@
+import json
+
 from django.db import models
-from picklefield import PickledObjectField
 
 from dashboard.widgets_meta import TYPES_META_DICT
 
@@ -50,7 +51,7 @@ class Widget(models.Model):
     days_before_now = models.IntegerField(verbose_name='Дней назад', null=True, blank=True)
     monitoring_object = models.ForeignKey(MonitoringObject, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Объект мониторинга')
 
-    params = PickledObjectField(null=True, blank=True)
+    params = models.TextField(null=True, blank=True)
 
     @property
     def template_name(self):
@@ -59,6 +60,10 @@ class Widget(models.Model):
     @property
     def callable(self):
         return TYPES_META_DICT[self.type]['callable']
+
+    @property
+    def params_obj(self):
+        return json.loads(self.params)
 
     def __str__(self):
         return f"Виджет - {self.title}"
