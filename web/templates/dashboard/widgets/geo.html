@@ -12,8 +12,8 @@
             <script>
                 var data = [
                     {
-                      lon: [{% for g in geo %}{{ g.0}}, {% endfor %}],
-                      lat: [{% for g in geo %}{{ g.1}}, {% endfor %}],
+                      lon: [{% for g in geo %}{{ g.1}}, {% endfor %}],
+                      lat: [{% for g in geo %}{{ g.0}}, {% endfor %}],
                       radius:10,
                       z: [{% for g in geo %}{{g.2}}, {% endfor %}],
                       type: "densitymapbox",
