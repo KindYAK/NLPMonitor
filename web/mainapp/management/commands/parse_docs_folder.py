@@ -23,25 +23,27 @@ class Command(BaseCommand):
             corpus = Corpus.objects.create(name=corpus_name)
         db_chunksize = 10000
         documents = []
-        file_list = os.listdir(os.path.join(MEDIA_ROOT, folder_name))
-        for i, file in enumerate(file_list):
-            if i % 100 == 0:
-                print(f"{i}/{len(file_list)}")
-            media_name = "Гос программа"
-            source = get_object_or_None(Source, name=media_name, corpus=corpus)
-            if not source:
-                source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
-
-            with open(os.path.join(MEDIA_ROOT, folder_name, file), "r") as f:
-                text = f.read()
-            title = file[:Document._meta.get_field('title').max_length]
-            title = ".".join(title.split(".")[:-1])
-            document = Document(source=source,
-                                text=text,
-                                title=title
-            )
-            documents.append(document)
-            if len(documents) % db_chunksize == 0:
-                Document.objects.bulk_create(documents, ignore_conflicts=True)
-                documents = []
+        i = 0
+        file_list = os.walk(os.path.join(MEDIA_ROOT, folder_name))
+        for dirpath, dirnames, filenames in file_list:
+            for file in filenames:
+                if i % 100 == 0:
+                    print(f"{i}")
+                i += 1
+                media_name = "Гос программа"
+                source = get_object_or_None(Source, name=media_name, corpus=corpus)
+                if not source:
+                    source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
+                with open(os.path.join(MEDIA_ROOT, folder_name, file), "r") as f:
+                    text = f.read()
+                title = file[:Document._meta.get_field('title').max_length]
+                title = ".".join(title.split(".")[:-1])
+                document = Document(source=source,
+                                    text=text,
+                                    title=title
+                )
+                documents.append(document)
+                if len(documents) % db_chunksize == 0:
+                    Document.objects.bulk_create(documents, ignore_conflicts=True)
+                    documents = []
         Document.objects.bulk_create(documents, ignore_conflicts=True)
