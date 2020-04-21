@@ -35,7 +35,10 @@ class Command(BaseCommand):
                 if not source:
                     source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
                 with open(os.path.join(dirpath, file), "r") as f:
-                    text = f.read()
+                    try:
+                        text = f.read()
+                    except UnicodeDecodeError:
+                        print(dirpath, file)
                 title = file[:Document._meta.get_field('title').max_length]
                 title = ".".join(title.split(".")[:-1])
                 document = Document(source=source,
