@@ -35,5 +35,10 @@ TYPES_META_DICT = {
         "name": "Source distribution",
         "callable": source_distribution,
         "template_name": "dashboard/widgets/source_distribution.html",
-    }
+    },
+    7: {
+        "name": "Map distribution",
+        "callable": geo,
+        "template_name": "dashboard/widgets/geo.html",
+    },
 }

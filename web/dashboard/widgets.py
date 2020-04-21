@@ -1,10 +1,10 @@
 import datetime
 
-from dashboard.services import es_document_eval_search_factory
+from dashboard.services import es_document_eval_search_factory, es_document_location_search_factory
 from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
     get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict, \
     smooth_buckets, normalize_documents_eval_dynamics_with_virt_negative
-
+from .util import location_buckets_parser
 
 def overall_positive_negative(widget):
     context_update = dict()
@@ -222,4 +222,17 @@ def top_topics(widget):
                                           topics_dict, tm_dict, 0.05, last_date)
     context_update[f'bottom_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[0].bottom_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
+    return context_update
+
+
+def geo(widget):
+    context_update = dict()
+    s = es_document_location_search_factory(widget)
+    if 'location_level' not in widget.params_obj:
+        s = s.filter('term', **{'location_level.keyword': 'Населенный пункт'})
+        s.aggs.bucket(name="criterion", agg_type="terms", field="location_name.keyword")
+        s.aggs['criterion'].metric(name='criterion_value_sum', agg_type='avg', field='criterion_bigartm_two_years_1')
+        results = s[:s.count()].execute()
+        buckets = results.aggregations.criterion.buckets
+        context_update[f'lat_lon_z_data_{widget.id}'] = location_buckets_parser(buckets)
     return context_update
