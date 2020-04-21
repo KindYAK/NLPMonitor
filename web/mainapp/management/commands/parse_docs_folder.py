@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 source = get_object_or_None(Source, name=media_name, corpus=corpus)
                 if not source:
                     source = Source.objects.create(name=media_name, url=media_name, corpus=corpus)
-                with open(os.path.join(MEDIA_ROOT, folder_name, file), "r") as f:
+                with open(os.path.join(dirpath, file), "r") as f:
                     text = f.read()
                 title = file[:Document._meta.get_field('title').max_length]
                 title = ".".join(title.split(".")[:-1])
