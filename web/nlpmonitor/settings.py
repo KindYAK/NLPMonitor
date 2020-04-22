@@ -207,7 +207,7 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
-ES_INDEX_DOCUMENT = 'main'
+ES_INDEX_DOCUMENT = 'main_sharded'
 ES_INDEX_EMBEDDING = 'embedding'
 ES_INDEX_TOPIC_MODELLING = 'topic_modelling'
 ES_INDEX_META_DTM = 'meta_dtm'
@@ -222,7 +222,7 @@ ES_INDEX_DOCUMENT_EVAL = 'document_eval'  # f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{cri
 ES_INDEX_DOCUMENT_LOCATION = 'document_location'  # f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}"
 ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS = 'unique_ids_document_eval'  # f"{ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS}_{tm}"
 ES_INDEX_DICTIONARY_INDEX = 'dictionary_index'
-ES_INDEX_DICTIONARY_WORD = 'dictionary_word'
+ES_INDEX_DICTIONARY_WORD = 'dictionary_word'   # f"{ES_INDEX_DICTIONARY_WORD}_{name}{_temp}"
 ES_INDEX_CUSTOM_DICTIONARY_WORD = 'custom_dictionary_word'
 
 from elasticsearch import Elasticsearch

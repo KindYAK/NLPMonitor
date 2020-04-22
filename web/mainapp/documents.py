@@ -442,6 +442,7 @@ class DictionaryWord(es.Document):
     is_stop_word = es.Boolean()
     is_latin = es.Boolean()
     is_kazakh = es.Boolean()
+    n_gram_len = es.Integer()
     pos_tag = es.Keyword()
     word_len = es.Integer()
 
@@ -459,8 +460,81 @@ class DictionaryWord(es.Document):
     word_normal_first_capital_ratio = es.Float()
 
     class Index:
-        name = ES_INDEX_DICTIONARY_WORD
+        name = ES_INDEX_DICTIONARY_WORD # f"{ES_INDEX_DICTIONARY_WORD}_{name}{_temp}"
         using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 3,
+            "number_of_replicas": 1,
+        }
+
+        mappings = {
+            "properties": {
+                "dictionary": {
+                    "type": "keyword",
+                },
+                "word": {
+                    "type": "keyword",
+                },
+                "word_normal": {
+                    "type": "keyword",
+                },
+                "is_in_pymorphy2_dict": {
+                    "type": "boolean",
+                },
+                "is_multiple_normals_in_pymorphy2": {
+                    "type": "boolean",
+                },
+                "is_stop_word": {
+                    "type": "boolean",
+                },
+                "is_latin": {
+                    "type": "boolean",
+                },
+                "is_kazakh": {
+                    "type": "boolean",
+                },
+                "n_gram_len": {
+                    "type": "integer",
+                },
+                "pos_tag": {
+                    "type": "keyword",
+                },
+                "word_len": {
+                    "type": "integer",
+                },
+                "word_frequency": {
+                    "type": "integer",
+                },
+                "word_normal_frequency": {
+                    "type": "integer",
+                },
+                "document_frequency": {
+                    "type": "integer",
+                },
+                "document_normal_frequency": {
+                    "type": "integer",
+                },
+                "word_frequency_relative": {
+                    "type": "float",
+                },
+                "word_normal_frequency_relative": {
+                    "type": "float",
+                },
+                "document_frequency_relative": {
+                    "type": "float",
+                },
+                "document_normal_frequency_relative": {
+                    "type": "float",
+                },
+                "word_first_capital_ratio": {
+                    "type": "float",
+                },
+                "word_normal_first_capital_ratio": {
+                    "type": "float",
+                },
+            },
+        }
 
 
 class Dictionary(es.Document):
