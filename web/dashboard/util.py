@@ -101,10 +101,13 @@ def isinstance_validator(array):
 def location_buckets_parser(buckets):
     from geo.models import Locality
 
+    magnitude = [bucket.criterion_value_sum.value for bucket in buckets]
+    mag_max, mag_min = max(magnitude), min(magnitude)
+    scaled_data = [int((m - mag_min) * 100 / (mag_max - mag_min)) for m in magnitude]
     coord_and_z = dict()
     loc_long_lat = {elem['name']: [elem['longitude'], elem['latitude']] for elem in Locality.objects.values()}
-    for bucket in buckets:
-        coord_and_z[bucket.key] = loc_long_lat[bucket.key] + [int(100 * bucket.criterion_value_sum.value)]
+    for i, bucket in enumerate(buckets):
+        coord_and_z[bucket.key] = loc_long_lat[bucket.key] + [scaled_data[i]]
     coord_and_z = list(coord_and_z.values())
 
     return coord_and_z

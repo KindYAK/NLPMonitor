@@ -7,6 +7,11 @@
 {% with widget.id|stringformat:"s" as widget_id %}
     {% with "lat_lon_z_data_"|add:widget_id as geo_data %}
         {% get_by_name geo_data as geo %}
+        {{ sorted_geo }}
+        <h5><strong>Num of dots:</strong>  {{ coords_meta.0 }} </h5>
+        <h5><strong>Buckets len:</strong>  {{ coords_meta.1 }}</h5>
+        <h5><strong>After aggs execute len:</strong>  {{ coords_meta.2 }}</h5>
+
         <div id="geo-plots">
             <div class="geo-plot" id="geoMap_{{ widget.id }}"></div>
             <script>
@@ -21,9 +26,9 @@
                       hoverinfo: 'skip'
                     }];
                 var layout = {
-                    mapbox: {center: {lon: 48, lat: 50}, style: "outdoors", zoom: 2},
+                    mapbox: {center: {lon: 65, lat: 50}, style: "outdoors", zoom: 3},
                     coloraxis: {colorscale: "Jet"}, title: {text: "Geo Topic Modelling"},
-                    width: 550, height: 600, margin: {l: 45,
+                    width: 700, height: 600, margin: {l: 45,
                         r: 15,
                         b: 35,
                         t: 45,
