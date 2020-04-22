@@ -459,7 +459,7 @@ class DictionaryWord(es.Document):
     word_normal_first_capital_ratio = es.Float()
 
     class Index:
-        name = ES_INDEX_DICTIONARY_WORD
+        name = ES_INDEX_DICTIONARY_WORD # f"{ES_INDEX_DICTIONARY_WORD}_{name}{_temp}"
         using = ES_CLIENT
 
 
