@@ -232,7 +232,7 @@ def geo(widget):
         s = s.filter('term', **{'location_level.keyword': 'Населенный пункт'})
         s.aggs.bucket(name="criterion", agg_type="terms", field="location_name.keyword")
         s.aggs['criterion'].metric(name='criterion_value_sum', agg_type='avg', field='criterion_bigartm_two_years_1')
-        results = s[:10_000].execute()
+        results = s[:100_000_000].execute()
         buckets = results.aggregations.criterion.buckets
         data = location_buckets_parser(buckets)
         context_update[f'lat_lon_z_data_{widget.id}'] = data
