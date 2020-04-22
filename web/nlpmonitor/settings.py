@@ -207,7 +207,7 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
-ES_INDEX_DOCUMENT = 'main'
+ES_INDEX_DOCUMENT = 'main_sharded'
 ES_INDEX_EMBEDDING = 'embedding'
 ES_INDEX_TOPIC_MODELLING = 'topic_modelling'
 ES_INDEX_META_DTM = 'meta_dtm'
