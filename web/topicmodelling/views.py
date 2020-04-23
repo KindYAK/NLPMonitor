@@ -106,7 +106,8 @@ class TopicDocumentListView(TemplateView):
         topic_documents, number_of_documents = get_current_topics_metrics(kwargs['topic_modelling'],
                                                                           topics,
                                                                           context['granularity'],
-                                                                          context['topic_weight_threshold']
+                                                                          context['topic_weight_threshold'],
+                                                                          intersection=self.request.GET.get("intersection", "") == "1"
                                                                           )
 
         # Get documents, set weights
