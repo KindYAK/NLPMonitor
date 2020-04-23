@@ -7,32 +7,41 @@
 {% with widget.id|stringformat:"s" as widget_id %}
     {% with "lat_lon_z_data_"|add:widget_id as geo_data %}
         {% get_by_name geo_data as geo %}
-        <div id="geo-plots">
-            <div class="geo-plot" id="geoMap_{{ widget.id }}"></div>
-            <script>
-                var data = [
-                    {
-                      lon: [{% for g in geo %}{{ g.1}}, {% endfor %}],
-                      lat: [{% for g in geo %}{{ g.0}}, {% endfor %}],
-                      radius:10,
-                      z: [{% for g in geo %}{{g.2}}, {% endfor %}],
-                      type: "densitymapbox",
-                      coloraxis: 'coloraxis',
-                      hoverinfo: 'skip'
-                    }];
-                var layout = {
-                    mapbox: {center: {lon: 48, lat: 50}, style: "outdoors", zoom: 2},
-                    coloraxis: {colorscale: "Jet"}, title: {text: "Geo Topic Modelling"},
-                    width: 550, height: 600, margin: {l: 45,
-                        r: 15,
-                        b: 35,
-                        t: 45,
-                        pad: 5}};
+            {% with "tm_"|add:widget_id as tm %}
+                {% get_by_name tm as tm_data %}
+                    {% with "criterion_"|add:widget_id as crit %}
+                        {% get_by_name crit as crit_data %}
+                            <h5><center><strong>Topic modelling: </strong>{{ tm_data }}</center></h5>
+                            <h5><center><strong>Criterion: </strong>{{ crit_data }}</center></h5>
+                            <hr>
+                                <div id="geo-plots">
+                                    <div class="geo-plot" id="geoMap_{{ widget.id }}"></div>
+                                    <script>
+                                        var data = [
+                                            {
+                                              lon: [{% for g in geo %}{{ g.1}}, {% endfor %}],
+                                              lat: [{% for g in geo %}{{ g.0}}, {% endfor %}],
+                                              radius:10,
+                                              z: [{% for g in geo %}{{g.2}}, {% endfor %}],
+                                              type: "densitymapbox",
+                                              coloraxis: 'coloraxis',
+                                              hoverinfo: 'skip'
+                                            }];
+                                        var layout = {
+                                            mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
+                                            coloraxis: {colorscale: "Jet"},
+                                            width: 850, height: 600, margin: {l: 45,
+                                                r: 15,
+                                                b: 35,
+                                                t: 25,
+                                                pad: 5}};
 
-                var config = {mapboxAccessToken: "pk.eyJ1Ijoic2Fuemhhcm1yeiIsImEiOiJjazh6dXZpMHIwbTAzM3FsNnVseTh3aHJ0In0.i2Ycpumv-EhdDvHBHt_48w"};
+                                        var config = {mapboxAccessToken: "pk.eyJ1Ijoic2Fuemhhcm1yeiIsImEiOiJjazh6dXZpMHIwbTAzM3FsNnVseTh3aHJ0In0.i2Ycpumv-EhdDvHBHt_48w"};
 
-                Plotly.newPlot('geoMap_{{ widget.id }}', data, layout, config);
-            </script>
-        </div>
+                                        Plotly.newPlot('geoMap_{{ widget.id }}', data, layout, config);
+                                    </script>
+                                </div>
+                {% endwith %}
+            {% endwith %}
     {% endwith %}
 {% endwith %}
