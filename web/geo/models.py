@@ -32,8 +32,8 @@ class Locality(models.Model):
 
     name = models.CharField(verbose_name='Населенный пункт', max_length=50, null=False, blank=False)
     kato_code = models.BigIntegerField(verbose_name='Код КАТО', blank=False, null=False, unique=True)
-    latitude = models.FloatField(verbose_name='Широта', blank=True, null=True)
-    longitude = models.FloatField(verbose_name='Долгота', blank=True, null=True)
+    latitude = models.CharField(verbose_name='Широта', blank=True, null=True, max_length=50)
+    longitude = models.CharField(verbose_name='Долгота', blank=True, null=True, max_length=50)
     district = models.ForeignKey(District, on_delete=models.CASCADE)
 
     def __str__(self):
