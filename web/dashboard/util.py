@@ -108,7 +108,7 @@ def location_buckets_parser(buckets):
         else:
             magnitude.append(0)
     mag_max, mag_min = max(magnitude), min(magnitude)
-    scaled_data = [int((m - mag_min) * 10 / (mag_max - mag_min)) for m in magnitude]
+    scaled_data = [abs(int((m - mag_min) * 10 / (mag_max - mag_min) - 10)) for m in magnitude]
     coord_and_z = dict()
     loc_long_lat = {elem['name']: [elem['longitude'], elem['latitude']] for elem in Locality.objects.values()}
     for i, bucket in enumerate(buckets):
