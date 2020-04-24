@@ -115,12 +115,13 @@ def get_documents_with_weights(topic_documents):
     return documents
 
 
-def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weight_threshold):
+def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weight_threshold, intersection=False):
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
-              .filter("terms", topic_id=topics).sort("-topic_weight") \
+              .filter("terms", topic_id=topics) \
               .filter("range", topic_weight={"gte": topic_weight_threshold}) \
               .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
               .filter("range", datetime={"lte": datetime.datetime.now().date()}) \
+              .sort("-topic_weight") \
               .source(['document_es_id', 'topic_weight'])[:100]
     std.aggs.bucket(name="dynamics",
                     agg_type="date_histogram",
@@ -129,6 +130,20 @@ def get_current_topics_metrics(topic_modelling, topics, granularity, topic_weigh
         .metric("dynamics_weight", agg_type="sum", field="topic_weight")
     std.aggs.bucket(name="source", agg_type="terms", field="document_source") \
         .metric("source_weight", agg_type="sum", field="topic_weight")
+    if intersection:
+        std_intersection = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
+                  .filter("terms", topic_id=topics) \
+                  .filter("range", topic_weight={"gte": topic_weight_threshold}) \
+                  .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
+                  .filter("range", datetime={"lte": datetime.datetime.now().date()}) \
+                  .sort("-topic_weight") \
+                  .source(['document_es_id', 'topic_id'])[:10000]
+        td_intersection = std_intersection.execute()
+        document_topics_dict = defaultdict(list)
+        for td in td_intersection:
+            document_topics_dict[td.document_es_id].append(td.topic_id)
+        ids_to_filter = [document_id for document_id, topics in document_topics_dict.items() if len(topics) == 2]
+        std = std.filter("terms", document_es_id=ids_to_filter)
     topic_documents = std.execute()
     return topic_documents, std.count().value
 
