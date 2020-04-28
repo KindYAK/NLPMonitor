@@ -19,13 +19,13 @@
                                     <script>
                                         var data = [
                                             {
-                                              lon: [{% for g in geo %}{{ g.1}}, {% endfor %}],
                                               lat: [{% for g in geo %}{{ g.0}}, {% endfor %}],
-                                              radius:10,
+                                              lon: [{% for g in geo %}{{ g.1}}, {% endfor %}],
                                               z: [{% for g in geo %}{{g.2}}, {% endfor %}],
+                                              radius:[{% for g in geo %}{{ g.3}}, {% endfor %}],
                                               type: "densitymapbox",
                                               coloraxis: 'coloraxis',
-                                              hoverinfo: 'skip'
+                                              hoverinfo: 'skip',
                                             }];
                                         var layout = {
                                             mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
