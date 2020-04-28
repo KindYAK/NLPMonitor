@@ -111,7 +111,7 @@ def location_buckets_parser(buckets):
         else:
             magnitude.append(0)
     scaled_data = list(map(lambda x: abs(x - 10), scale(data=magnitude, scale_range=(1, 10))))
-    scaled_radius = scale(data=radius, scale_range=(25, 30))
+    scaled_radius = scale(data=radius, scale_range=(15, 30))
     coord_and_z = dict()
     loc_long_lat = {elem['name']: [elem['longitude'][:5] + str(int(random.random() * 100_000)),
                                    elem['latitude'][:5] + str(int(random.random() * 100_000))]
