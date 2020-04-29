@@ -54,9 +54,9 @@ def get_topics_with_meta(topic_modelling, topic_weight_threshold, is_multi_corpu
         max_word_weight = max((word.weight for word in topic.topic_words))
         for topic_word in topic.topic_words:
             topic_word.weight /= max_word_weight
-            topic_word.word = topic_word.word[0].upper() + topic_word.word[1:]  # Stub - upper case
+            topic_word.word = "_".join((word[0].upper() + word[1:]) for word in topic_word.word.split("_"))  # Stub - upper case
         # Stub - topic name upper case
-        topic.name = ", ".join([w[0].upper() + w[1:] for w in topic.name.split(", ")])
+        topic.name = ", ".join([s[0].upper() + s[1:] for w in topic.name.split(", ") for s in w.split("_") ])
 
     # Normalize topic weights by max
     max_topic_weight = max((topic.weight for topic in topics))

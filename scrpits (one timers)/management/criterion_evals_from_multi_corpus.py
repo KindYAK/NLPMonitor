@@ -10,9 +10,9 @@ def get_corpus_weight(topic):
     return topic.corpus_weights[target_corpus].weight_sum if target_corpus in topic.corpus_weights else 0
 
 
-topic_modelling = "bigartm_two_years_main_and_gos"
-target_corpus = "gos"
-criterion_name = "Гос. программы (общий ТМ)"
+topic_modelling = "bigartm_two_years_rus_and_rus_propaganda"
+target_corpus = "rus"
+criterion_name = "Объективность (RU)"
 
 topics = get_topics_with_meta(topic_modelling=topic_modelling,
                               topic_weight_threshold=0.05,
