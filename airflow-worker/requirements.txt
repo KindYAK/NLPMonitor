@@ -3,3 +3,4 @@
 scrapy_proxies==0.4
 proxybroker==0.3.2
 pymystem3==0.2.0
+bert-serving-client==1.10.0
