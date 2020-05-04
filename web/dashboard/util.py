@@ -98,7 +98,7 @@ def isinstance_validator(array):
         return array
 
 
-def location_buckets_parser(buckets):
+def location_buckets_parser(buckets, crit_type):
     from geo.models import Locality
     import random
 
@@ -110,7 +110,9 @@ def location_buckets_parser(buckets):
             magnitude.append(bucket.criterion_value_sum.value)
         else:
             magnitude.append(0)
-    scaled_data = list(map(lambda x: abs(x - 10), scale(data=magnitude, scale_range=(1, 10))))
+    scaled_data = scale(data=magnitude, scale_range=(1, 10))
+    if crit_type == 'негатив':
+        scaled_data = list(map(lambda x: abs(x - 10), scaled_data))
     scaled_radius = scale(data=radius, scale_range=(15, 30))
     coord_and_z = dict()
     loc_long_lat = {elem['name']: [elem['longitude'][:5] + str(int(random.random() * 100_000)),
@@ -127,8 +129,18 @@ def location_buckets_parser(buckets):
 def scale(data, scale_range):
     from sklearn.preprocessing import MinMaxScaler
     import numpy as np
+
     scaler = MinMaxScaler(feature_range=scale_range)
-    scaled_data = scaler.fit_transform(np.array(data).reshape(-1, 1)).reshape(1, -1)[0]
-    scaled_data = list(map(lambda x: int(round(x)), scaled_data))
+    scaled_data = list(map(lambda x: int(round(x)),
+                           scaler.fit_transform(np.array(data).reshape(-1, 1)).reshape(1, -1)[0]))
     return scaled_data
 
+
+def criterion_map_parser(widget):
+    from dashboard.criterions_meta import CRITERIONS_META
+    crits = CRITERIONS_META[widget.criterion_id]['crits']   # TODO check on another criterions
+    colormaps = CRITERIONS_META[widget.criterion_id]['colormap']
+    params = widget.params_obj
+    k = [key.split('__')[-1] for key in params.keys() if key.startswith('criterion')][0]
+    return crits[k], colormaps[crits[k]]
+    # TODO create all criterions parser, now only pos/neg
