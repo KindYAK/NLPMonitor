@@ -25,7 +25,7 @@
                 column-count: 2;
             }
         }
-        @media (min-width: 1920px) {
+        @media (min-width: 2700px) {
             .card-columns {
                 -webkit-column-count: 3;
                 -moz-column-count: 3;
@@ -65,7 +65,11 @@
             {% for widget in widgets %}
                 {% cache 28800 widget widget.id %}
                     <!-- Widget -->
-                    <div class="card">
+                    {% if widget.type == 7 %}
+                        <div class="card" style="width: 900px">
+                    {% else %}
+                        <div class="card">
+                    {% endif %}
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="{{ widget.icon_class }} mr-1"></i>
