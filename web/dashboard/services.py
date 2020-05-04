@@ -16,12 +16,17 @@ def es_document_location_search_factory(widget, **kwargs):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT_LOCATION)
     s = es_default_fields_parser(widget, s)
     params = widget.params_obj
+    if 'location_level' not in params:  # TODO fix this shit, now we need this because of default locality maps,
+                                        # TODO in future we need to parse all levels(locality, area, district)
+        s = s.filter('term', **{'location_level.keyword': 'Населенный пункт'})
     if params:
         for key, value in params.items():
             if not value:
                 continue
             if any(key.endswith(range_selector) for range_selector in ['__gte', '__lte', '__gt', '__lt']):
                 range_selector = key.split("__")[-1]
+                if key == f'criterion__{range_selector}':
+                    key = f'criterion_{widget.topic_modelling_name}_{widget.criterion_id}__{range_selector}'
                 s = s.filter('range', **{key.replace(f"__{range_selector}", ""): {range_selector: value}})
             else:
                 s = s.filter('term', **{key: value})
