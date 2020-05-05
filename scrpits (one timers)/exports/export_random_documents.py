@@ -6,7 +6,8 @@ from elasticsearch_dsl import Search
 
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 
-corpus = "main"
+corpus = ["rus", "rus_propaganda"]
+datetime_from = datetime.datetime(2018, 1, 1)
 res = ES_CLIENT.search(index=ES_INDEX_DOCUMENT, size=2000, body={
     "query": {
         "function_score": {
@@ -21,14 +22,14 @@ res = ES_CLIENT.search(index=ES_INDEX_DOCUMENT, size=2000, body={
                 "bool": {
                     "must": [
                         {
-                            "term": {
+                            "terms": {
                                 "corpus": corpus
                             },
                         },
                         {
                             "range": {
                                 "datetime": {
-                                    "gte": datetime.datetime(2018, 1, 1)
+                                    "gte": datetime_from
                                 }
                             }
                         }
@@ -40,7 +41,7 @@ res = ES_CLIENT.search(index=ES_INDEX_DOCUMENT, size=2000, body={
 })
 
 tm = "bigartm_two_years_rus_and_rus_propaganda"
-criterion_id = 34
+criterion_id = 32
 
 s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion_id}")
 s = s.filter('terms', document_es_id=[hit['_id'] for hit in res['hits']['hits']])
@@ -60,7 +61,7 @@ for hit in res['hits']['hits']:
             "title": hit['_source']['title'],
             "datetime": hit['_source']['datetime'],
             "source": hit['_source']['source'],
-            "url": hit['_source']['url'],
+            "url": hit['_source']['url'] if 'url' in hit['_source'] else "",
             "value": document_eval_dict[hit['_id']],
         }
     )
@@ -69,7 +70,7 @@ for hit in res['hits']['hits']:
 #     f.write(json.dumps(output))
 
 keys = output[0].keys()
-with open(f'/output2.csv', 'w') as output_file:
+with open(f'/output.csv', 'w') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(output)
