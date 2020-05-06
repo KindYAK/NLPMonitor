@@ -603,6 +603,7 @@ class Mappings(es.Document):
 class ClusterSource(es.Document):
     name = es.Keyword()
     clusters = es.Object()
+    clustering_params = es.Object()
 
     class Index:
         name = ES_INDEX_SOURCE_CLUSTERS
@@ -619,6 +620,9 @@ class ClusterSource(es.Document):
                     "type": "keyword",
                 },
                 "clusters": {
+                    "type": "object",
+                },
+                "clustering_params": {
                     "type": "object",
                 },
             },
