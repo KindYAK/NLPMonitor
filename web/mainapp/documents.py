@@ -9,7 +9,7 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_EMBEDDING, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
     ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
     ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DOCUMENT_LOCATION, \
-    ES_INDEX_TOPIC_COMBOS
+    ES_INDEX_TOPIC_COMBOS, ES_INDEX_SOURCE_CLUSTERS
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -596,5 +596,30 @@ class Mappings(es.Document):
                 "topic_modelling_second_to": {
                     "type": "date"
                 }
+            },
+        }
+
+
+class ClusterSource(es.Document):
+    name = es.Keyword()
+    clusters = es.Object()
+
+    class Index:
+        name = ES_INDEX_SOURCE_CLUSTERS
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+        }
+
+        mappings = {
+            "properties": {
+                "name": {
+                    "type": "keyword",
+                },
+                "clusters": {
+                    "type": "object",
+                },
             },
         }
