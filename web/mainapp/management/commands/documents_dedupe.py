@@ -15,7 +15,8 @@ class Command(BaseCommand):
                 doc_dupe = None
             if doc_dupe:
                 unique_collisions += 1
-                print("Deleting duplicate", unique_collisions)
+                if unique_collisions % 10000 == 0:
+                    print("Deleting duplicate", unique_collisions)
                 doc.delete()
             i += 1
             if i % 100000 == 0:
