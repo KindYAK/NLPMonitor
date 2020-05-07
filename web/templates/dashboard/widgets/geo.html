@@ -50,7 +50,7 @@
                                                             {
                                                               lat:   [{% for g in geo %}{{g.0}},{% endfor %}],
                                                               lon:   [{% for g in geo %}{{g.1}},{% endfor %}],
-                                                              z:     1,
+                                                              z:     [{% for g in geo %}{{g.2}},{% endfor %}],
                                                               radius:10,
                                                               type: "densitymapbox",
                                                               coloraxis: 'coloraxis',
