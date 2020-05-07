@@ -36,20 +36,8 @@
                                                               coloraxis: 'coloraxis',
                                                               hoverinfo: 'skip',
                                                             }];
-                                                        {% else %}
-                                                            var data = [
-                                                            {
-                                                              lat:   [{% for g in geo %}{{g.0}},{% endfor %}],
-                                                              lon:   [{% for g in geo %}{{g.1}},{% endfor %}],
-                                                              z:     1,
-                                                              radius:15,
-                                                              type: "densitymapbox",
-                                                              coloraxis: 'coloraxis',
-                                                              hoverinfo: 'skip',
-                                                            }];
-                                                        {% endif %}
 
-                                                        var layout = {
+                                                            var layout = {
                                                             mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
                                                             coloraxis: {colorscale: "{{ cm }}"},
                                                             width: 850, height: 600, margin: {l: 45,
@@ -57,6 +45,27 @@
                                                                 b: 35,
                                                                 t: 25,
                                                                 pad: 5}};
+                                                        {% else %}
+                                                            var data = [
+                                                            {
+                                                              lat:   [{% for g in geo %}{{g.0}},{% endfor %}],
+                                                              lon:   [{% for g in geo %}{{g.1}},{% endfor %}],
+                                                              z:     1,
+                                                              radius:10,
+                                                              type: "densitymapbox",
+                                                              coloraxis: 'coloraxis',
+                                                              hoverinfo: 'skip',
+                                                            }];
+
+                                                            var layout = {
+                                                            mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
+                                                            coloraxis: {colorscale: "RdBu"},
+                                                            width: 850, height: 600, margin: {l: 45,
+                                                                r: 15,
+                                                                b: 35,
+                                                                t: 25,
+                                                                pad: 5}};
+                                                        {% endif %}
 
                                                         var config = {mapboxAccessToken: "pk.eyJ1Ijoic2Fuemhhcm1yeiIsImEiOiJjazh6dXZpMHIwbTAzM3FsNnVseTh3aHJ0In0.i2Ycpumv-EhdDvHBHt_48w"};
 
