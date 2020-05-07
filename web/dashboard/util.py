@@ -141,6 +141,8 @@ def criterion_map_parser(widget):
     crits = CRITERIONS_META[widget.criterion_id]['crits']   # TODO check on another criterions
     colormaps = CRITERIONS_META[widget.criterion_id]['colormap']
     params = widget.params_obj
+    if not params:
+        return None, None
     k = [key.split('__')[-1] for key in params.keys() if key.startswith('criterion')][0]
     return crits[k], colormaps[crits[k]]
     # TODO create all criterions parser, now only pos/neg
