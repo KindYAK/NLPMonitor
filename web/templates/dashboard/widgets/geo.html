@@ -16,12 +16,17 @@
                                     {% with "criterion_"|add:widget_id as crit %}
                                         {% get_by_name crit as crit_data %}
                                             <h5><center><strong>Topic modelling: </strong>{{ tm_data }}</center></h5>
-                                            <h5><center><strong>Criterion: </strong>{{ crit_data }}, {{ m_t }}</center></h5>
+                                            {% if widget.type == 7 %}
+                                                <h5><center><strong>Criterion: </strong>{{ crit_data }}, {{ m_t }}</center></h5>
+                                            {% else %}
+                                                <h5><center><strong>Coverage Map</strong></center></h5>
+                                            {% endif %}
                                             <hr>
                                                 <div id="geo-plots">
                                                     <div class="geo-plot" id="geoMap_{{ widget.id }}"></div>
                                                     <script>
-                                                        var data = [
+                                                        {% if widget.type == 7 %}
+                                                            var data = [
                                                             {
                                                               lat:   [{% for g in geo %}{{g.0}},{% endfor %}],
                                                               lon:   [{% for g in geo %}{{g.1}},{% endfor %}],
@@ -31,7 +36,8 @@
                                                               coloraxis: 'coloraxis',
                                                               hoverinfo: 'skip',
                                                             }];
-                                                        var layout = {
+
+                                                            var layout = {
                                                             mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
                                                             coloraxis: {colorscale: "{{ cm }}"},
                                                             width: 850, height: 600, margin: {l: 45,
@@ -39,6 +45,27 @@
                                                                 b: 35,
                                                                 t: 25,
                                                                 pad: 5}};
+                                                        {% else %}
+                                                            var data = [
+                                                            {
+                                                              lat:   [{% for g in geo %}{{g.0}},{% endfor %}],
+                                                              lon:   [{% for g in geo %}{{g.1}},{% endfor %}],
+                                                              z:     [{% for g in geo %}{{g.2}},{% endfor %}],
+                                                              radius:10,
+                                                              type: "densitymapbox",
+                                                              coloraxis: 'coloraxis',
+                                                              hoverinfo: 'skip',
+                                                            }];
+
+                                                            var layout = {
+                                                            mapbox: {center: {lon: 67, lat: 47}, style: "outdoors", zoom: 3.5},
+                                                            coloraxis: {colorscale: "RdBu"},
+                                                            width: 850, height: 600, margin: {l: 45,
+                                                                r: 15,
+                                                                b: 35,
+                                                                t: 25,
+                                                                pad: 5}};
+                                                        {% endif %}
 
                                                         var config = {mapboxAccessToken: "pk.eyJ1Ijoic2Fuemhhcm1yeiIsImEiOiJjazh6dXZpMHIwbTAzM3FsNnVseTh3aHJ0In0.i2Ycpumv-EhdDvHBHt_48w"};
 

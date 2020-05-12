@@ -41,4 +41,9 @@ TYPES_META_DICT = {
         "callable": geo,
         "template_name": "dashboard/widgets/geo.html",
     },
+    8: {
+        "name": "Map coverage",
+        "callable": geo,
+        "template_name": "dashboard/widgets/geo.html",
+    },
 }
