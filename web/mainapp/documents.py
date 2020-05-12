@@ -129,6 +129,8 @@ class TopicDocument(es.Document):
     datetime = es.Date()
     document_source = es.Keyword()
     document_corpus = es.Keyword()
+    document_num_views = es.Integer()
+    document_num_comments = es.Integer()
 
     class Index:
         name = ES_INDEX_TOPIC_DOCUMENT  # f"{ES_INDEX_TOPIC_DOCUMENT}_{tm}"
@@ -157,6 +159,12 @@ class TopicDocument(es.Document):
                 },
                 "document_corpus": {
                     "type": "keyword",
+                },
+                "document_num_views": {
+                    "type": "integer",
+                },
+                "document_num_comments": {
+                    "type": "integer",
                 },
                 "topic_id": {
                     "type": "keyword",
