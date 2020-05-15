@@ -72,7 +72,7 @@ class Document(models.Model):
     class Meta:
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
-        unique_together = ('source', 'date', 'title', )
+        unique_together = ('source', 'title', )
 
     TYPES = (
         (0, "News"),
@@ -92,7 +92,6 @@ class Document(models.Model):
     type = models.SmallIntegerField(choices=TYPES, default=0, verbose_name="Тип публикации (в основном для Тенгри)")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
-    date = models.DateField(null=True, blank=True, verbose_name="Дата публикации (dateonly)")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
 
     num_views = models.IntegerField(null=True, blank=True, verbose_name="Количество просмотров")
@@ -105,11 +104,6 @@ class Document(models.Model):
 
     author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
     sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.datetime and not self.date:
-            self.date = self.datetime.date()
-        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.title
