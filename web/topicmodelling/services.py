@@ -1,5 +1,6 @@
 import datetime
 from collections import defaultdict
+from statistics import mean, pstdev
 
 from elasticsearch_dsl import Search
 
@@ -29,6 +30,64 @@ def get_topics_aggregations(topic_modelling, topic_weight_threshold, is_multi_co
         }) for bucket in result.aggregations.topics.buckets
     )
     return topic_info_dict
+
+
+def calc_topics_resonance(topics, topic_modelling, topic_weight_threshold=0.05):
+    std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
+              .filter("range", document_num_views={"gt": 0}) \
+              .filter("range", topic_weight={"gt": topic_weight_threshold})[:0]
+    std.aggs.bucket("sources", agg_type="terms", field="document_source") \
+        .bucket("documents", agg_type="terms", field="document_es_id", size=5_000_000) \
+        .metric("document_resonance", agg_type="avg", field="document_num_views")
+    r = std.execute()
+    if not r.aggregations.sources.buckets:
+        return
+
+    source_resonances = dict(
+        (bucket.key, [b.document_resonance.value for b in bucket.documents.buckets]) for bucket in r.aggregations.sources.buckets
+    )
+    source_resonance_means = dict(((source, mean(resonances)) for source, resonances in source_resonances.items()))
+    source_resonance_stds = dict(((source, pstdev(resonances)) for source, resonances in source_resonances.items()))
+    sigma_threshold = 1
+    source_resonance_thresholds = dict(((source, source_resonance_means[source] + sigma_threshold * source_resonance_stds[source]) for source in source_resonances.keys()))
+
+    topic_resonances = dict(
+        (topic.id,
+         {
+             "low": 0,
+             "high": 0,
+         }) for topic in topics
+    )
+    for source, threshold in source_resonance_thresholds.items():
+        std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
+                  .filter("range", document_num_views={"gt": 0}) \
+                  .filter("term", document_source=source) \
+                  .filter("range", topic_weight={"gt": topic_weight_threshold})[:0]
+        std.aggs.bucket("topics", agg_type="terms", field="topic_id", size=1000) \
+            .bucket("resonance", agg_type="range", field="document_num_views", ranges=
+        [
+            {"from": 1, "to": threshold},
+            {"from": threshold},
+        ])
+        r = std.execute()
+        for bucket in r.aggregations.topics:
+            topic_resonances[bucket.key]['low'] += bucket.resonance.buckets[0].doc_count
+            topic_resonances[bucket.key]['high'] += bucket.resonance.buckets[1].doc_count
+
+    total_low_resonance = 0
+    total_high_resonance = 0
+    for res in topic_resonances.values():
+        total_low_resonance += res['low']
+        total_high_resonance += res['high']
+    for topic in topics:
+        if topic.id in topic_resonances:
+            topic.low_resonance_score = topic_resonances[topic.id]['low'] / total_low_resonance
+            topic.high_resonance_score = topic_resonances[topic.id]['high'] / total_high_resonance
+            total_weight = topic.low_resonance_score + topic.high_resonance_score
+            if total_weight == 0:
+                continue
+            topic.low_resonance_score /= total_weight
+            topic.high_resonance_score /= total_weight
 
 
 def get_topics_with_meta(topic_modelling, topic_weight_threshold, is_multi_corpus):
@@ -83,6 +142,9 @@ def get_topics_with_meta(topic_modelling, topic_weight_threshold, is_multi_corpu
             for corpus in corpus_total_weights.keys():
                 if corpus in topic.corpus_weights:
                     topic.corpus_weights[corpus].weight_sum /= total_weight
+
+    # Add resonance to existing topics
+    calc_topics_resonance(topics, topic_modelling, topic_weight_threshold)
     return topics
 
 

@@ -171,6 +171,9 @@
                             <tr role="row">
                                 <th>Название</th>
                                 <th>Топ 25 слов</th>
+                                {% if has_resonance_score %}
+                                    <th>Резонансность</th>
+                                {% endif %}
                                 <th>Мощность</th>
                                 <th>Удельный вес</th>
                                 {% if is_multi_corpus %}
@@ -195,6 +198,15 @@
                                         {% endif %}
                                     </td>
                                     <td class="topic-words">{% for word in topic.topic_words|slice:':25' %}{{ word.word }} ({{ word.weight|floatformat:2|unlocalize }}); {% endfor %}</td>
+                                    {% if has_resonance_score %}
+                                        <td class="topic-resonance">
+                                            {% if topic.high_resonance_score %}
+                                                {{ topic.high_resonance_score|floatformat:3|unlocalize }}
+                                            {% else %}
+                                                0.000
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
                                     <td class="topic-size">{{ topic.size }}</td>
                                     <td class="topic-weight">{{ topic.weight|floatformat:3|unlocalize }}</td>
                                     {% if is_multi_corpus %}

@@ -10,14 +10,15 @@ class Command(BaseCommand):
         total = Document.objects.count()
         for doc in Document.objects.all().only("title", "source"):
             try:
-                doc_dupe = Document.objects.exclude(id=doc.id).get(title=doc.title, source=doc.source)
+                doc_dupe = Document.objects.exclude(id=doc.id).filter(title=doc.title, source=doc.source)
             except:
                 doc_dupe = None
             if doc_dupe:
                 unique_collisions += 1
                 if unique_collisions % 10000 == 0:
                     print("Deleting duplicate", unique_collisions)
-                doc.delete()
+                for d in doc_dupe:
+                    d.delete()
             i += 1
             if i % 100000 == 0:
                 print(i, "/", total)

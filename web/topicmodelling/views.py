@@ -52,6 +52,7 @@ class TopicsListView(TemplateView):
 
         # Create context
         context['is_multi_corpus'] = is_multi_corpus
+        context['has_resonance_score'] = any((hasattr(topic, "high_resonance_score") and topic.high_resonance_score for topic in topics))
         if is_multi_corpus:
             corpuses = set()
             for topic in topics:
