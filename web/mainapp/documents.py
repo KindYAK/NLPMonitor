@@ -9,7 +9,7 @@ from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_EMBEDDING, \
     ES_INDEX_TOPIC_MODELLING, ES_INDEX_DICTIONARY_INDEX, ES_INDEX_DICTIONARY_WORD, ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, \
     ES_INDEX_CUSTOM_DICTIONARY_WORD, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_EVAL_UNIQUE_IDS, ES_INDEX_META_DTM, \
     ES_INDEX_TOPIC_DOCUMENT_UNIQUE_IDS, ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DOCUMENT_LOCATION, \
-    ES_INDEX_TOPIC_COMBOS, ES_INDEX_SOURCE_CLUSTERS
+    ES_INDEX_TOPIC_COMBOS, ES_INDEX_SOURCE_CLUSTERS, ES_INDEX_EVAL_DICT
 
 DYNAMIC_TEMPLATES = [{
     "not_indexed_double": {
@@ -624,6 +624,43 @@ class ClusterSource(es.Document):
                 },
                 "clustering_params": {
                     "type": "object",
+                },
+            },
+        }
+
+
+class EvalDict(es.Document):
+    topic_modelling_name = es.Keyword()
+    weighted_criterion_value = es.Keyword()
+    criterion_id = es.Keyword()
+    criterion_name = es.Keyword()
+    word = es.Keyword()
+
+    class Index:
+        name = ES_INDEX_EVAL_DICT
+        using = ES_CLIENT
+
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 1,
+        }
+
+        mappings = {
+            "properties": {
+                "topic_modelling_name": {
+                    "type": "keyword",
+                },
+                "weighted_criterion_value": {
+                    "type": "keyword",
+                },
+                "criterion_id": {
+                    "type": "keyword",
+                },
+                "criterion_name": {
+                    "type": "keyword",
+                },
+                "word": {
+                    "type": "keyword",
                 },
             },
         }

@@ -231,6 +231,8 @@ ES_INDEX_DOCUMENT_LOCATION = 'document_location'  # f"{ES_INDEX_DOCUMENT_EVAL}_{
 
 ES_INDEX_SOURCE_CLUSTERS = 'cluster_source'
 
+ES_INDEX_EVAL_DICT = 'eval_dict'
+
 from elasticsearch import Elasticsearch
 http_auth = None
 es_username = os.getenv('DJANGO_ES_BASIC_AUTH_USERNAME', '')
