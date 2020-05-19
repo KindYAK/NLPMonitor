@@ -88,7 +88,7 @@ class Document(models.Model):
     text = models.TextField(verbose_name="Текст*")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
-    url = models.CharField(max_length=1000, null=True, blank=True, verbose_name="URL")
+    url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
     type = models.SmallIntegerField(choices=TYPES, default=0, verbose_name="Тип публикации (в основном для Тенгри)")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
