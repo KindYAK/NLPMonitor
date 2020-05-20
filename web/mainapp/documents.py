@@ -643,6 +643,7 @@ class EvalDict(es.Document):
     criterion_id = es.Keyword()
     criterion_name = es.Keyword()
     word = es.Keyword()
+    topic_id = es.Keyword()
 
     class Index:
         name = ES_INDEX_EVAL_DICT
@@ -668,6 +669,9 @@ class EvalDict(es.Document):
                     "type": "keyword",
                 },
                 "word": {
+                    "type": "keyword",
+                },
+                "topic_id": {
                     "type": "keyword",
                 },
             },
