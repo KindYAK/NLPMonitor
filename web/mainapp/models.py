@@ -88,11 +88,12 @@ class Document(models.Model):
     text = models.TextField(verbose_name="Текст*")
     html = models.TextField(null=True, blank=True, verbose_name="HTML")
     links = models.TextField(null=True, blank=True, verbose_name="Перечень ссылок")
-    url = models.CharField(max_length=1000, null=True, blank=True, verbose_name="URL")
+    url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
     type = models.SmallIntegerField(choices=TYPES, default=0, verbose_name="Тип публикации (в основном для Тенгри)")
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
+    datetime_activity_parsed = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего парсинга активности")
 
     num_views = models.IntegerField(null=True, blank=True, verbose_name="Количество просмотров")
     num_shares = models.IntegerField(null=True, blank=True, verbose_name="Количество репостов/шейров")

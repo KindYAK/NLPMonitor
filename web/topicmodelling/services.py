@@ -39,7 +39,10 @@ def calc_topics_resonance(topics, topic_modelling, topic_weight_threshold=0.05):
     std.aggs.bucket("sources", agg_type="terms", field="document_source") \
         .bucket("documents", agg_type="terms", field="document_es_id", size=5_000_000) \
         .metric("document_resonance", agg_type="avg", field="document_num_views")
-    r = std.execute()
+    try:
+        r = std.execute()
+    except: # TODO Specify exception somehow - that's for old indices with no correct mapping for document_num_views
+        return
     if not r.aggregations.sources.buckets:
         return
 
