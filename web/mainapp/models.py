@@ -93,7 +93,7 @@ class Document(models.Model):
 
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
-    datetime_activity_parsed = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего парсинга активности")
+    # datetime_activity_parsed = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего парсинга активности")
 
     num_views = models.IntegerField(null=True, blank=True, verbose_name="Количество просмотров")
     num_shares = models.IntegerField(null=True, blank=True, verbose_name="Количество репостов/шейров")
