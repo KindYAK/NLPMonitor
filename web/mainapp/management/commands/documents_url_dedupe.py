@@ -7,8 +7,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         i = 0
         unique_collisions = 0
-        total = Document.objects.count()
-        for doc in Document.objects.all().only("url"):
+        qs = Document.objects.exclude(url=None)
+        total = qs.count()
+        for doc in qs.only("url"):
             doc_dupe = Document.objects.exclude(id=doc.id).filter(url=doc.url)
             for d in doc_dupe:
                 unique_collisions += 1
