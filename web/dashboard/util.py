@@ -101,7 +101,8 @@ def isinstance_validator(array):
 def location_buckets_parser(buckets, crit_type):
     from geo.models import Locality
     import random
-
+    # {"criterion__gte": "0"}
+    # {"criterion__lt": "0"}
     magnitude = list()
     radius = list()
     for bucket in buckets:
