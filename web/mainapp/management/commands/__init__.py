@@ -40,6 +40,12 @@ def get_mapping(index_name: str) -> dict:
                 },
                 "topic_weight": {
                     "type": "float"
+                },
+                "document_num_comments": {
+                    "type": "long"
+                },
+                "document_num_views": {
+                    "type": "long"
                 }
             }
         }
