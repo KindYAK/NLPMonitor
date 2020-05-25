@@ -161,10 +161,10 @@ class TopicDocument(es.Document):
                     "type": "keyword",
                 },
                 "document_num_views": {
-                    "type": "integer",
+                    "type": "long",
                 },
                 "document_num_comments": {
-                    "type": "integer",
+                    "type": "long",
                 },
                 "topic_id": {
                     "type": "keyword",
