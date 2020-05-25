@@ -1,3 +1,5 @@
+from mainapp.documents import TopicDocument, DocumentEval
+
 SETTINGS_BODY = {
     "settings": {
         "number_of_shards": None,
@@ -24,52 +26,7 @@ def shards_mapping(doc_count: int) -> int:
 
 def get_mapping(index_name: str) -> dict:
     if index_name.startswith('topic_document_sharded'):
-        return {
-            "properties": {
-                "datetime": {
-                    "type": "date"
-                },
-                "document_es_id": {
-                    "type": "keyword",
-                },
-                "document_source": {
-                    "type": "keyword",
-                },
-                "topic_id": {
-                    "type": "keyword",
-                },
-                "topic_weight": {
-                    "type": "float"
-                },
-                "document_num_comments": {
-                    "type": "long"
-                },
-                "document_num_views": {
-                    "type": "long"
-                }
-            }
-        }
+        return TopicDocument.Index.mappings
     elif index_name.startswith('document_eval'):
-        return {
-            "properties": {
-                "document_datetime": {
-                    "type": "date"
-                },
-                "document_es_id": {
-                    "type": "keyword"
-                },
-                "document_source": {
-                    "type": "keyword"
-                },
-                "value": {
-                    "type": "float"
-                },
-                "topic_ids_top": {
-                    "type": "keyword"
-                },
-                "topic_ids_bottom": {
-                    "type": "keyword"
-                },
-            }
-        }
+        return DocumentEval.Index.mappings
     return {}
