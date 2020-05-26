@@ -234,7 +234,7 @@ class DocumentEval(es.Document):
     topic_ids_bottom = es.Keyword()
 
     class Index:
-        name = ES_INDEX_DOCUMENT_EVAL  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}{_neg}"
+        name = ES_INDEX_DOCUMENT_EVAL  # !!! f"{ES_INDEX_DOCUMENT_EVAL}_{tm}_{criterion.id}{_neg}{_m4a}{_m4a_class}"
         using = ES_CLIENT
 
         settings = {
