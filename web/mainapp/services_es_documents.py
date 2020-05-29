@@ -3,7 +3,7 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 
 
 TERM_FIELDS = (('corpuses', 'corpus'),
-               ('sources', 'source'),
+               ('sources', 'source.keyword'),
                ('authors', 'author'),
                ('tags', 'tags'),
                ('categories', 'categories'),)
