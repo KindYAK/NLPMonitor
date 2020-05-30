@@ -242,11 +242,11 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         if self.request.GET['sources'] and self.request.GET['sources'] != "None":
             sources_ids = json.loads(self.request.GET['sources'].replace("'", '"'))
             ss = Source.objects.filter(id__in=sources_ids)
-            s = s.filter('terms', **{"source": [s.name for s in ss]})
+            s = s.filter('terms', **{"source.keyword": [s.name for s in ss]})
         if self.request.GET['authors'] and self.request.GET['authors'] != "None":
             author_ids = json.loads(self.request.GET['authors'].replace("'", '"'))
             aus = Author.objects.filter(id__in=author_ids)
-            s = s.filter('terms', **{"author.keyword": [a.id for a in aus]})
+            s = s.filter('terms', **{"author.keyword": [a.name for a in aus]})
         if self.request.GET['title']:
             s = s.filter('match', title=self.request.GET['title'])
         if self.request.GET['text']:
@@ -257,7 +257,6 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                           'categories^3',
                           'text^2'])
             s = s.query(q)
-
         s = s[:100]
         s.aggs.bucket(name="source", agg_type="terms", field="source.keyword") \
             .metric("source_weight", agg_type="sum", field="topic_weight")
