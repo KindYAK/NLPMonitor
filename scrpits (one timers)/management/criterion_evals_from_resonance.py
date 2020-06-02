@@ -8,7 +8,7 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_MODELLING
 from topicmodelling.services import calc_topics_resonance
 
 # topic_modelling = "bigartm_two_years_old_parse"
-topic_modelling = "bigartm_test"
+topic_modelling = "bigartm_two_years_main_and_gos2"
 criterion_name = "Резонансность"
 
 tm_index = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", name=topic_modelling).execute()[0]
