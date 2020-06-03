@@ -80,6 +80,89 @@ class Document(es.Document):
         name = ES_INDEX_DOCUMENT
         using = ES_CLIENT
 
+        mappings = {
+            "author": {
+                "type": "keyword"
+            },
+            "categories": {
+                "type": "keyword"
+            },
+            "corpus": {
+                "type": "keyword"
+            },
+            "datetime": {
+                "type": "date"
+            },
+            "datetime_indexed": {
+                "type": "date"
+            },
+            "datetime_modified": {
+                "type": "date"
+            },
+            "datetime_parsed": {
+                "type": "date"
+            },
+            "html": {
+                "type": "text"
+            },
+            "id": {
+                "type": "keyword"
+            },
+            "links": {
+                "type": "keyword"
+            },
+            "num_comments": {
+                "type": "integer"
+            },
+            "num_likes": {
+                "type": "integer"
+            },
+            "num_shares": {
+                "type": "integer"
+            },
+            "num_views": {
+                "type": "integer"
+            },
+            "source": {
+                "type": "keyword"
+            },
+            "tags": {
+                "type": "keyword"
+            },
+            "text": {
+                "type": "text"
+            },
+            "text_lemmatized": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "text_lemmatized_yandex": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "title": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "url": {
+                "type": "keyword"
+            }
+        }
+
     class Meta:
         dynamic_templates = MetaField(DYNAMIC_TEMPLATES)
 
