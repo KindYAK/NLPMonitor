@@ -115,12 +115,12 @@
                                         <select class="custom-select form-control select2 select2-multi"
                                                 name="criterions" id="criterions" multiple="multiple">
                                             {% for criterion in criterions_list %}
-                                                <option value="{{ criterion.id }}">{{ criterion.name }}</option>
+                                                <option value="{{ criterion.id_postfix }}">{{ criterion.name }}</option>
                                             {% endfor %}
                                         </select>
                                         <script>
                                             {% for criterion in criterions %}
-                                                $("#criterions option[value='" + {{ criterion.id }} +"']").prop("selected", true);
+                                                $("#criterions option[value='{{ criterion.id_postfix }}']").prop("selected", true);
                                             {% endfor %}
                                         </script>
                                     </div>
@@ -257,7 +257,7 @@
                                                         name="criterion_q" id="criterion_q">
                                                     <option value="-1">-----Выбор критерия-----</option>
                                                     {% for criterion in criterions_list %}
-                                                        <option value="{{ criterion.id }}">{{ criterion.name }}</option>
+                                                        <option value="{{ criterion.id_postfix }}">{{ criterion.name }}</option>
                                                     {% endfor %}
                                                 </select>
                                                 <script>

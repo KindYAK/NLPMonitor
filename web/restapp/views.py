@@ -1,15 +1,14 @@
 import json
-import datetime
+from copy import deepcopy
 
 from annoying.functions import get_object_or_None
-from django.core.serializers import serialize
 from django.db.utils import IntegrityError
-from elasticsearch_dsl import Search, Q
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
+from evaluation.models import EvalCriterion, TopicIDEval
 from evaluation.services import *
+from evaluation.utils import parse_eval_index_name
 from mainapp.services import get_user_group
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .serializers import *
@@ -95,10 +94,10 @@ class TopicGroupViewSet(viewsets.ViewSet):
             )
         try:
             group = TopicGroup.objects.create(name=request.POST['name'],
-                                      topic_modelling_name=request.POST['topic_modelling'],
-                                      owner=request.user,
-                                      is_public=bool(request.user.is_superuser or request.user.expert)
-                                      )
+                                              topic_modelling_name=request.POST['topic_modelling'],
+                                              owner=request.user,
+                                              is_public=bool(request.user.is_superuser or request.user.expert)
+                                             )
         except IntegrityError:
             return Response(
                 {
@@ -458,7 +457,8 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
         my_groups = TopicGroup.objects.filter(owner=self.request.user, topic_modelling_name=topic_modelling).values('id', 'name')
 
         eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_*").keys()
-        criterions = EvalCriterion.objects.filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in eval_indices]).distinct().values('id', 'name')
+        criterion_id_labels = [parse_eval_index_name(index)['criterion_id'] for index in eval_indices if not index.endswith("_neg")]
+        criterions = EvalCriterion.objects.filter(id__in=criterion_id_labels).distinct().values('id', 'name')
         if not request.user.is_superuser:
             group = get_user_group(request.user)
             if topic_modelling not in group.topic_modelling_names.split(","):
@@ -466,11 +466,24 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
                     {"status": 403}
                 )
             criterions = criterions.filter(usergroup=group)
+        criterions_dict = dict(
+            (c['id'], c) for c in criterions
+        )
+        criterions_result = []
+        for index in eval_indices:
+            index = parse_eval_index_name(index)
+            if index['ignore']:
+                continue
+            criterion = deepcopy(criterions_dict[index['criterion_id']])
+            criterion['id'] = index['critetion_id+postfix']
+            if index['postfix']:
+                criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
+            criterions_result.append(criterion)
 
         return Response(
             {
                 "status": 200,
-                "criterions": sorted(criterions, key=lambda x: x['id']),
+                "criterions": sorted(criterions_result, key=lambda x: x['id']),
                 "my_groups": sorted(my_groups, key=lambda x: x['id']),
                 "public_groups": sorted(public_groups, key=lambda x: x['id']),
             }

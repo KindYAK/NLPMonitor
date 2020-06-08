@@ -196,6 +196,8 @@ def normalize_documents_eval_dynamics(document_evals, total_metrics_dict):
 
 
 def normalize_documents_eval_dynamics_with_virt_negative(document_evals, topic_modelling, granularity, criterion):
+    if not ES_CLIENT.indices.exists(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}_neg"):
+        return
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion.id}_neg") \
         .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
         .source([])[:0]

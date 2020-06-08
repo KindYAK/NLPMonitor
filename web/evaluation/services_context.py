@@ -1,4 +1,5 @@
 import datetime
+from copy import deepcopy
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -8,6 +9,7 @@ from evaluation.services import get_documents_with_values, divide_posneg_source_
     get_low_volume_positive_topics, get_current_document_evals, smooth_buckets, get_topic_dict, \
     get_total_group_dynamics, normalize_documents_eval_dynamics, normalize_documents_eval_dynamics_with_virt_negative, \
     get_documents_ids_filter, get_criterions_values_for_normalization
+from evaluation.utils import parse_eval_index_name
 from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models import Source
 from mainapp.models_user import TopicGroup
@@ -36,11 +38,11 @@ def form_creation(request, context):
         if not group:
             raise Forbidden("403")
         context['criterions_list'] = EvalCriterion.objects.filter(usergroup=group)
-        eval_indices = filter(lambda x: "_".join(x.split("_")[2:-1]) in group.topic_modelling_names.split(","), eval_indices)
+        eval_indices = filter(lambda x: parse_eval_index_name(x)['topic_modelling'] in group.topic_modelling_names.split(","), eval_indices)
     context['public_groups'] = TopicGroup.objects.filter(is_public=True)
     context['my_groups'] = TopicGroup.objects.filter(owner=request.user)
     context['topic_modellings'] = list(sorted(list(set(
-        [("_".join(tm.split("_")[2:-1]), "_".join(tm.split("_")[2:-1]).replace("bigartm", "tm")) for tm in eval_indices if not tm.endswith("_neg")]
+        [(parse_eval_index_name(tm)['topic_modelling'], parse_eval_index_name(tm)['topic_modelling'].replace("bigartm", "tm")) for tm in eval_indices if not parse_eval_index_name(tm)['ignore']]
     ))))
     if not context['topic_modellings']:
         raise Forbidden("403")
@@ -57,10 +59,28 @@ def form_management(request, context, skip_cache=False):
     context['my_groups'] = context['my_groups'].filter(topic_modelling_name=context['topic_modelling'])
 
     eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
-    context['criterions_list'] = context['criterions_list'].filter(id__in=[index.replace("_neg", "").split("_")[-1] for index in eval_indices]).distinct()
-    context['criterions'] = EvalCriterion.objects.filter(id__in=request.GET.getlist('criterions')) \
+
+    criterions = context['criterions_list'].filter(id__in=[parse_eval_index_name(index)['criterion_id'] for index in eval_indices]).distinct()
+    criterions_dict = dict(
+        (c.id, c) for c in criterions
+    )
+    context['criterions_list'] = []
+    for index in eval_indices:
+        index = parse_eval_index_name(index)
+        if index['ignore']:
+            continue
+        criterion = deepcopy(criterions_dict[index['criterion_id']])
+        criterion.id_postfix = index['critetion_id+postfix']
+        if index['postfix']:
+            criterion.name = criterion.name + ("_" + index['postfix'] if index['postfix'] else "")
+        context['criterions_list'].append(criterion)
+    criterions_list_dict = dict(
+        (c.id_postfix, c) for c in context['criterions_list']
+    )
+
+    context['criterions'] = [criterions_list_dict[c] for c in request.GET.getlist('criterions')] \
         if 'criterions' in request.GET else \
-        [context['criterions_list'].first()]
+        [context['criterions_list'][0]]
     context['sources'] = Source.objects.filter(id__in=request.GET.getlist('sources')) \
         if 'sources' in request.GET else None
     context['keyword'] = request.GET['keyword'] if 'keyword' in request.GET else ""

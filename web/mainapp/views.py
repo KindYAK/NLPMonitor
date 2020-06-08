@@ -1,5 +1,4 @@
 import datetime
-from collections import defaultdict
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -9,9 +8,9 @@ from django.views.generic import TemplateView, CreateView, ListView, DeleteView
 from elasticsearch_dsl import Search
 
 from dashboard.models import DashboardPreset
-from mainapp.models import Document, Corpus
+from mainapp.models import Document
 from mainapp.services_es import get_elscore_cutoff
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 from .forms import DocumentSearchForm, DocumentForm
 from .services import apply_fir_filter, unique_ize, get_user_group
 from .services_es_documents import execute_search, es_filter
