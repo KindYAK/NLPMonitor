@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 from copy import deepcopy
 
 from django.core.cache import cache
@@ -107,8 +108,12 @@ def form_management(request, context, skip_cache=False):
         if 'topic_weight_threshold' in request.GET else \
         0.05
 
+    hash = hashlib.md5()
+    for c in sorted(context['criterions'], key=lambda x: x.id_postfix):
+        hash.update(c.id_postfix.encode())
+    context['criterions_postfixed_hash'] = hash.hexdigest()
     key = make_template_fragment_key('criterion_analysis', [context['topic_modelling'],
-                                                            context['topic_weight_threshold'], context['criterions'],
+                                                            context['topic_weight_threshold'], context['criterions_postfixed_hash'],
                                                             context['sources'], context['keyword'],
                                                             context['group'], context['granularity'],
                                                             context['smooth'], context['action_q'],
