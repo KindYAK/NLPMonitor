@@ -1,4 +1,6 @@
-from mainapp.documents import TopicDocument, DocumentEval
+from mainapp.documents import (
+    TopicDocument, DocumentEval, Document
+)
 
 SETTINGS_BODY = {
     "settings": {
@@ -29,4 +31,6 @@ def get_mapping(index_name: str) -> dict:
         return TopicDocument.Index.mappings
     elif index_name.startswith('document_eval'):
         return DocumentEval.Index.mappings
+    elif index_name.startswith('main_sharded'):
+        return Document.Index.mappings
     return {}
