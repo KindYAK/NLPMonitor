@@ -70,7 +70,7 @@ def form_management(request, context, skip_cache=False):
         if index['ignore']:
             continue
         criterion = deepcopy(criterions_dict[index['criterion_id']])
-        criterion.id_postfix = index['critetion_id+postfix']
+        criterion.id_postfix = index['criterion.id_postfix']
         if index['postfix']:
             criterion.name = criterion.name + ("_" + index['postfix'] if index['postfix'] else "")
         context['criterions_list'].append(criterion)

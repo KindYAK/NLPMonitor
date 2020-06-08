@@ -23,7 +23,7 @@ def parse_eval_index_name(index_name):
     return {
         "criterion_id": int(criterion_id),
         "postfix": postfix,
-        "critetion_id+postfix": criterion_id + (("_" + postfix) if postfix else ""),
+        "criterion.id_postfix": criterion_id + (("_" + postfix) if postfix else ""),
         "topic_modelling": topic_modelling,
         "ignore": ignore
     }

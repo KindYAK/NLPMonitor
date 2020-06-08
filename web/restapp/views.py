@@ -475,7 +475,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
             if index['ignore']:
                 continue
             criterion = deepcopy(criterions_dict[index['criterion_id']])
-            criterion['id'] = index['critetion_id+postfix']
+            criterion['id'] = index['criterion.id_postfix']
             if index['postfix']:
                 criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
             criterions_result.append(criterion)
