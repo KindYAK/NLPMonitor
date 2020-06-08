@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from nlpmonitor.settings import ES_INDEX_DOCUMENT_EVAL
 
 POSTFIXES_TO_IGNORE = ["neg", ]
@@ -27,3 +29,38 @@ def parse_eval_index_name(index_name):
         "topic_modelling": topic_modelling,
         "ignore": ignore
     }
+
+
+def add_id_postfix_to_dicts(criterions, eval_indices):
+    criterions_dict = dict(
+        (c['id'], c) for c in criterions
+    )
+    criterions_result = []
+    for index in eval_indices:
+        index = parse_eval_index_name(index)
+        if index['ignore']:
+            continue
+        criterion = deepcopy(criterions_dict[index['criterion_id']])
+        criterion['id'] = index['criterion.id_postfix']
+        criterion['id_postfix'] = index['criterion.id_postfix']
+        if index['postfix']:
+            criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
+        criterions_result.append(criterion)
+    return criterions_result
+
+
+def add_id_postfix_to_qs(criterions, eval_indices):
+    criterions_dict = dict(
+        (c.id, c) for c in criterions
+    )
+    criterions_result = []
+    for index in eval_indices:
+        index = parse_eval_index_name(index)
+        if index['ignore']:
+            continue
+        criterion = deepcopy(criterions_dict[index['criterion_id']])
+        criterion.id_postfix = index['criterion.id_postfix']
+        if index['postfix']:
+            criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
+        criterions_result.append(criterion)
+    return criterions_result

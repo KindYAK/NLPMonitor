@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 
 from annoying.functions import get_object_or_None
 from django.db.utils import IntegrityError
@@ -8,7 +7,7 @@ from rest_framework.response import Response
 
 from evaluation.models import EvalCriterion, TopicIDEval
 from evaluation.services import *
-from evaluation.utils import parse_eval_index_name
+from evaluation.utils import parse_eval_index_name, add_id_postfix_to_qs, add_id_postfix_to_dicts
 from mainapp.services import get_user_group
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 from .serializers import *
@@ -266,7 +265,9 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
         date_from = datetime.datetime.strptime(self.request.GET['date_from'][:10], "%Y-%m-%d").date()
         date_to = datetime.datetime.strptime(self.request.GET['date_to'][:10], "%Y-%m-%d").date()
         topic_modelling = self.request.GET['topic_modelling']
-        criterions = EvalCriterion.objects.filter(id__in=self.request.GET.getlist('criterions'))
+        eval_indices = [f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{criterion_id}" for criterion_id in self.request.GET.getlist('criterions')]
+        criterions = EvalCriterion.objects.filter(id__in=[parse_eval_index_name(index)['criterion_id'] for index in eval_indices])
+        criterions = add_id_postfix_to_qs(criterions, eval_indices)
         sources = Source.objects.filter(id__in=self.request.GET.getlist('sources'))
         keyword = self.request.GET['keyword'] if 'keyword' in self.request.GET else ""
         group = TopicGroup.objects.get(id=self.request.GET['group']) \
@@ -466,20 +467,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
                     {"status": 403}
                 )
             criterions = criterions.filter(usergroup=group)
-        criterions_dict = dict(
-            (c['id'], c) for c in criterions
-        )
-        criterions_result = []
-        for index in eval_indices:
-            index = parse_eval_index_name(index)
-            if index['ignore']:
-                continue
-            criterion = deepcopy(criterions_dict[index['criterion_id']])
-            criterion['id'] = index['criterion.id_postfix']
-            if index['postfix']:
-                criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
-            criterions_result.append(criterion)
-
+        criterions_result = add_id_postfix_to_dicts(criterions, eval_indices)
         return Response(
             {
                 "status": 200,
