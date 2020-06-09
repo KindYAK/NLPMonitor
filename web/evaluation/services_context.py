@@ -10,7 +10,7 @@ from evaluation.services import get_documents_with_values, divide_posneg_source_
     get_low_volume_positive_topics, get_current_document_evals, smooth_buckets, get_topic_dict, \
     get_total_group_dynamics, normalize_documents_eval_dynamics, normalize_documents_eval_dynamics_with_virt_negative, \
     get_documents_ids_filter, get_criterions_values_for_normalization
-from evaluation.utils import parse_eval_index_name
+from evaluation.utils import parse_eval_index_name, POSTFIXES_ALLOWED
 from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models import Source
 from mainapp.models_user import TopicGroup
@@ -82,6 +82,7 @@ def form_management(request, context, skip_cache=False):
     context['criterions'] = [criterions_list_dict[c] for c in request.GET.getlist('criterions')] \
         if 'criterions' in request.GET else \
         [context['criterions_list'][0]]
+    context['has_postfix'] = any((any([criterion.id_postfix.endswith(postfix) for postfix in POSTFIXES_ALLOWED]) for criterion in context['criterions']))
     context['sources'] = Source.objects.filter(id__in=request.GET.getlist('sources')) \
         if 'sources' in request.GET else None
     context['keyword'] = request.GET['keyword'] if 'keyword' in request.GET else ""
