@@ -29,7 +29,7 @@
     <!-- Chroma.js -->
     <script src="{% static 'js_vendor/chroma.min.js' %}"></script>
     {# Custom script #}
-    <script src="{% static 'js/range_plots_management_eval_v2.js' %}"></script>
+    <script src="{% static 'js/range_plots_management_eval_v3.js' %}"></script>
     {% if request.user.is_superuser or request.user.expert %}
         <!-- Clipboard.js -->
         <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
@@ -1085,7 +1085,11 @@
 
     {# Custom script #}
     <script>
-        run_range_plot_management({{ criterions|json|safe }},
+        var criterions = {{ criterions|json|safe }};
+        {% for c in criterions %}
+            criterions[{{ forloop.counter0  }}].id_postfix = '{{ c.id_postfix }}';
+        {% endfor %}
+        run_range_plot_management(criterions,
             '{{ topic_modelling }}',
             {{topic_weight_threshold|safe }},
             '{{ keyword }}',

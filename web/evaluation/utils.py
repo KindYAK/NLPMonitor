@@ -61,6 +61,6 @@ def add_id_postfix_to_qs(criterions, eval_indices):
         criterion = deepcopy(criterions_dict[index['criterion_id']])
         criterion.id_postfix = index['criterion.id_postfix']
         if index['postfix']:
-            criterion['name'] = criterion['name'] + ("_" + index['postfix'] if index['postfix'] else "")
+            criterion.name = criterion.name + ("_" + index['postfix'] if index['postfix'] else "")
         criterions_result.append(criterion)
     return criterions_result

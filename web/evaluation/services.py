@@ -137,6 +137,8 @@ def get_current_document_evals(topic_modelling, criterion, granularity, sources,
 
 
 def calc_source_input(document_evals):
+    if not document_evals.aggregations.source.buckets:
+        return document_evals
     max_sum = max((bucket.source_value_sum.value for bucket in document_evals.aggregations.source.buckets))
     max_average = max((bucket.source_value_average.value for bucket in document_evals.aggregations.source.buckets))
     for bucket in document_evals.aggregations.source.buckets:

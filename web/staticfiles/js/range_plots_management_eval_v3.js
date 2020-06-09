@@ -451,7 +451,7 @@ function run_range_plot_management(criterions, topic_modelling, topic_weight_thr
                     "&topic_modelling=" + topic_modelling +
                     "&topic_weight_threshold=" + topic_weight_threshold.toString();
         for (criterion of criterions){
-            url += "&criterions=" + criterion.pk.toString()
+            url += "&criterions=" + criterion.id_postfix.toString()
         }
         for (source of sources){
             url += "&sources=" + source.pk.toString()
