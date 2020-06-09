@@ -7,6 +7,7 @@ from .util import default_parser
 
 
 def es_document_eval_search_factory(widget, **kwargs):
+    widget.criterion.id_postfix = widget.criterion.id
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{widget.topic_modelling_name}_{widget.criterion.id}")
     s = es_default_fields_parser(widget, s)
     return s
