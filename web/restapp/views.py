@@ -459,7 +459,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
 
         eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_*").keys()
         criterion_id_labels = [parse_eval_index_name(index)['criterion_id'] for index in eval_indices if not index.endswith("_neg")]
-        criterions = EvalCriterion.objects.filter(id__in=criterion_id_labels).distinct().values('id', 'name')
+        criterions = EvalCriterion.objects.filter(id__in=criterion_id_labels)
         if not request.user.is_superuser:
             group = get_user_group(request.user)
             if topic_modelling not in group.topic_modelling_names.split(","):
@@ -467,6 +467,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
                     {"status": 403}
                 )
             criterions = criterions.filter(usergroup=group)
+        criterions = criterions.distinct().values('id', 'name')
         criterions_result = add_id_postfix_to_dicts(criterions, eval_indices)
         return Response(
             {
