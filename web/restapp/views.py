@@ -458,7 +458,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
         my_groups = TopicGroup.objects.filter(owner=self.request.user, topic_modelling_name=topic_modelling).values('id', 'name')
 
         eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_*").keys()
-        criterion_id_labels = [parse_eval_index_name(index)['criterion_id'] for index in eval_indices if not index.endswith("_neg")]
+        criterion_id_labels = [parse_eval_index_name(index)['criterion_id'] for index in eval_indices if not index.endswith("_neg") if parse_eval_index_name(index)['topic_modelling'] == topic_modelling]
         criterions = EvalCriterion.objects.filter(id__in=criterion_id_labels)
         if not request.user.is_superuser:
             group = get_user_group(request.user)
