@@ -2,7 +2,7 @@ from elasticsearch_dsl import Search
 
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, roc_auc_score
 
 tm_name = "bigartm_two_years_old_parse"
 criterion_id = 35
@@ -46,7 +46,7 @@ x_y = []
 for document_es_id in document_values:
     if document_es_id not in document_ground_truth:
         continue
-    # if 0.2 < document_values[document_es_id] < 0.7:
+    # if 0.35 < document_values[document_es_id] < 0.65:
     #     continue
     x_y.append((document_values[document_es_id], document_ground_truth[document_es_id]))
 
@@ -54,6 +54,8 @@ x, y = [], []
 for a, b in x_y:
     x.append(bool(round(a)))
     y.append(b)
+
+print(roc_auc_score(x, y))
 
 # Verification
 print(classification_report(x, y))
