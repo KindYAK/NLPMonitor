@@ -7,15 +7,18 @@ from topicmodelling.services import get_topics_with_meta
 
 
 def get_corpus_weight(topic):
-    return topic.corpus_weights[target_corpus].weight_sum if target_corpus in topic.corpus_weights else 0
+    try:
+        return topic.corpus_weights[target_corpus].weight_sum if target_corpus in topic.corpus_weights else 0
+    except KeyError:
+        return 0
 
 
-topic_modelling = "bigartm_two_years_rus_and_rus_propaganda"
-target_corpus = "rus"
-criterion_name = "Объективность (RU)"
+topic_modelling = "bigartm_two_years_1000_rus_and_rus_propaganda"
+target_corpus = "rus_propaganda"
+criterion_name = "Пропаганда (RU)"
 
 topics = get_topics_with_meta(topic_modelling=topic_modelling,
-                              topic_weight_threshold=0.05,
+                              topic_weight_threshold=0.005,
                               is_multi_corpus=True)
 
 author = User.objects.filter(is_superuser=True).first()
