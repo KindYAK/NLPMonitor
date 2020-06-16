@@ -9,7 +9,7 @@ from topicmodelling.services import get_topics_with_meta
 def get_corpus_weight(topic):
     try:
         return topic.corpus_weights[target_corpus].weight_sum if target_corpus in topic.corpus_weights else 0
-    except KeyError:
+    except:
         return 0
 
 
