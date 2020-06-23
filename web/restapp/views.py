@@ -468,7 +468,7 @@ class CriterionEvalUtilViewSet(viewsets.ViewSet):
                 )
             criterions = criterions.filter(usergroup=group)
         criterions = criterions.distinct().values('id', 'name')
-        criterions_result = add_id_postfix_to_dicts(criterions, eval_indices)
+        criterions_result = add_id_postfix_to_dicts(criterions, eval_indices, topic_modelling)
         return Response(
             {
                 "status": 200,

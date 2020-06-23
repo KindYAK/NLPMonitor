@@ -43,7 +43,8 @@ def form_creation(request, context):
     context['public_groups'] = TopicGroup.objects.filter(is_public=True)
     context['my_groups'] = TopicGroup.objects.filter(owner=request.user)
     context['topic_modellings'] = list(sorted(list(set(
-        [(parse_eval_index_name(tm)['topic_modelling'], parse_eval_index_name(tm)['topic_modelling'].replace("bigartm", "tm")) for tm in eval_indices if not parse_eval_index_name(tm)['ignore']]
+        [(parse_eval_index_name(tm)['topic_modelling'], parse_eval_index_name(tm)['topic_modelling'].replace("bigartm", "tm"))
+                                    for tm in eval_indices if not parse_eval_index_name(tm)['ignore']]
     ))))
     if not context['topic_modellings']:
         raise Forbidden("403")
@@ -61,7 +62,9 @@ def form_management(request, context, skip_cache=False):
 
     eval_indices = ES_CLIENT.indices.get_alias(f"{ES_INDEX_DOCUMENT_EVAL}_{context['topic_modelling']}_*").keys()
 
-    criterions = context['criterions_list'].filter(id__in=[parse_eval_index_name(index)['criterion_id'] for index in eval_indices]).distinct()
+    criterions = context['criterions_list'].filter(id__in=[parse_eval_index_name(index)['criterion_id']
+                                                          for index in eval_indices
+                                                          if parse_eval_index_name(index)['topic_modelling'] == context['topic_modelling']]).distinct()
     criterions_dict = dict(
         (c.id, c) for c in criterions
     )
@@ -69,6 +72,8 @@ def form_management(request, context, skip_cache=False):
     for index in eval_indices:
         index = parse_eval_index_name(index)
         if index['ignore']:
+            continue
+        if index['topic_modelling'] != context['topic_modelling']:
             continue
         criterion = deepcopy(criterions_dict[index['criterion_id']])
         criterion.id_postfix = index['criterion.id_postfix']

@@ -31,7 +31,7 @@ def parse_eval_index_name(index_name):
     }
 
 
-def add_id_postfix_to_dicts(criterions, eval_indices):
+def add_id_postfix_to_dicts(criterions, eval_indices, topic_modelling):
     criterions_dict = dict(
         (c['id'], c) for c in criterions
     )
@@ -39,6 +39,8 @@ def add_id_postfix_to_dicts(criterions, eval_indices):
     for index in eval_indices:
         index = parse_eval_index_name(index)
         if index['ignore']:
+            continue
+        if index['topic_modelling'] != topic_modelling:
             continue
         criterion = deepcopy(criterions_dict[index['criterion_id']])
         criterion['id'] = index['criterion.id_postfix']
