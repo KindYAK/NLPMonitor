@@ -19,8 +19,6 @@ services:
   airflow:
     volumes:
       - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
-    ports:
-      - "8001:8001"
   airflow-scheduler:
     volumes:
       - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg

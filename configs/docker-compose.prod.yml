@@ -20,9 +20,6 @@ services:
       - ../certbot/conf:/etc/letsencrypt
       - ../certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-  db:
-    ports:
-      - "5456:5432"
   bert_as_service:
     build:
       context: ./bert_as_service
