@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     text = request.args.get('text')
-    lemmatized = subprocess.getoutput(f"echo '{text}' | apertium -d . kaz-disam")
+    lemmatized = subprocess.getoutput(f"echo '{text}' | apertium -d . kaz-disam | python3 /kaz-tagger/kaz-tagger.py")
     lines = [l.strip() for l in lemmatized.split("\n")]
     result = ""
     for i, line in enumerate(lines):
