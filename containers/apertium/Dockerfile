@@ -15,8 +15,7 @@ RUN git clone https://github.com/apertium/apertium-kaz.git && cd /apertium-kaz/ 
 RUN apt-get -f -y install python3-pip
 RUN pip3 install Flask==1.1.2 waitress==1.4.4
 
-COPY ./appertium_server.py /apertium-kaz/
-COPY ./waitress_serve.py /apertium-kaz/
+COPY ./apertium-kaz/ /apertium-kaz/
 COPY ./kaz-tagger/ /kaz-tagger/
 
 WORKDIR /apertium-kaz/
