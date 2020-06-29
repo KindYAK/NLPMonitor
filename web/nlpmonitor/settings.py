@@ -242,17 +242,17 @@ if es_username and es_password:
 if not DEBUG:
     hosts = [
         {
-            'host': os.getenv('ES_HOST', 'elasticsearch1'),
+            'host': os.getenv('ES_HOST1', 'elasticsearch1'),
             'port': os.getenv('ES_PORT1', 9200),
             'http_auth': http_auth,
         },
         {
-            'host': os.getenv('ES_HOST', 'elasticsearch2'),
+            'host': os.getenv('ES_HOST2', 'elasticsearch2'),
             'port': os.getenv('ES_PORT2', 9200),
             'http_auth': http_auth,
         },
         {
-            'host': os.getenv('ES_HOST', 'elasticsearch3'),
+            'host': os.getenv('ES_HOST3', 'elasticsearch3'),
             'port': os.getenv('ES_PORT3', 9200),
             'http_auth': http_auth,
         },

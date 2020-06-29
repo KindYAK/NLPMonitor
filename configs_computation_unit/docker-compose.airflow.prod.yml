@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  airflow-worker:
+    image: ${AIRFLOW_WORKER_IMAGE}
+    volumes:
+      - ../web:/django:ro
+      - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 30720M
+        reservations:
+          cpus: '0.1'
+          memory: 1024M
+  airflow:
+    volumes:
+      - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg
+    expose:
+      - 8001
+  airflow-scheduler:
+    volumes:
+      - ./airflow.cfg.prod:/opt/bitnami/airflow/airflow.cfg
+  airflow-postgresql:
+    ports:
+      - "5455:5432"
+  airflow-redis:
+    ports:
+      - "6378:6379"

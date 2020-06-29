@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  airflow-worker:
+    volumes:
+      - airflow:/bitnami
+      - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
+      - ../configs/airflow_plugins:/opt/bitnami/airflow/plugins
+      - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
+      - ../logs/:/opt/bitnami/airflow/logs:rw
+    env_file:
+      - ../.env
+    expose:
+      - 8793
+    environment:
+      - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
+      - AIRFLOW_FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW_EXECUTOR=CeleryExecutor
+      - AIRFLOW_DATABASE_NAME=${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DB_USER}
+      - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@airflow-postgresql:5432/${AIRFLOW_DB_NAME}
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@airflow-postgresql:5432/${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_HOST=airflow-postgresql
+      - REDIS_HOST=airflow-redis
+      - SENTRY_DSN=${SENTRY_DSN}
+    networks:
+      - network
+    depends_on:
+      - airflow-redis
+      - airflow-postgresql
+    restart: always
+
+volumes:
+  airflow:
+    driver: local
