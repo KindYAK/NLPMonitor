@@ -79,6 +79,8 @@ services:
       - AIRFLOW_LOAD_EXAMPLES=no
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/1
     volumes:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
@@ -110,6 +112,8 @@ services:
       - AIRFLOW__SMTP__SMTP_PORT=${AIRFLOW_SMTP_PORT}
       - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW_SMTP_USER}
       - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/1
     volumes:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
