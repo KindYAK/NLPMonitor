@@ -30,8 +30,6 @@ services:
       - REDIS_HOST=${AIRFLOW_REDIS_HOST}
       - SENTRY_DSN=${SENTRY_DSN}
       - CELERY__BROKER_URL=redis://:@${AIRFLOW_REDIS_HOST}:6379/1
-    networks:
-      - network
     deploy:
       resources:
         limits:
