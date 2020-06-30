@@ -27,4 +27,4 @@ services:
       - "5455:5432"
   airflow-redis:
     ports:
-      - "6378:6379"
+      - "6379:6379"

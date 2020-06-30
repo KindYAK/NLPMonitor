@@ -8,6 +8,8 @@ services:
       - ../configs/airflow_plugins:/opt/bitnami/airflow/plugins
       - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
       - ../logs/:/opt/bitnami/airflow/logs:rw
+      - ../web:/django:ro
+      - ./airflow.cfg:/opt/bitnami/airflow/airflow.cfg
     env_file:
       - ../.env
     expose:
@@ -19,16 +21,22 @@ services:
       - AIRFLOW_DATABASE_NAME=${AIRFLOW_DB_NAME}
       - AIRFLOW_DATABASE_USERNAME=${AIRFLOW_DB_USER}
       - AIRFLOW_DATABASE_PASSWORD=${AIRFLOW_DB_PASSWORD}
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@airflow-postgresql:5432/${AIRFLOW_DB_NAME}
-      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@airflow-postgresql:5432/${AIRFLOW_DB_NAME}
-      - AIRFLOW_DATABASE_HOST=airflow-postgresql
-      - REDIS_HOST=airflow-redis
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@${AIRFLOW_DB_HOST}:${AIRFLOW_DB_PORT}/${AIRFLOW_DB_NAME}
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@${AIRFLOW_DB_HOST}:${AIRFLOW_DB_PORT}/${AIRFLOW_DB_NAME}
+      - AIRFLOW_DATABASE_HOST=${AIRFLOW_DB_HOST}
+      - REDIS_HOST=${AIRFLOW_REDIS_HOST}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CELERY__BROKER_URL=redis://:@${AIRFLOW_REDIS_HOST}:6379/1
     networks:
       - network
-    depends_on:
-      - airflow-redis
-      - airflow-postgresql
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 5000M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
     restart: always
 
 volumes:
