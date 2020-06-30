@@ -2,6 +2,9 @@ version: '3'
 
 services:
   airflow-worker:
+    build:
+      context: ../airflow-worker
+      dockerfile: Dockerfile
     volumes:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
