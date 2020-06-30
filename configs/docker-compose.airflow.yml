@@ -49,6 +49,8 @@ services:
       - AIRFLOW_DATABASE_HOST=airflow-postgresql
       - REDIS_HOST=airflow-redis
       - SENTRY_DSN=${SENTRY_DSN}
+      - AIRFLOW_DATABASE_PORT_NUMBER=5432
+      - AIRFLOW__CELERY__BROKER_URL=redis://:@airflow-redis:6379/1
     networks:
       - network
     depends_on:
