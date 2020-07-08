@@ -9,8 +9,6 @@ services:
     volumes:
       - ../web:/opt/app
       - media_root:/opt/app/media_root
-    ports:
-      - "8000:8000"
     tty: true
     stdin_open: true
   nginx:

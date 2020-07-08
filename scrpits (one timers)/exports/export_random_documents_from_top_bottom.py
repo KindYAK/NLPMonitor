@@ -5,8 +5,9 @@ from elasticsearch_dsl import Search, Q
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 
 tm = "bigartm_two_years_main_and_gos2"
-name = "final_class"
-criterion_id = "36_m4a_class" # 34 - соц значимость, 35 - резонансность, 1 - тональность, 36 - целевой класс
+name = "social"
+corpus = "main"
+criterion_id = "34_m4a" # 34 - соц значимость, 35 - резонансность, 1 - тональность, 36 - целевой класс
 low_threshold = 10
 high_threshold = 90
 
@@ -46,6 +47,7 @@ document_eval_dict = dict(
 
 s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
 s = s.filter("terms", _id=list(document_eval_dict.keys()))
+s = s.filter("term", corpus=corpus)
 s = s.source(("id", "title", "datetime", "source", "url", "value"))
 
 output = []
