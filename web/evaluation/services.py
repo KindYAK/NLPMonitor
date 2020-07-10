@@ -229,7 +229,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
-             .source(('id', 'url', 'title', 'source', 'datetime',))[:len(top_news_total)]
+             .source(('id', 'url', 'title', 'source', 'datetime',))[:1000]
     if date_from:
         sd = sd.filter("range", datetime={"gte": date_from})
     if date_to:
@@ -239,7 +239,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     std = Search(using=ES_CLIENT, index=[f"{ES_INDEX_DOCUMENT_EVAL}_{topic_modelling}_{c.id_postfix}" for c in criterions]) \
             .filter("terms", **{'document_es_id': list(top_news_total)}) \
             .filter("range", document_datetime={"gte": datetime.date(2000, 1, 1)}).filter("range", document_datetime={"lte": datetime.datetime.now().date()}) \
-            .source(['document_es_id', 'value'])
+            .source(['document_es_id', 'value'])[:10000]
     document_evals = std.scan()
 
     # Creating final documents dict

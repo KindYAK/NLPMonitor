@@ -49,7 +49,7 @@ def form_creation(request, context):
     if not context['topic_modellings']:
         raise Forbidden("403")
     context['sources_list'] = Source.objects.filter(document__isnull=False).distinct()
-    context['top_news_num'] = 200
+    context['top_news_num'] = 1000
 
 
 def form_management(request, context, skip_cache=False):
