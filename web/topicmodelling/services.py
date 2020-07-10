@@ -36,9 +36,8 @@ def calc_topics_resonance(topics, topic_modelling, topic_weight_threshold=0.05):
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
               .filter("range", document_num_views={"gt": 0}) \
               .filter("range", topic_weight={"gt": topic_weight_threshold})[:0]
-    std.aggs.bucket("sources", agg_type="terms", field="document_source") \
-        .bucket("documents", agg_type="terms", field="document_es_id", size=5_000_000) \
-        .metric("document_resonance", agg_type="avg", field="document_num_views")
+    std.aggs.bucket("sources", agg_type="terms", field="document_source", size=500) \
+        .metric("stats", agg_type="extended_stats", field="document_num_views")
     try:
         r = std.execute()
     except: # TODO Specify exception somehow - that's for old indices with no correct mapping for document_num_views
@@ -46,14 +45,9 @@ def calc_topics_resonance(topics, topic_modelling, topic_weight_threshold=0.05):
     if not r.aggregations.sources.buckets:
         return
 
-    source_resonances = dict(
-        (bucket.key, [b.document_resonance.value for b in bucket.documents.buckets]) for bucket in r.aggregations.sources.buckets
-    )
-    source_resonance_means = dict(((source, mean(resonances)) for source, resonances in source_resonances.items()))
-    source_resonance_stds = dict(((source, pstdev(resonances)) for source, resonances in source_resonances.items()))
     sigma_threshold = 1
-    source_resonance_thresholds = dict(((source, source_resonance_means[source] + sigma_threshold * source_resonance_stds[source]) for source in source_resonances.keys()))
-
+    source_resonance_thresholds = dict(((source.key, source.stats.avg + sigma_threshold * source.stats.std_deviation)
+                                                for source in r.aggregations.sources.buckets))
     topic_resonances = dict(
         (topic.id,
          {
