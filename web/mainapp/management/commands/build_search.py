@@ -46,6 +46,7 @@ class Command(BaseCommand):
         # import datetime
         # qs = qs.filter(datetime__gte=datetime.date(2018, 10, 1), datetime__lte=datetime.date(2018, 10, 10)).order_by('id')
         # qs = qs.filter(source__corpus__name="gos").order_by('id')
+        qs = qs.filter(source__corpus__name="hate")
         print("Start build")
         for ok, result in parallel_bulk(self.client, self.document_generator(qs), index=ES_INDEX_DOCUMENT,
                                         chunk_size=self.batch_size, raise_on_error=False, thread_count=6):

@@ -21,8 +21,8 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'datetime', 'source', 'corpus')
-    list_filter = ('source', 'source__corpus')
+    list_display = ('title', 'datetime', 'source', 'corpus', )
+    list_filter = ('source', 'source__corpus', 'class_label', )
     search_fields = ('title', 'author__name', 'source__name', 'url', )
 
     def corpus(self, doc):

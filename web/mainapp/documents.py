@@ -45,6 +45,8 @@ class Document(es.Document):
     tags = es.Keyword()
     categories = es.Keyword()
 
+    class_label = es.Keyword()
+
     def init_from_model(self, model_obj: ModelDocument) -> None:
         self.id = model_obj.id
         self.corpus = model_obj.source.corpus.name
@@ -75,6 +77,8 @@ class Document(es.Document):
 
         self.tags = [tag.name for tag in model_obj.tags.all()]
         self.categories = [category.name for category in model_obj.categories.all()]
+
+        self.class_label = model_obj.class_label
 
     class Index:
         name = ES_INDEX_DOCUMENT
@@ -160,6 +164,9 @@ class Document(es.Document):
                     }
                 },
                 "url": {
+                    "type": "keyword"
+                },
+                "class_label": {
                     "type": "keyword"
                 }
             }

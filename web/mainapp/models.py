@@ -107,6 +107,8 @@ class Document(models.Model):
     author_loader = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Автор (кто загрузил)")
     sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
 
+    class_label = models.CharField(null=True, blank=True, max_length=25, verbose_name="Класс (разметка)")
+
     def __str__(self):
         return self.title
 

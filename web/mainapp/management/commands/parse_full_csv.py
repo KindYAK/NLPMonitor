@@ -57,7 +57,7 @@ class Command(BaseCommand):
                             author = Author.objects.create(name=author_name, corpus=corpus)
 
                 date = None
-                if row['date'] and type(row['date']) == str:
+                if row.get('date', None) and type(row['date']) == str:
                     try:
                         date = datetime.datetime.strptime(row['date'], "%Y-%m-%d")
                     except:
@@ -85,6 +85,7 @@ class Command(BaseCommand):
                                     links=self.row_str_parser(row, 'links'),
                                     num_comments=self.row_int_parser(row, 'num_comments'),
                                     num_views=self.row_int_parser(row, 'num_views'),
+                                    class_label=self.row_str_parser(row, 'class_label')
                                     )
 
                 if ('tags' not in row) or ('topic' not in row)  \
