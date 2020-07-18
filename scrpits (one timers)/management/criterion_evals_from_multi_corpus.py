@@ -13,12 +13,12 @@ def get_corpus_weight(topic):
         return 0
 
 
-topic_modelling = "bigartm_two_years_1000_rus_and_rus_propaganda"
-target_corpus = "rus_propaganda"
-criterion_name = "Пропаганда (RU)"
+topic_modelling = "bigartm_hate"
+target_corpus = "hate_neither"
+criterion_name = "Neither (hate)"
 
 topics = get_topics_with_meta(topic_modelling=topic_modelling,
-                              topic_weight_threshold=0.005,
+                              topic_weight_threshold=0.025,
                               is_multi_corpus=True)
 
 author = User.objects.filter(is_superuser=True).first()

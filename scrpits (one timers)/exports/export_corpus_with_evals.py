@@ -7,7 +7,7 @@ from evaluation.models import EvalCriterion
 from elasticsearch_dsl import Search
 
 tm_name = "bigartm_hate"
-corpus = "hate"
+# corpus = "hate"
 criterion_ids = [4, 5, 6]
 
 criterion_dicts = defaultdict(dict)
@@ -20,7 +20,8 @@ for criterion_id in criterion_ids:
         (doc.document_es_id, doc.value) for doc in s.scan()
     )
 
-s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", corpus=corpus)
+s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
+# s = s.filter("term", corpus=corpus)
 s = s.source(("text", "class_label"))
 
 output = []
@@ -38,7 +39,7 @@ for doc in s.scan():
         new_line[criterion_names[criterion_id]] = criterion_dicts[criterion_id][doc.meta.id]
     output.append(new_line)
 
-print(skipped)
+print("Skipped", skipped)
 
 keys = output[0].keys()
 with open(f'/output_hate.csv', 'w') as output_file:
