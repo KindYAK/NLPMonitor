@@ -42,12 +42,17 @@ for i, document_es_id in enumerate(document_values.keys()):
         document_ground_truth[document_es_id] = d.num_views >= source_resonance_thresholds[d.source]
 
 # Dataset to verify
+low_threshold, high_threshold = 10, 90
+s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{tm_name}_{criterion_id}")[:0]
+s.aggs.metric("percents", agg_type="percentiles", field="value", percents=[low_threshold, high_threshold])
+r = s.execute()
+
 x_y = []
 for document_es_id in document_values:
     if document_es_id not in document_ground_truth:
         continue
-    # if 0.35 < document_values[document_es_id] < 0.65:
-    #     continue
+    if r.aggregations.percents.values[f'{low_threshold}.0'] < document_values[document_es_id] < r.aggregations.percents.values[f'{high_threshold}.0']:
+        continue
     x_y.append((document_values[document_es_id], document_ground_truth[document_es_id]))
 
 x, y = [], []
