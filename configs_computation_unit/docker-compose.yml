@@ -17,6 +17,8 @@ services:
       - ../.env
     expose:
       - 8793
+    networks:
+      - worker-network
     environment:
       - AIRFLOW_WEBSERVER_PORT_NUMBER=8001
       - AIRFLOW_WEBSERVER_HOST=${AIRFLOW_WEBSERVER_HOST}
@@ -45,3 +47,10 @@ services:
 volumes:
   airflow:
     driver: local
+
+networks:
+  worker-network:
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
+          gateway: 172.16.238.1
