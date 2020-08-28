@@ -21,6 +21,13 @@ class MonitoringObjectAdmin(admin.ModelAdmin):
     search_fields = ('name_query',)
 
 
+class MonitoringObjectsGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', )
+    list_filter = ()
+    search_fields = ('name',)
+
+
 admin.site.register(DashboardPreset, DashboardPresetAdmin)
 admin.site.register(Widget, WidgetAdmin)
 admin.site.register(MonitoringObject, MonitoringObjectAdmin)
+admin.site.register(MonitoringObjectsGroup, MonitoringObjectsGroupAdmin)

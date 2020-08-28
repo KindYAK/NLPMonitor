@@ -19,7 +19,7 @@ class DashboardPreset(models.Model):
 
 class MonitoringObject(models.Model):
     class Meta:
-        verbose_name = "Объекты мониторинга"
+        verbose_name = "Объект мониторинга"
         verbose_name_plural = "Объекты мониторинга"
 
     name_query = models.CharField(verbose_name='Предмет запроса', max_length=100, null=True, blank=True)
@@ -27,6 +27,18 @@ class MonitoringObject(models.Model):
 
     def __str__(self):
         return f"Предмет запроса - {self.name_query}"
+
+
+class MonitoringObjectsGroup(models.Model):
+    class Meta:
+        verbose_name = "Группа объектов мониторинга"
+        verbose_name_plural = "Группы объектов мониторинга"
+
+    name = models.CharField(verbose_name='Название', max_length=100, null=True, blank=True)
+    monitoring_objects = models.ManyToManyField('MonitoringObject')
+
+    def __str__(self):
+        return f"Группа объектов мониторинга - {self.name}"
 
 
 class Widget(models.Model):
