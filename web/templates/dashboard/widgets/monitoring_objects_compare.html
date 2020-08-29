@@ -105,7 +105,7 @@
                                     {% else %}
                                         y: [{% for tick in object.dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
                                     {% endif %}
-                                    mode: 'lines',
+                                    mode: {% if object.dynamics|length_is:1 %}'scatter'{% else %}'lines'{% endif %},
                                 }
                             ];
 
@@ -113,10 +113,12 @@
                                 xaxis: {
                                     fixedrange: true,
                                     showgrid: false,
+                                    visible: false,
                                 },
                                 yaxis: {
                                     fixedrange: true,
                                     showgrid: false,
+                                    visible: false,
                                 },
                                 margin: {
                                     l: 0,
