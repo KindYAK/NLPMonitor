@@ -6,77 +6,133 @@
     {% with "monitoring_objects_"|add:widget_id as objects_name %}
         {% get_by_name objects_name as objects %}
         <div id="dynamic_plots">
-            <div class="dynamics-plot" id="objectsCompare_{{ widget.id }}"></div>
-            <script>
-                var layout = {
-                    title: '{{ widget.criterion.name }}',
-                    xaxis: {
-                        fixedrange: true
-                    },
-                    yaxis: {
-                        fixedrange: true,
-                    },
-                    height: {{ objects|length|multiply_by_50 }},
-                    margin: {
-                        l: 150,
-                        r: 15,
-                        b: 35,
-                        t: 45,
-                        pad: 5
-                    },
-                    bargap: 0.25
-                };
-                var data_{{ widget.id }} = [{
-                    type: 'bar',
-                    x: [{% for object in objects %}{{ object.value|round_fl:5|safe }}, {% endfor %}],
-                    y: [{% for object in objects %}'{{ object.name }}', {% endfor %}],
-                    orientation: 'h'
-                }];
+            <div class="row">
+                <div class="col">
+                    <div class="dynamics-plot" id="objectsCompare_{{ widget.id }}"></div>
+                </div>
 
-                addBreaksAtLength = 20;
-                function testWhite(x) {
-                    var white = new RegExp(/^\s$/);
-                    return white.test(x.charAt(0));
-                };
+                <div class="col">
+                    <div style="height: 45px;"></div>
+                    {% for object in objects %}
+                        <div class="dynamics-plot" id="dynamics_{{ widget.id }}_{{ object.id }}"
+                             style="height: 40px;"></div>
+                    {% endfor %}
+                </div>
 
-                function wordWrap(str, maxWidth) {
-                    var newLineStr = "<br>";
-                    done = false;
-                    res = '';
-                    while (str.length > maxWidth) {
-                        found = false;
-                        // Inserts new line at first whitespace of the line
-                        for (i = maxWidth - 1; i >= 0; i--) {
-                            if (testWhite(str.charAt(i))) {
-                                res = res + [str.slice(0, i), newLineStr].join('');
-                                str = str.slice(i + 1);
-                                found = true;
-                                break;
+                <script>
+                    var layout = {
+                        title: '{% if widget.criterion %}{{ widget.criterion.name }}{% else %}Освещённость{% endif %}',
+                        xaxis: {
+                            fixedrange: true
+                        },
+                        yaxis: {
+                            fixedrange: true,
+                        },
+                        height: {{ objects|length|multiply_by_50 }},
+                        margin: {
+                            l: 150,
+                            r: 15,
+                            b: 35,
+                            t: 45,
+                            pad: 5
+                        },
+                        bargap: 0.25
+                    };
+                    var data_{{ widget.id }} = [{
+                        type: 'bar',
+                        x: [{% for object in objects %}{{ object.value|round_fl:5|safe }}, {% endfor %}],
+                        y: [{% for object in objects %}'{{ object.name }}', {% endfor %}],
+                        orientation: 'h'
+                    }];
+
+                    addBreaksAtLength = 20;
+
+                    function testWhite(x) {
+                        var white = new RegExp(/^\s$/);
+                        return white.test(x.charAt(0));
+                    };
+
+                    function wordWrap(str, maxWidth) {
+                        var newLineStr = "<br>";
+                        done = false;
+                        res = '';
+                        while (str.length > maxWidth) {
+                            found = false;
+                            // Inserts new line at first whitespace of the line
+                            for (i = maxWidth - 1; i >= 0; i--) {
+                                if (testWhite(str.charAt(i))) {
+                                    res = res + [str.slice(0, i), newLineStr].join('');
+                                    str = str.slice(i + 1);
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
-                        // Inserts new line at maxWidth position, the word is too long to wrap
-                        if (!found) {
-                            res += [str.slice(0, maxWidth), newLineStr].join('');
-                            str = str.slice(maxWidth);
+                            // Inserts new line at maxWidth position, the word is too long to wrap
+                            if (!found) {
+                                res += [str.slice(0, maxWidth), newLineStr].join('');
+                                str = str.slice(maxWidth);
+                            }
+
                         }
 
+                        return res + str;
                     }
 
-                    return res + str;
-                }
+                    textwrapper = function (traces) {
+                        for (trace of traces) {
+                            trace.y = trace.y.map(text => {
+                                return wordWrap(text, addBreaksAtLength)
+                            });
+                        }
+                        return traces;
+                    };
+                    data_{{ widget.id }} = textwrapper(data_{{ widget.id }});
 
-                textwrapper = function (traces) {
-                    for (trace of traces) {
-                        trace.y = trace.y.map(text => {
-                            return wordWrap(text, addBreaksAtLength)
+                    Plotly.newPlot('objectsCompare_{{ widget.id }}', data_{{ widget.id }}, layout, {
+                        responsive: true,
+                        displayModeBar: false
+                    });
+                </script>
+
+                <script>
+                    {% for object in objects %}
+                        var data_{{ widget.id }}_{{ object.id }} = [
+                            {
+                                x: [{% for tick in object.dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                {% if object.is_criterion %}
+                                    y: [{% for tick in object.dynamics %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
+                                {% else %}
+                                    y: [{% for tick in object.dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                {% endif %}
+                                mode: 'lines',
+                            }
+                        ];
+
+                        var layout = {
+                            xaxis: {
+                                fixedrange: true,
+                                showgrid: false,
+                            },
+                            yaxis: {
+                                fixedrange: true,
+                                showgrid: false,
+                            },
+                            margin: {
+                                l: 0,
+                                r: 0,
+                                b: 0,
+                                t: 0,
+                                pad: 5
+                            }
+                        };
+
+                        Plotly.newPlot('dynamics_{{ widget.id }}_{{ object.id }}', data_{{ widget.id }}_{{ object.id }}, layout, {
+                            displayModeBar: false,
+                            responsive: true,
                         });
-                    }
-                    return traces;
-                };
-                data_{{ widget.id }} = textwrapper(data_{{ widget.id }});
-
-                Plotly.newPlot('objectsCompare_{{ widget.id }}', data_{{ widget.id }}, layout, {responsive: true, displayModeBar: false});
-            </script>
+                    {% endfor %}
+                </script>
+            </div>
         </div>
     {% endwith %}
 {% endwith %}

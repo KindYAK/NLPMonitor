@@ -252,15 +252,34 @@ def monitoring_objects_compare(widget):
     for s, monitoring_object in zip(ss, widget.monitoring_objects_group.monitoring_objects.all()):
         s = s.source(tuple())[:0]
         if widget.criterion:
+            s.aggs.bucket(name="dynamics",
+                          agg_type="date_histogram",
+                          field="document_datetime",
+                          calendar_interval="1w") \
+                .metric("dynamics_weight", agg_type="avg", field="value")
             s.aggs.metric('avg', agg_type='avg', field='value')
             r = s.execute()
             value = r.aggregations.avg.value
+            is_posneg = False
         else:
+            s.aggs.bucket(name="dynamics",
+                          agg_type="date_histogram",
+                          field="datetime",
+                          calendar_interval="1w")
             value = s.count()
+            r = s.execute()
+            is_posneg = True
+        buckets = r.aggregations.dynamics.buckets
+        smooth_buckets(buckets,
+                       is_posneg=is_posneg,
+                       granularity="1w")
         monitoring_objects.append(
             {
+                "id": monitoring_object.id,
                 "name": monitoring_object.name_query,
-                "value": value if value else 0
+                "is_criterion": bool(widget.criterion),
+                "value": value if value else 0,
+                "dynamics": buckets
             }
         )
     monitoring_objects = sorted(monitoring_objects, key=lambda x: x['value'], reverse=False)
