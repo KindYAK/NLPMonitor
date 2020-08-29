@@ -249,13 +249,16 @@ def monitoring_objects_compare(widget):
     context_update = {}
     ss = es_document_eval_search_factory(widget)
     monitoring_objects = list()
+    granularity = "1w"
+    if widget.days_len < 65:
+        granularity = "1d"
     for s, monitoring_object in zip(ss, widget.monitoring_objects_group.monitoring_objects.all()):
         s = s.source(tuple())[:0]
         if widget.criterion:
             s.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="document_datetime",
-                          calendar_interval="1w") \
+                          calendar_interval=granularity) \
                 .metric("dynamics_weight", agg_type="avg", field="value")
             s.aggs.metric('avg', agg_type='avg', field='value')
             r = s.execute()
@@ -265,14 +268,14 @@ def monitoring_objects_compare(widget):
             s.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="datetime",
-                          calendar_interval="1w")
+                          calendar_interval=granularity)
             value = s.count()
             r = s.execute()
             is_posneg = True
         buckets = r.aggregations.dynamics.buckets
         smooth_buckets(buckets,
                        is_posneg=is_posneg,
-                       granularity="1w")
+                       granularity=granularity)
         monitoring_objects.append(
             {
                 "id": monitoring_object.id,

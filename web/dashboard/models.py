@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.db import models
@@ -65,6 +66,16 @@ class Widget(models.Model):
     monitoring_objects_group = models.ForeignKey('MonitoringObjectsGroup', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Группа объектов мониторинга')
 
     params = models.TextField(null=True, blank=True)
+
+    @property
+    def days_len(self):
+        if self.days_before_now:
+            return self.days_before_now
+        if self.datetime_from and self.datetime_to:
+            return (self.datetime_to - self.datetime_from).days
+        if self.datetime_from:
+            return (datetime.datetime.now().date() - self.datetime_from).days
+        return 1000
 
     @property
     def template_name(self):
