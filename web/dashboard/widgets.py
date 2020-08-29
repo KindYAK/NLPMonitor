@@ -260,7 +260,7 @@ def monitoring_objects_compare(widget):
         monitoring_objects.append(
             {
                 "name": monitoring_object.name_query,
-                "value": value
+                "value": value if value else 0
             }
         )
     monitoring_objects = sorted(monitoring_objects, key=lambda x: x['value'], reverse=False)
