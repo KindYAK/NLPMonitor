@@ -96,40 +96,42 @@
 
                 <script>
                     {% for object in objects reversed  %}
-                        var data_{{ widget.id }}_{{ object.id }} = [
-                            {
-                                x: [{% for tick in object.dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
-                                {% if object.is_criterion %}
-                                    y: [{% for tick in object.dynamics %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
-                                {% else %}
-                                    y: [{% for tick in object.dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
-                                {% endif %}
-                                mode: 'lines',
-                            }
-                        ];
+                        {% if object.dynamics %}
+                            var data_{{ widget.id }}_{{ object.id }} = [
+                                {
+                                    x: [{% for tick in object.dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
+                                    {% if object.is_criterion %}
+                                        y: [{% for tick in object.dynamics %}{{ tick.dynamics_weight.value|round_fl:5|safe }}, {% endfor %}],
+                                    {% else %}
+                                        y: [{% for tick in object.dynamics %}{{ tick.doc_count|safe }}, {% endfor %}],
+                                    {% endif %}
+                                    mode: 'lines',
+                                }
+                            ];
 
-                        var layout_dynamics = {
-                            xaxis: {
-                                fixedrange: true,
-                                showgrid: false,
-                            },
-                            yaxis: {
-                                fixedrange: true,
-                                showgrid: false,
-                            },
-                            margin: {
-                                l: 0,
-                                r: 0,
-                                b: 0,
-                                t: 0,
-                                pad: 5
-                            }
-                        };
+                            var layout_dynamics = {
+                                xaxis: {
+                                    fixedrange: true,
+                                    showgrid: false,
+                                },
+                                yaxis: {
+                                    fixedrange: true,
+                                    showgrid: false,
+                                },
+                                margin: {
+                                    l: 0,
+                                    r: 0,
+                                    b: 0,
+                                    t: 0,
+                                    pad: 5
+                                }
+                            };
 
-                        Plotly.newPlot('dynamics_{{ widget.id }}_{{ object.id }}', data_{{ widget.id }}_{{ object.id }}, layout_dynamics, {
-                            displayModeBar: false,
-                            responsive: true,
-                        });
+                            Plotly.newPlot('dynamics_{{ widget.id }}_{{ object.id }}', data_{{ widget.id }}_{{ object.id }}, layout_dynamics, {
+                                displayModeBar: false,
+                                responsive: true,
+                            });
+                        {% endif %}
                     {% endfor %}
                 </script>
             </div>
