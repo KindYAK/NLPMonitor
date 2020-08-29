@@ -46,4 +46,9 @@ TYPES_META_DICT = {
         "callable": geo,
         "template_name": "dashboard/widgets/geo.html",
     },
+    9: {
+        "name": "Monitoring objects compare",
+        "callable": monitoring_objects_compare,
+        "template_name": "dashboard/widgets/monitoring_objects_compare.html",
+    },
 }

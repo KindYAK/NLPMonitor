@@ -1,0 +1,82 @@
+{% load custom_stuff %}
+{% load dictionary_getter %}
+{% load serializers %}
+
+{% with widget.id|stringformat:"s" as widget_id %}
+    {% with "monitoring_objects_"|add:widget_id as objects_name %}
+        {% get_by_name objects_name as objects %}
+        <div id="dynamic_plots">
+            <div class="dynamics-plot" id="valueDynamics_{{ widget.id }}"></div>
+            <script>
+                var layout = {
+                    title: '{{ widget.criterion.name }}',
+                    xaxis: {
+                        fixedrange: true
+                    },
+                    yaxis: {
+                        fixedrange: true,
+                    },
+                    height: {{ objects|length|multiply_by_50 }},
+                    margin: {
+                        l: 150,
+                        r: 15,
+                        b: 35,
+                        t: 45,
+                        pad: 5
+                    },
+                    bargap: 0.25
+                };
+                var data_{{ widget.id }} = [{
+                    type: 'bar',
+                    x: [{% for object in objects %}{{ object.value|round_fl:5|safe }}, {% endfor %}],
+                    y: [{% for object in objects %}'{{ object.name }}', {% endfor %}],
+                    orientation: 'h'
+                }];
+
+                addBreaksAtLength = 20;
+                function testWhite(x) {
+                    var white = new RegExp(/^\s$/);
+                    return white.test(x.charAt(0));
+                };
+
+                function wordWrap(str, maxWidth) {
+                    var newLineStr = "<br>";
+                    done = false;
+                    res = '';
+                    while (str.length > maxWidth) {
+                        found = false;
+                        // Inserts new line at first whitespace of the line
+                        for (i = maxWidth - 1; i >= 0; i--) {
+                            if (testWhite(str.charAt(i))) {
+                                res = res + [str.slice(0, i), newLineStr].join('');
+                                str = str.slice(i + 1);
+                                found = true;
+                                break;
+                            }
+                        }
+                        // Inserts new line at maxWidth position, the word is too long to wrap
+                        if (!found) {
+                            res += [str.slice(0, maxWidth), newLineStr].join('');
+                            str = str.slice(maxWidth);
+                        }
+
+                    }
+
+                    return res + str;
+                }
+
+                textwrapper = function (traces) {
+                    for (trace of traces) {
+                        trace.y = trace.y.map(text => {
+                            return wordWrap(text, addBreaksAtLength)
+                        });
+                    }
+                    return traces;
+                };
+                data_{{ widget.id }} = textwrapper(data_{{ widget.id }});
+
+                Plotly.newPlot('valueDynamics_{{ widget.id }}', data_{{ widget.id }}, layout, {responsive: true, displayModeBar: false});
+            </script>
+        </div>
+    {% endwith %}
+{% endwith %}

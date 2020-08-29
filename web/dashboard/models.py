@@ -50,7 +50,7 @@ class Widget(models.Model):
         (key, value['name']) for key, value in TYPES_META_DICT.items()
     )
 
-    criterion = models.ForeignKey("evaluation.EvalCriterion", on_delete=models.CASCADE)
+    criterion = models.ForeignKey("evaluation.EvalCriterion", on_delete=models.CASCADE, null=True, blank=True)
     topic_modelling_name = models.CharField(max_length=100, verbose_name="Название ТМ")
     type = models.SmallIntegerField(choices=TYPES, default=0)
 
@@ -61,7 +61,8 @@ class Widget(models.Model):
     datetime_from = models.DateField(verbose_name='Отфильтровать с', null=True, blank=True)
     datetime_to = models.DateField(verbose_name='Отфильтровать до', null=True, blank=True)
     days_before_now = models.IntegerField(verbose_name='Дней назад', null=True, blank=True)
-    monitoring_object = models.ForeignKey(MonitoringObject, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Объект мониторинга')
+    monitoring_object = models.ForeignKey('MonitoringObject', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Объект мониторинга')
+    monitoring_objects_group = models.ForeignKey('MonitoringObjectsGroup', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Группа объектов мониторинга')
 
     params = models.TextField(null=True, blank=True)
 

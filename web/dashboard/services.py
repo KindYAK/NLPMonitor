@@ -2,14 +2,19 @@ from datetime import datetime, timedelta
 
 from elasticsearch_dsl import Search
 
-from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_DOCUMENT_LOCATION
+from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_DOCUMENT_LOCATION
 from .util import default_parser
 
 
 def es_document_eval_search_factory(widget, **kwargs):
-    widget.criterion.id_postfix = widget.criterion.id
-    s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{widget.topic_modelling_name}_{widget.criterion.id}")
-    s = es_default_fields_parser(widget, s)
+    if widget.criterion:
+        s_type = "eval"
+        widget.criterion.id_postfix = widget.criterion.id
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{widget.topic_modelling_name}_{widget.criterion.id}")
+    else:
+        s_type = "tm"
+        s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{widget.topic_modelling_name}")
+    s = es_default_fields_parser(widget, s, s_type)
     return s
 
 
@@ -34,7 +39,7 @@ def es_document_location_search_factory(widget, **kwargs):
     return s
 
 
-def es_default_fields_parser(widget, s):
+def es_default_fields_parser(widget, s, s_type="eval"):
     datetime_from = datetime(2000, 1, 1).date()
     datetime_to = datetime.now().date()
 
@@ -46,8 +51,12 @@ def es_default_fields_parser(widget, s):
         datetime_from = datetime_to - timedelta(days=widget.days_before_now)
         datetime_to = datetime.now().date()
 
-    s = s.filter("range", document_datetime={"gte": datetime_from}) \
-        .filter("range", document_datetime={"lte": datetime_to})
+    if s_type == "eval":
+        datetime_field = "document_datetime"
+    else:
+        datetime_field = "datetime"
+    s = s.filter("range", **{datetime_field: {"gte": datetime_from}}) \
+        .filter("range", **{datetime_field: {"lte": datetime_to}})
 
     try:
         widget_ner_query = widget.monitoring_object.ner_query
@@ -61,6 +70,22 @@ def es_default_fields_parser(widget, s):
             datetime_to=datetime_to,
             parent_search=s
         )
+
+    try:
+        monitoring_objects = widget.monitoring_objects_group.monitoring_objects.all()
+    except AttributeError:
+        monitoring_objects = None
+
+    if monitoring_objects:
+        ss = list()
+        for monitoring_object in monitoring_objects:
+            ss.append(
+                default_parser(
+                    widget_ner_query=monitoring_object.ner_query,
+                    datetime_from=datetime_from,
+                    datetime_to=datetime_to,
+                    parent_search=s
+                )
+            )
+        s = ss
     return s
-
-

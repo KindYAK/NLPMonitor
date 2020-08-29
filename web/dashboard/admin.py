@@ -4,21 +4,21 @@ from .models import *
 
 
 class DashboardPresetAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', )
     list_filter = ()
-    search_fields = ('name',)
+    search_fields = ('name', )
 
 
 class WidgetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type', 'criterion', 'topic_modelling_name', 'index',)
-    list_filter = ('type', 'criterion', 'topic_modelling_name',)
-    search_fields = ('title',)
+    list_display = ('title', 'type', 'criterion', 'topic_modelling_name', 'index', 'monitoring_object', 'monitoring_objects_group', )
+    list_filter = ('type', 'criterion', 'topic_modelling_name', 'monitoring_object', 'monitoring_objects_group', )
+    search_fields = ('title', )
 
 
 class MonitoringObjectAdmin(admin.ModelAdmin):
-    list_display = ('name_query', 'ner_query')
+    list_display = ('name_query', 'ner_query', )
     list_filter = ()
-    search_fields = ('name_query',)
+    search_fields = ('name_query', )
 
 
 class MonitoringObjectsGroupAdmin(admin.ModelAdmin):

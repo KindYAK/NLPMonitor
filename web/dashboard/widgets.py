@@ -243,3 +243,26 @@ def geo(widget):
     context_update[f'tm_{widget.id}'] = widget.topic_modelling_name
     context_update[f'criterion_{widget.id}'] = widget.criterion
     return context_update
+
+
+def monitoring_objects_compare(widget):
+    context_update = {}
+    ss = es_document_eval_search_factory(widget)
+    monitoring_objects = list()
+    for s, monitoring_object in zip(ss, widget.monitoring_objects_group.monitoring_objects.all()):
+        s = s.source(tuple())[:0]
+        if widget.criterion:
+            s.aggs.metric('avg', agg_type='avg', field='value')
+            r = s.execute()
+            value = r.aggregations.avg.value
+        else:
+            value = s.count()
+        monitoring_objects.append(
+            {
+                "name": monitoring_object.name_query,
+                "value": value
+            }
+        )
+    monitoring_objects = sorted(monitoring_objects, key=lambda x: x['value'], reverse=False)
+    context_update[f'monitoring_objects_{widget.id}'] = monitoring_objects
+    return context_update
