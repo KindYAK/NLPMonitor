@@ -6,7 +6,7 @@
     {% with "monitoring_objects_"|add:widget_id as objects_name %}
         {% get_by_name objects_name as objects %}
         <div id="dynamic_plots">
-            <div class="dynamics-plot" id="valueDynamics_{{ widget.id }}"></div>
+            <div class="dynamics-plot" id="objectsCompare_{{ widget.id }}"></div>
             <script>
                 var layout = {
                     title: '{{ widget.criterion.name }}',
@@ -75,7 +75,7 @@
                 };
                 data_{{ widget.id }} = textwrapper(data_{{ widget.id }});
 
-                Plotly.newPlot('valueDynamics_{{ widget.id }}', data_{{ widget.id }}, layout, {responsive: true, displayModeBar: false});
+                Plotly.newPlot('objectsCompare_{{ widget.id }}', data_{{ widget.id }}, layout, {responsive: true, displayModeBar: false});
             </script>
         </div>
     {% endwith %}
