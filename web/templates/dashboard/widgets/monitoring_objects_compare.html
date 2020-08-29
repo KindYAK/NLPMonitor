@@ -13,7 +13,7 @@
 
                 <div class="col">
                     <div style="height: 45px;"></div>
-                    {% for object in objects %}
+                    {% for object in objects reversed  %}
                         <div class="dynamics-plot" id="dynamics_{{ widget.id }}_{{ object.id }}" style="height: 40px;"></div>
                     {% endfor %}
                 </div>
@@ -95,7 +95,7 @@
                 </script>
 
                 <script>
-                    {% for object in objects %}
+                    {% for object in objects reversed  %}
                         var data_{{ widget.id }}_{{ object.id }} = [
                             {
                                 x: [{% for tick in object.dynamics %}new Date('{{ tick.key_as_string }}'), {% endfor %}],
