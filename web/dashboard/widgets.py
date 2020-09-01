@@ -1,6 +1,6 @@
 import datetime
 
-from dashboard.services import es_document_eval_search_factory, es_document_location_search_factory
+from dashboard.services import es_widget_search_factory, es_document_location_search_factory
 from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
     get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict, \
     smooth_buckets, normalize_documents_eval_dynamics_with_virt_negative
@@ -9,7 +9,7 @@ from .util import location_buckets_parser, criterion_map_parser
 
 def overall_positive_negative(widget):
     context_update = dict()
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     s = s.source(tuple())[:0]
     if widget.criterion.value_range_from < 0:
         range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
@@ -35,7 +35,7 @@ def overall_positive_negative(widget):
 
 def dynamics(widget):
     context_update = {}
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     s = s.source(tuple())[:0]
     # Average dynamics
     s.aggs.bucket(name="dynamics",
@@ -62,7 +62,7 @@ def dynamics(widget):
 
 def source_distribution(widget):
     context_update = dict()
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     s = s.source(tuple())[:0]
 
     # Posneg distribution
@@ -134,7 +134,7 @@ def main_news(widget, mode):
     neutrality_threshold = 0.1
 
     # Get top news
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('-value')
     elif mode == "last":
@@ -143,7 +143,7 @@ def main_news(widget, mode):
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('value')
     elif mode == "last":
@@ -185,7 +185,7 @@ def main_news(widget, mode):
 
 def top_topics(widget):
     context_update = dict()
-    s = es_document_eval_search_factory(widget)
+    s = es_widget_search_factory(widget)
     num_topics = 5
     # Posneg distribution
     if widget.criterion.value_range_from < 0:
@@ -247,7 +247,7 @@ def geo(widget):
 
 def monitoring_objects_compare(widget):
     context_update = {}
-    ss = es_document_eval_search_factory(widget)
+    ss = es_widget_search_factory(widget)
     monitoring_objects = list()
     granularity = "1w"
     if widget.days_len < 65:

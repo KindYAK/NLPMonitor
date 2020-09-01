@@ -42,6 +42,7 @@
                         type: 'bar',
                         x: [{% for object in objects %}{{ object.value|round_fl:5|safe }}, {% endfor %}],
                         y: [{% for object in objects %}'{{ object.name }}', {% endfor %}],
+                        info: [{% for object in objects %}'{{ object.id }}', {% endfor %}],
                         orientation: 'h'
                     }];
 
@@ -91,6 +92,11 @@
                     Plotly.newPlot('objectsCompare_{{ widget.id }}', data_{{ widget.id }}, layout_{{ widget.id }}, {
                         responsive: true,
                         displayModeBar: false
+                    });
+
+                    document.getElementById("objectsCompare_{{ widget.id }}").on('plotly_click', function (data) {
+                        let object_id = data.points[0].data.info[data.points[0].pointNumber];
+                        window.location.href = "/topicmodelling/monitoring_object_documents_list/{{ widget.id }}/" + object_id + "/"
                     });
                 </script>
 

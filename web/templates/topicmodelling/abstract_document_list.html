@@ -7,17 +7,25 @@
 {% load custom_stuff %}
 
 {% block title %}
-    {% if request.GET.topic_name %}
-        Список документов топика "{{ request.GET.topic_name }}"
-    {% else %}
-        Список документов выбранной группы
+    {% if list_type == "topics" %}
+        {% if request.GET.topic_name %}
+            Список документов топика "{{ request.GET.topic_name }}"
+        {% else %}
+            Список документов выбранной группы
+        {% endif %}
+    {% elif list_type == "monitoring_object" %}
+        Список документов объекта мониторинга {{ monitoring_object.name_query }}
     {% endif %}
 {% endblock %}
 {% block heading %}
-    {% if request.GET.topic_name %}
-        Список документов топика "{{ request.GET.topic_name }}"
-    {% else %}
-        Список документов выбранной группы
+    {% if list_type == "topics" %}
+        {% if request.GET.topic_name %}
+            Список документов топика "{{ request.GET.topic_name }}"
+        {% else %}
+            Список документов выбранной группы
+        {% endif %}
+    {% elif list_type == "monitoring_object" %}
+        Список документов объекта мониторинга {{ monitoring_object.name_query }}
     {% endif %}
     <div>Количество документов - {{ number_of_documents }}</div>
 {% endblock %}
@@ -121,13 +129,17 @@
     </div>
     </form>
 
-    {% cache 28800 topic_detail view.kwargs request.GET %}
+    {% cache 28800 abstract_detail view.kwargs request.GET %}
     {# Графики #}
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3>Динамика топика</h3>
+                    {% if list_type == "topics" %}
+                        <h3>Динамика топика</h3>
+                    {% elif list_type == "monitoring_object" %}
+                        <h3>Динамика объекта мониторинга (освещённость)</h3>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     <div id="dynamic_plots">
@@ -177,16 +189,12 @@
                                     mode: 'lines',
                                     x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
                                     y: [{% for tick in absolute_power %}{{ tick|round_fl:0|safe }}, {% endfor %}],
-                                    name: 'Абсолютная мощность топика',
+                                    name: 'Абсолютная мощность {% if list_type == "topics" %}топика{% elif list_type == "monitoring_object" %}объекта мониторинга{% endif %}',
                                     fill: 'tozeroy',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
                                 },
                             ];
                             var layout = {
-                                title: 'Абсолютная мощность топика',
+                                title: 'Абсолютная мощность {% if list_type == "topics" %}топика{% elif list_type == "monitoring_object" %}объекта мониторинга{% endif %}',
                                 xaxis: {
                                     rangeselector: selectorOptions,
                                     rangeslider: {},
@@ -199,89 +207,83 @@
                             Plotly.plot('topic_dynamics', data, layout, {responsive: true});
                         </script>
 
-                        {# Относительная мощность #}
-                        <div class="clipboard" style="display: none">
-                            <div style="text-align: center;">
-                                <button class="btn btn-default" id="topic_dynamics_normal_copy">Временной ряд в буфер обмена</button>
+                        {% if list_type == "topics" %}
+                            {# Относительная мощность #}
+                            <div class="clipboard" style="display: none">
+                                <div style="text-align: center;">
+                                    <button class="btn btn-default" id="topic_dynamics_normal_copy">Временной ряд в буфер обмена</button>
+                                </div>
+                                <script>
+                                    new ClipboardJS('#topic_dynamics_normal_copy', {
+                                        text: function (trigger) {
+                                            return get_time_series("topic_dynamics_normal");
+                                        }
+                                    });
+                                </script>
                             </div>
+                            <div class="dynamics-plot" id="topic_dynamics_normal"></div>
                             <script>
-                                new ClipboardJS('#topic_dynamics_normal_copy', {
-                                    text: function (trigger) {
-                                        return get_time_series("topic_dynamics_normal");
+                                var data = [
+                                    {
+                                        mode: 'lines',
+                                        x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                        y: [{% for tick in relative_power %}{{ tick|round_fl:5|safe }}, {% endfor %}],
+                                        name: 'Относительная мощность топика',
+                                        fill: 'tozeroy',
+                                    },
+                                ];
+                                var layout = {
+                                    title: 'Относительная мощность топика',
+                                    xaxis: {
+                                        rangeselector: selectorOptions,
+                                        rangeslider: {},
+                                        fixedrange: true
+                                    },
+                                    yaxis: {
+                                        fixedrange: true
                                     }
-                                });
+                                };
+                                Plotly.plot('topic_dynamics_normal', data, layout, {responsive: true});
                             </script>
-                        </div>
-                        <div class="dynamics-plot" id="topic_dynamics_normal"></div>
-                        <script>
-                            var data = [
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_power %}{{ tick|round_fl:5|safe }}, {% endfor %}],
-                                    name: 'Относительная мощность топика',
-                                    fill: 'tozeroy',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
-                                },
-                            ];
-                            var layout = {
-                                title: 'Относительная мощность топика',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {},
-                                    fixedrange: true
-                                },
-                                yaxis: {
-                                    fixedrange: true
-                                }
-                            };
-                            Plotly.plot('topic_dynamics_normal', data, layout, {responsive: true});
-                        </script>
 
-                        {# Относительный удельный вес #}
-                        <div class="clipboard" style="display: none">
-                            <div style="text-align: center;">
-                                <button class="btn btn-default" id="topic_dynamics_weight_copy">Временной ряд в буфер обмена</button>
+                            {# Относительный удельный вес #}
+                            <div class="clipboard" style="display: none">
+                                <div style="text-align: center;">
+                                    <button class="btn btn-default" id="topic_dynamics_weight_copy">Временной ряд в буфер обмена</button>
+                                </div>
+                                <script>
+                                    new ClipboardJS('#topic_dynamics_weight_copy', {
+                                        text: function (trigger) {
+                                            return get_time_series("topic_dynamics_weight");
+                                        }
+                                    });
+                                </script>
                             </div>
+                            <div class="dynamics-plot" id="topic_dynamics_weight"></div>
                             <script>
-                                new ClipboardJS('#topic_dynamics_weight_copy', {
-                                    text: function (trigger) {
-                                        return get_time_series("topic_dynamics_weight");
+                                var data = [
+                                    {
+                                        mode: 'lines',
+                                        x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
+                                        y: [{% for tick in relative_weight %}{{ tick|round_fl:5|safe }}, {% endfor %}],
+                                        name: 'Удельный вес топика',
+                                        fill: 'tozeroy',
+                                    },
+                                ];
+                                var layout = {
+                                    title: 'Удельный вес топика',
+                                    xaxis: {
+                                        rangeselector: selectorOptions,
+                                        rangeslider: {},
+                                        fixedrange: true
+                                    },
+                                    yaxis: {
+                                        fixedrange: true
                                     }
-                                });
+                                };
+                                Plotly.plot('topic_dynamics_weight', data, layout, {responsive: true});
                             </script>
-                        </div>
-                        <div class="dynamics-plot" id="topic_dynamics_weight"></div>
-                        <script>
-                            var data = [
-                                {
-                                    mode: 'lines',
-                                    x: [{% for tick in date_ticks %}new Date('{{ tick }}'), {% endfor %}],
-                                    y: [{% for tick in relative_weight %}{{ tick|round_fl:5|safe }}, {% endfor %}],
-                                    name: 'Удельный вес топика',
-                                    fill: 'tozeroy',
-{#                                    {% if smooth %}#}
-{#                                    line: {shape: 'spline'},#}
-{#                                    smoothing: 0.5#}
-{#                                    {% endif %}#}
-                                },
-                            ];
-                            var layout = {
-                                title: 'Удельный вес топика',
-                                xaxis: {
-                                    rangeselector: selectorOptions,
-                                    rangeslider: {},
-                                    fixedrange: true
-                                },
-                                yaxis: {
-                                    fixedrange: true
-                                }
-                            };
-                            Plotly.plot('topic_dynamics_weight', data, layout, {responsive: true});
-                        </script>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -314,7 +316,11 @@
                             var data = [
                                 {
                                     x: [{% for source in source_weight %}'{{ source.key|remove_http }}', {% endfor %}],
-                                    y: [{% for source in source_weight %}{{ source.source_weight.value|round_fl:2|safe }}, {% endfor %}],
+                                    {% if list_type == "topics" %}
+                                        y: [{% for source in source_weight %}{{ source.source_weight.value|round_fl:2|safe }}, {% endfor %}],
+                                    {% elif list_type == "monitoring_object" %}
+                                        y: [{% for source in source_weight %}{{ source.doc_count|safe }}, {% endfor %}],
+                                    {% endif %}
                                     type: 'bar'
                                 }
                             ];
@@ -342,7 +348,9 @@
                         <table id="search-results-table" class="table table-bordered table-hover">
                             <thead>
                             <tr role="row">
-                                <th>Вес в топике</th>
+                                {% if list_type == "topics" %}
+                                    <th>Вес в топике</th>
+                                {% endif %}
                                 <th>Дата</th>
                                 <th>Заголовок</th>
                                 <th>Источник</th>
@@ -352,7 +360,9 @@
                             <tbody>
                             {% for document in documents %}
                                 <tr>
-                                    <td>{{ document.weight|floatformat:3|unlocalize }}</td>
+                                    {% if list_type == "topics" %}
+                                        <td>{{ document.weight|floatformat:3|unlocalize }}</td>
+                                    {% endif %}
                                     <td>{{ document.datetime }}</td>
                                     <td>{{ document.title }}</td>
                                     <td>{{ document.source }}</td>

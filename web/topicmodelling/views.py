@@ -2,12 +2,13 @@ import json
 import re
 
 import numpy as np
-from django.core.cache import cache
-from django.core.cache.utils import make_template_fragment_key
+
 from django.views.generic import TemplateView
 
+from dashboard.models import MonitoringObject, Widget
+from dashboard.services import es_widget_search_factory
 from evaluation.models import EvalCriterion
-from mainapp.forms import TopicChooseForm, get_topic_weight_threshold_options, DynamicTMForm
+from mainapp.forms import TopicChooseForm, DynamicTMForm
 from mainapp.services import apply_fir_filter, unique_ize, get_user_group
 from nlpmonitor.settings import ES_INDEX_META_DTM, \
     ES_INDEX_DYNAMIC_TOPIC_MODELLING, ES_INDEX_MAPPINGS, ES_INDEX_DYNAMIC_TOPIC_DOCUMENT, ES_INDEX_TOPIC_COMBOS
@@ -68,7 +69,7 @@ class TopicsListView(TemplateView):
 
 
 class TopicDocumentListView(TemplateView):
-    template_name = "topicmodelling/topic_document_list.html"
+    template_name = "topicmodelling/abstract_document_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -86,14 +87,10 @@ class TopicDocumentListView(TemplateView):
             is_too_many_groups = len(topics) > 50
 
         # Forms Management
-        context['granularity'] = self.request.GET['granularity'] if 'granularity' in self.request.GET else "1w"
-        context['smooth'] = True if 'smooth' in self.request.GET else (
-            True if 'granularity' not in self.request.GET else False)
-        context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(
-            self.request.user.is_superuser or hasattr(self.request.user, "expert"))
-        context['topic_weight_threshold'] = float(self.request.GET['topic_weight_threshold']) \
-            if 'topic_weight_threshold' in self.request.GET else \
-            0.05  # Initial
+        try:
+            context = abstract_documents_list_form_management(context, self.request, kwargs)
+        except CacheHit:
+            return context
 
         key = make_template_fragment_key('topic_detail', [kwargs, self.request.GET])
         if cache.get(key):
@@ -129,6 +126,7 @@ class TopicDocumentListView(TemplateView):
             relative_weight = apply_fir_filter(relative_weight, granularity=context['granularity'])
 
         # Create context
+        context['list_type'] = "topics"
         context['documents'] = unique_ize(documents, key=lambda x: x.id)
         context['number_of_documents'] = number_of_documents
         context['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
@@ -137,6 +135,59 @@ class TopicDocumentListView(TemplateView):
         context['relative_weight'] = relative_weight
         context['source_weight'] = sorted(topic_documents.aggregations.source.buckets,
                                           key=lambda x: x.source_weight.value,
+                                          reverse=True)
+        return context
+
+
+class MonitoringObjectDocumentListView(TemplateView):
+    template_name = "topicmodelling/abstract_document_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if not self.request.user.is_superuser:
+            group = get_user_group(self.request.user)
+            if not group or kwargs['topic_modelling'] not in group.topic_modelling_names.split(","):
+                context['error'] = "403 FORBIDDEN"
+                return context
+
+        widget = Widget.objects.get(id=kwargs['widget_id'])
+        monitoring_object = MonitoringObject.objects.get(id=kwargs['object_id'])
+
+        # Forms Management
+        try:
+            context = abstract_documents_list_form_management(context, self.request, kwargs)
+        except CacheHit:
+            return context
+
+        s = es_widget_search_factory(widget, object_id=monitoring_object.id)
+        s.aggs.bucket("dynamics", agg_type="date_histogram", field="datetime", calendar_interval=context['granularity'])
+        s.aggs.bucket("source", agg_type="terms", field="document_source")
+        number_of_documents = s.count()
+        s = s.source(("document_es_id", "datetime"))[:1000 * 300]
+        r = s.execute()
+
+        documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=list(set([d.document_es_id for d in r])))
+        documents = documents.source(("id", "title", "datetime", "source", "url"))[:2000]
+        documents = documents.execute()
+
+        # Separate signals
+        absolute_power = [bucket.doc_count for bucket in r.aggregations.dynamics.buckets]
+
+        # Smooth
+        if context['smooth']:
+            absolute_power = apply_fir_filter(absolute_power, granularity=context['granularity'])
+
+        # Create context
+        context['list_type'] = "monitoring_object"
+        context['monitoring_object'] = monitoring_object
+        context['widget'] = widget
+        context['documents'] = unique_ize(documents, key=lambda x: x.id)
+        context['number_of_documents'] = number_of_documents
+        context['date_ticks'] = [bucket.key_as_string for bucket in r.aggregations.dynamics.buckets]
+        context['absolute_power'] = absolute_power
+        context['source_weight'] = sorted(r.aggregations.source.buckets,
+                                          key=lambda x: x.doc_count,
                                           reverse=True)
         return context
 

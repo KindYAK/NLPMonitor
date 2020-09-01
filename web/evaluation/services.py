@@ -6,7 +6,6 @@ from evaluation.models import TopicsEval
 from evaluation.utils import parse_eval_index_name
 from mainapp.constants import SEARCH_CUTOFF_CONFIG
 from mainapp.services import apply_fir_filter
-from mainapp.services_es import get_elscore_cutoff
 from nlpmonitor.settings import ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, \
     ES_INDEX_TOPIC_MODELLING
 from topicmodelling.services import get_total_metrics

@@ -11,23 +11,11 @@ from evaluation.services import get_documents_with_values, divide_posneg_source_
     get_total_group_dynamics, normalize_documents_eval_dynamics, normalize_documents_eval_dynamics_with_virt_negative, \
     get_documents_ids_filter, get_criterions_values_for_normalization
 from evaluation.utils import parse_eval_index_name, POSTFIXES_ALLOWED
-from mainapp.forms import get_topic_weight_threshold_options
 from mainapp.models import Source
 from mainapp.models_user import TopicGroup
 from mainapp.services import get_user_group, unique_ize
+from mainapp.utils import CacheHit, EmptySearchException, Forbidden, get_topic_weight_threshold_options
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL
-
-
-class CacheHit(Exception):
-    pass
-
-
-class EmptySearchException(Exception):
-    pass
-
-
-class Forbidden(Exception):
-    pass
 
 
 def form_creation(request, context):

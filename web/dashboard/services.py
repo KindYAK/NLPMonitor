@@ -6,15 +6,15 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_TOPI
 from .util import default_parser
 
 
-def es_document_eval_search_factory(widget, **kwargs):
-    if widget.criterion:
+def es_widget_search_factory(widget, object_id=None):
+    if widget.criterion and object_id is None:
         s_type = "eval"
         widget.criterion.id_postfix = widget.criterion.id
         s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{widget.topic_modelling_name}_{widget.criterion.id}")
     else:
         s_type = "tm"
         s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{widget.topic_modelling_name}")
-    s = es_default_fields_parser(widget, s, s_type)
+    s = es_default_fields_parser(widget, s, s_type, object_id)
     return s
 
 
@@ -39,7 +39,7 @@ def es_document_location_search_factory(widget, **kwargs):
     return s
 
 
-def es_default_fields_parser(widget, s, s_type="eval"):
+def es_default_fields_parser(widget, s, s_type="eval", object_id=None):
     datetime_from = datetime(2000, 1, 1).date()
     datetime_to = datetime.now().date()
 
@@ -79,6 +79,8 @@ def es_default_fields_parser(widget, s, s_type="eval"):
     if monitoring_objects:
         ss = list()
         for monitoring_object in monitoring_objects:
+            if object_id and monitoring_object.id != object_id:
+                continue
             ss.append(
                 default_parser(
                     widget_ner_query=monitoring_object.ner_query,
@@ -88,4 +90,6 @@ def es_default_fields_parser(widget, s, s_type="eval"):
                 )
             )
         s = ss
+        if object_id:
+            s = s[0]
     return s

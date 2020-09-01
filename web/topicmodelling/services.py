@@ -1,9 +1,11 @@
 import datetime
 from collections import defaultdict
-from statistics import mean, pstdev
 
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from elasticsearch_dsl import Search
 
+from mainapp.utils import CacheHit, get_topic_weight_threshold_options
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
 
 
@@ -227,3 +229,17 @@ def get_total_metrics(topic_modelling, granularity, topic_weight_threshold):
         ) for t in topic_documents_total.aggregations.dynamics.buckets
     )
     return total_metrics_dict
+
+
+def abstract_documents_list_form_management(context, request, kwargs):
+    context['granularity'] = request.GET['granularity'] if 'granularity' in request.GET else "1w"
+    context['smooth'] = True if 'smooth' in request.GET else ('granularity' not in request.GET)
+    context['topic_weight_threshold_options'] = get_topic_weight_threshold_options(request.user.is_superuser or hasattr(request.user, "expert"))
+    context['topic_weight_threshold'] = float(request.GET['topic_weight_threshold']) \
+        if 'topic_weight_threshold' in request.GET else \
+        0.05  # Initial
+
+    key = make_template_fragment_key('abstract_detail', [kwargs, request.GET])
+    if cache.get(key):
+        raise CacheHit()
+    return context
