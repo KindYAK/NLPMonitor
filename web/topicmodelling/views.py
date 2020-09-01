@@ -153,20 +153,23 @@ class MonitoringObjectDocumentListView(TemplateView):
 
         widget = Widget.objects.get(id=kwargs['widget_id'])
         monitoring_object = MonitoringObject.objects.get(id=kwargs['object_id'])
+        context['monitoring_object'] = monitoring_object
+        context['widget'] = widget
 
+        s = es_widget_search_factory(widget, object_id=monitoring_object.id)
+        number_of_documents = s.count()
+        s = s.source(("document_es_id", "datetime"))[:1000 * 300]
+
+        context['number_of_documents'] = number_of_documents
         # Forms Management
         try:
             context = abstract_documents_list_form_management(context, self.request, kwargs)
         except CacheHit:
             return context
 
-        s = es_widget_search_factory(widget, object_id=monitoring_object.id)
         s.aggs.bucket("dynamics", agg_type="date_histogram", field="datetime", calendar_interval=context['granularity'])
         s.aggs.bucket("source", agg_type="terms", field="document_source")
-        number_of_documents = s.count()
-        s = s.source(("document_es_id", "datetime"))[:1000 * 300]
         r = s.execute()
-
         documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=list(set([d.document_es_id for d in r])))
         documents = documents.source(("id", "title", "datetime", "source", "url"))[:2000]
         documents = documents.execute()
@@ -180,10 +183,7 @@ class MonitoringObjectDocumentListView(TemplateView):
 
         # Create context
         context['list_type'] = "monitoring_object"
-        context['monitoring_object'] = monitoring_object
-        context['widget'] = widget
         context['documents'] = unique_ize(documents, key=lambda x: x.id)
-        context['number_of_documents'] = number_of_documents
         context['date_ticks'] = [bucket.key_as_string for bucket in r.aggregations.dynamics.buckets]
         context['absolute_power'] = absolute_power
         context['source_weight'] = sorted(r.aggregations.source.buckets,
