@@ -400,11 +400,21 @@
     {# Custom script #}
     <script src="{% static 'js/range_plots_management.js' %} "></script>
     <script>
-        run_range_plot_management('{{ view.kwargs.topic_modelling }}',
+        {% if list_type == "topics" %}
+            run_range_plot_management('{{ view.kwargs.topic_modelling }}',
                                    {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
                                   '{{ csrf_token }}',
                                    {{ topic_weight_threshold|unlocalize }},
-                                   true);
+                                   "topics");
+        {% elif list_type == "monitoring_object" %}
+            run_range_plot_management('{{ widget.topic_modelling_name }}',
+                                   {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
+                                  '{{ csrf_token }}',
+                                   {{ topic_weight_threshold|unlocalize }},
+                                   "monitoring_object",
+                                   {"widget_id": {{ widget.id }}, "monitoring_object_id": {{ monitoring_object.id }}}
+                                );
+        {% endif %}
     </script>
     {% if request.user.is_superuser or request.user.expert %}
         <script>

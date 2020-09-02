@@ -351,7 +351,7 @@
     <script>
         run_range_plot_management('{{ view.kwargs.topic_modelling }}',
                                    {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
-                                  '{{ csrf_token }}', false, 0,
+                                  '{{ csrf_token }}', false, "search",
                                    {
                                         "sources": "{{ request.GET|get_item:'sources'|safe }}",
                                         {% if request.GET|get_item:'corpuses' %}
