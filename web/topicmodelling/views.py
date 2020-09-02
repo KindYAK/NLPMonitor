@@ -144,15 +144,15 @@ class MonitoringObjectDocumentListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        widget = Widget.objects.get(id=kwargs['widget_id'])
+        monitoring_object = MonitoringObject.objects.get(id=kwargs['object_id'])
 
         if not self.request.user.is_superuser:
             group = get_user_group(self.request.user)
-            if not group or kwargs['topic_modelling'] not in group.topic_modelling_names.split(","):
+            if not group or widget.topic_modelling_name not in group.topic_modelling_names.split(","):
                 context['error'] = "403 FORBIDDEN"
                 return context
 
-        widget = Widget.objects.get(id=kwargs['widget_id'])
-        monitoring_object = MonitoringObject.objects.get(id=kwargs['object_id'])
         context['monitoring_object'] = monitoring_object
         context['widget'] = widget
 
