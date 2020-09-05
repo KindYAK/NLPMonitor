@@ -47,7 +47,7 @@ __*Mapping DTM*__ is a custom algorithm for analyzing topic dynamics based on co
 It allows to visualize topics lifesycle, analyze changes in vocabulary, classify topics by their dynamic characteristics in order to distinguish events, informational attacks, long-term trends, etc.
 
 <div align="center">
-    <img src=https://camo.githubusercontent.com/2158625e5d970464282c70be2aaaab78d5119331/68747470733a2f2f692e696d6775722e636f6d2f493149464d35612e6a706722" >
+    <img src=https://i.ibb.co/1601df5/68747470733a2f2f692e696d6775722e636f6d2f493149464d35612e6a706722.jpg">
     <p>Analytics Dashboard</p>
 </div>
                                              
@@ -58,7 +58,7 @@ Example of such request is ```1(Machine Learning) AND 1(Deep | Convolutional)```
 along with either "Deep" or "Convolutional". This language allows to flexibly filter the corpus in order to analyze different entities such as persons, organisations, location and topics.
 
 <div align="center">
-    <img src=https://camo.githubusercontent.com/7acb08c9939e66db1668f2eb21e6f04c648f9cba/68747470733a2f2f692e696d6775722e636f6d2f63645762456e6a2e6a706722" >
+    <img src=https://i.ibb.co/JktNXMt/68747470733a2f2f692e696d6775722e636f6d2f63645762456e6a2e6a706722.jpg">
     <p>Geo Dashboard</p>
 </div>
 
