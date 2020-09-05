@@ -53,7 +53,7 @@ It allows to visualize topics lifesycle, analyze changes in vocabulary, classify
                                              
 __Dashboards__ - set of configurable widgets, which are able to perform the above mentioned visualizations.
 Dashboard can be configured according to client's needs and does __not require additional development__.
-*Monitoring objects* are implemented as a special NER requests language which allow to filter information on any given entities.
+*Monitoring objects* are implemented as a special NER requests language which allow to filter information based on any given entities.
 Example of such request is ```1(Machine Learning) AND 1(Deep | Convolutional)```, which would require "Machine learning" phrase to be present in a text,
 along with either "Deep" or "Convolutional". This language allows to flexibly filter the corpus in order to analyze different entities such as persons, organisations, location and topics.
 
