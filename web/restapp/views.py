@@ -5,6 +5,8 @@ from django.db.utils import IntegrityError
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from dashboard.models import Widget, MonitoringObject
+from dashboard.services import es_widget_search_factory
 from evaluation.models import EvalCriterion, TopicIDEval
 from evaluation.services import *
 from evaluation.utils import parse_eval_index_name, add_id_postfix_to_qs, add_id_postfix_to_dicts
@@ -345,6 +347,26 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
 
         return documents_eval_dict, source_weight, posneg_distribution, posneg_top_topics, posneg_bottom_topics, low_volume_positive_topics
 
+    def search_object(self):
+        date_from = datetime.datetime.strptime(self.request.GET['datetime_from'][:10], "%Y-%m-%d").date()
+        date_to = datetime.datetime.strptime(self.request.GET['datetime_to'][:10], "%Y-%m-%d").date()
+
+        widget = Widget.objects.get(id=self.request.GET['widget_id'])
+        monitoring_object = MonitoringObject.objects.get(id=self.request.GET['monitoring_object_id'])
+
+        s = es_widget_search_factory(widget, object_id=monitoring_object.id)
+        s = s.filter('range', datetime={"gte": date_from})
+        s = s.filter('range', datetime={"lte": date_to})
+        s = s.source(("document_es_id", "datetime"))[:1000 * 300]
+
+        s.aggs.bucket("source", agg_type="terms", field="document_source") \
+            .metric("source_weight", agg_type="sum", field="topic_weight")
+        r = s.execute()
+        documents = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("terms", _id=list(set([d.document_es_id for d in r])))
+        documents = documents.source(("id", "title", "datetime", "source", "url"))[:2000]
+        documents = documents.execute()
+        return documents, r.aggregations.source.buckets
+
     def list(self, request):
         filter_type = request.GET['type']
         posneg_distribution = {}
@@ -359,6 +381,8 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
             documents, source_buckets, posneg_distribution, \
                 posneg_top_topics, posneg_bottom_topics, \
                 low_volume_positive_topics = self.search_criterions()
+        elif filter_type == "monitoring_object":
+            documents, source_buckets = self.search_object()
         else:
             return Response(
                 {
@@ -376,7 +400,7 @@ class RangeDocumentsViewSet(viewsets.ViewSet):
                 return round(document.meta.score, 3) if document.meta.score != 0 else 1.000
             return 1
 
-        if filter_type in ["topics", "search"]:
+        if filter_type in ["topics", "search", "monitoring_object"]:
             source_weights = [
                         {
                             "source": bucket.key,
