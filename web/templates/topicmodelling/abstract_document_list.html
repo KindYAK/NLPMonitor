@@ -408,9 +408,9 @@
                                    "topics");
         {% elif list_type == "monitoring_object" %}
             run_range_plot_management('{{ widget.topic_modelling_name }}',
-                                   {% if 'topic_name' in view.kwargs %}'["{{ view.kwargs.topic_name }}"]'{% else %}'{{ request.GET.topics|safe }}'{% endif %},
+                                   null,
                                   '{{ csrf_token }}',
-                                   {{ topic_weight_threshold|unlocalize }},
+                                   null,
                                    "monitoring_object",
                                    {"widget_id": {{ widget.id }}, "monitoring_object_id": {{ monitoring_object.id }}}
                                 );
