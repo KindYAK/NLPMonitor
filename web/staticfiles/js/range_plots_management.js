@@ -168,7 +168,6 @@ function request_documents(range_from, range_to, type, search_request, table, to
                 url: '/api/range_documents/?datetime_from=' + range_from +
                                             "&datetime_to=" + range_to +
                                             "&widget_id=" + search_request.widget_id +
-                                            "&widget_id=" + search_request.widget_id +
                                             "&monitoring_object_id=" + search_request.monitoring_object_id +
                                             "&type=monitoring_object",
                 method: 'GET',
@@ -177,7 +176,7 @@ function request_documents(range_from, range_to, type, search_request, table, to
                         alert("Что-то пошло не так :( Истекла сессия? Попробуйте обновить страницу");
                         return;
                     }
-                    rerender_table_plot(result, "search", table);
+                    rerender_table_plot(result, "monitoring_object", table);
                 },
                 error: function (result) {
                     alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
