@@ -5,9 +5,9 @@ from elasticsearch_dsl import Search, Q
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL
 
 tm = "bigartm_two_years_main_and_gos2"
-name = "social"
+name = "social_survey"
 corpus = "main"
-criterion_id = "34_m4a" # 34 - соц значимость, 35 - резонансность, 1 - тональность, 36 - целевой класс
+criterion_id = "37" # 34 - соц значимость, 35 - резонансность, 1 - тональность, 36 - целевой класс, 37 - опросы
 low_threshold = 10
 high_threshold = 90
 

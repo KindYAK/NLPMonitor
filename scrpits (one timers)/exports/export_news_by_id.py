@@ -4,18 +4,12 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_
 
 from elasticsearch_dsl import Search
 
-tm_name = "bigartm_two_years_rus_and_rus_propaganda"
-criterion_id = 32 # Пропаганда
+tm_name = "bigartm_two_years_main_and_gos2"
+criterion_id = 37 # Соц (опросы)
 ids_list = """
-67386776
-67386774
-67386773
-67386770
-67386768
-67386775
-67386771
-67386772
-67386769
+1481052
+152220
+15697638
 """
 ids_list = [s.strip() for s in ids_list.split() if s.strip()]
 
@@ -51,7 +45,7 @@ tm_name_dict = dict(
 
 output = []
 for document_id in ids_list:
-    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", id=int(document_id))[:1]
+    s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT).filter("term", id=int(document_id)).source(("id", "title", "url", "datetime"))[:1]
     doc = s.execute()[0]
     new_line = {
         "id": doc.id,
@@ -62,9 +56,10 @@ for document_id in ids_list:
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{tm_name}_{criterion_id}").filter("term", document_es_id=doc.meta.id).source(('value', ))[:1]
     try:
         eval = s.execute()[0]
-        new_line['propaganda'] = eval.value
+        new_line['value'] = eval.value
     except:
         print("!!!!!! SKIP Eval ", doc.id, "!", hasattr(doc, "datetime"), hasattr(doc, "text_lemmatized"))
+        continue
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}")
     std = std.filter("term", document_es_id=doc.meta.id)
     std = std.sort('-topic_weight')[:500]
@@ -79,7 +74,7 @@ for document_id in ids_list:
     output.append(new_line)
 
 keys = output[0].keys()
-with open(f'/output_refugees_dw.csv', 'w') as output_file:
+with open(f'/output_survey.csv', 'w') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(output)

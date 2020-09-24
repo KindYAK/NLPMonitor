@@ -1,3 +1,9 @@
+var last_range_from = null;
+var last_range_to = null;
+var last_req_range_from = null;
+var last_req_range_to = null;
+var n_redraw_plot = 0;
+
 function init_table(){
     return $('#search-results-table').DataTable({
         "paging": true,
@@ -51,12 +57,24 @@ function rerender_table_plot(result, type, table) {
             "                            </thead>\n" +
             "                            <tbody>";
     } else if(type === "monitoring_object") {
-
+        table_html = "<div id=\"search-results\">\n" +
+            "                        <table id=\"search-results-table\" class=\"table table-bordered table-hover\">\n" +
+            "                            <thead>\n" +
+            "                            <tr role=\"row\">\n" +
+            "                                <th>Дата</th>\n" +
+            "                                <th>Заголовок</th>\n" +
+            "                                <th>Источник</th>\n" +
+            "                                <th></th>\n" +
+            "                            </tr>\n" +
+            "                            </thead>\n" +
+            "                            <tbody>";
     }
 
     for (doc of result.documents) {
         table_html += "<tr>";
-        table_html += "<td>" + doc.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+        if(type !== "monitoring_object") {
+            table_html += "<td>" + doc.weight.toFixed(3).toString().replace(".", ",") + "</td>";
+        }
         table_html += "<td>" + doc.datetime + "</td>";
         table_html += "<td>" + doc.title + "</td>";
         table_html += "<td>" + doc.source + " </td>";
@@ -97,8 +115,8 @@ function rerender_table_plot(result, type, table) {
     }
 }
 
-function request_documents(range_from, range_to, type, search_request, table) {
-    if(type === "topic") {
+function request_documents(range_from, range_to, type, search_request, table, topic_modelling, topics, topic_weight_threshold) {
+    if(type === "topics") {
         $.ajax(
             {
                 url: '/api/range_documents/?topic_modelling=' + topic_modelling +
@@ -145,7 +163,26 @@ function request_documents(range_from, range_to, type, search_request, table) {
             }
         );
     } else if(type === "monitoring_object") {
-        console.log("Not implemented yet")
+        $.ajax(
+            {
+                url: '/api/range_documents/?datetime_from=' + range_from +
+                                            "&datetime_to=" + range_to +
+                                            "&widget_id=" + search_request.widget_id +
+                                            "&monitoring_object_id=" + search_request.monitoring_object_id +
+                                            "&type=monitoring_object",
+                method: 'GET',
+                success: function (result) {
+                    if (result.status !== 200) {
+                        alert("Что-то пошло не так :( Истекла сессия? Попробуйте обновить страницу");
+                        return;
+                    }
+                    rerender_table_plot(result, "monitoring_object", table);
+                },
+                error: function (result) {
+                    alert("Возможно отсутствует соединение с интернетом. Если проблема повторяется, обратитесь к администратору системы");
+                }
+            }
+        );
     }
     last_req_range_from = range_from;
     last_req_range_to = range_to;
@@ -153,8 +190,6 @@ function request_documents(range_from, range_to, type, search_request, table) {
 
 function run_range_plot_management(topic_modelling, topics, csrf_token, topic_weight_threshold,
                                    type, search_request=null) {
-
-    console.log(type, search_request);
     var main_plot_id = null;
     var plots_ids = null;
     if(type === "topics"){
@@ -163,17 +198,12 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
     } else if(type === "search") {
         main_plot_id = "dynamics";
         plot_ids = ["dynamics", "dynamics_normal", "dynamics_weight"];
-    } else if(type === "monitoring_objects") {
-        main_plot_id = "dynamics";
-        plot_ids = ["dynamics", "dynamics_normal", "dynamics_weight"];
+    } else if(type === "monitoring_object") {
+        main_plot_id = "topic_dynamics";
+        plot_ids = ["topic_dynamics"];
     }
 
     var table = init_table();
-    var last_range_from = null;
-    var last_range_to = null;
-    var last_req_range_from = null;
-    var last_req_range_to = null;
-    var n_redraw_plot = 0;
 
     setInterval(function () {
         var main_plot = document.getElementById(main_plot_id);
@@ -189,7 +219,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
         var range_from = main_plot.layout.xaxis.range[0];
         var range_to = main_plot.layout.xaxis.range[1];
         if (last_req_range_from && last_req_range_to && (last_req_range_from !== range_from || last_req_range_to !== range_to)) {
-            request_documents(range_from, range_to, type, search_request, table);
+            request_documents(range_from, range_to, type, search_request, table, topic_modelling, topics, topic_weight_threshold);
         }
     }, 3333);
 
@@ -204,7 +234,7 @@ function run_range_plot_management(topic_modelling, topics, csrf_token, topic_we
                 rerender_new_range(range_from, range_to, e.target.id);
             }
             if (n_redraw_plot === 1 || n_redraw_plot % 33 === 0) {
-                request_documents(range_from, range_to, type, search_request, table);
+                request_documents(range_from, range_to, type, search_request, table, topic_modelling, topics, topic_weight_threshold);
             }
         }
     );
