@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'evaluation',
     'dashboard',
     'geo',
+    'scraping',
 ]
 
 MIDDLEWARE = [
