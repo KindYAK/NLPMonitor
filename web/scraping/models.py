@@ -24,10 +24,11 @@ class SocialNetworkAccount(models.Model):
         (2, 'Непроверенный'),
     )
 
-    name = models.CharField(max_length=100, verbose_name="Название")
+    name = models.CharField(max_length=100, verbose_name="Название")  # Мухтар Шлюхтар Залупкин
+    nickname = models.CharField(max_length=1000, verbose_name="Никнэйм аккаунта")  # @muha_reptar
     social_network = models.PositiveSmallIntegerField(choices=SOCIAL_NETWORKS, verbose_name="Соц. сеть")
     url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)")
-    account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")
+    account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")  # 66614881337
     is_private = models.BooleanField(default=False, verbose='Конфеденциальность аккаунта')
     is_valid = models.PositiveSmallIntegerField(default=2, max_length=1000, choices=ACCOUNT_STATUSES,
                                                 verbose='Состояние аккаунта')
