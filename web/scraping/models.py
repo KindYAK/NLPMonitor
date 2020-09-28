@@ -7,7 +7,7 @@ class SocialNetworkAccount(models.Model):
         verbose_name = "Аккаунт соц. сети"
         verbose_name_plural = "Аккаунты соц. сетей"
         unique_together = (('url', 'social_network'), ('account_id', 'social_network'))
-
+    # social networks choices
     SOCIAL_NETWORKS = (
         (0, "Facebook"),
         (1, "VK"),
@@ -17,10 +17,20 @@ class SocialNetworkAccount(models.Model):
         (5, "Youtube"),
     )
 
+    # account status choices
+    ACCOUNT_STATUSES = (
+        (0, 'Неверифицированный'),
+        (1, 'Верифицированный'),
+        (2, 'Непроверенный'),
+    )
+
     name = models.CharField(max_length=100, verbose_name="Название")
     social_network = models.PositiveSmallIntegerField(choices=SOCIAL_NETWORKS, verbose_name="Соц. сеть")
     url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)")
     account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")
+    is_private = models.BooleanField(default=False, verbose='Конфеденциальность аккаунта')
+    is_valid = models.PositiveSmallIntegerField(default=2, max_length=1000, choices=ACCOUNT_STATUSES,
+                                                verbose='Состояние аккаунта')
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
