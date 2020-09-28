@@ -8,3 +8,4 @@ numba==0.49.1
 llvmlite==0.32.1
 attrs==19.3.0
 lemminflect==0.2.1
+aiohttp
