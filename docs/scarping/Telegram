@@ -1,0 +1,13 @@
+1) If a key expires or get compromised, here's the code to get a new key:
+
+# Remember to use your own values from my.telegram.org!
+api_id = 123
+api_hash = 'abc'
+
+name = 'NLPMonitor'
+client = TelegramClient('NLPMonitor', api_id, api_hash)
+
+with TelegramClient(name, api_id, api_hash) as client:
+     print(StringSession.save(client.session))
+
+It prints a stringified session containing a new auth key

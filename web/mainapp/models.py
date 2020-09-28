@@ -82,6 +82,7 @@ class Document(models.Model):
     )
 
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник*")
+    social_network_account = models.ForeignKey('scraping.SocialNetworkAccount', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Аккаунт (соц сетей)")
     author = models.ForeignKey('Author', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Автор (FK)")
     author_txt = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор")
     title = models.CharField(max_length=500, verbose_name="Заголовок*")
@@ -108,6 +109,8 @@ class Document(models.Model):
     sentiment_loader = models.FloatField(null=True, blank=True, verbose_name="Тональность*")
 
     class_label = models.CharField(null=True, blank=True, max_length=25, verbose_name="Класс (разметка)")
+
+    is_deleted = models.BooleanField(default=False, verbose_name="Оригинал был удалён/недоступен")
 
     def __str__(self):
         return self.title
