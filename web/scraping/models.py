@@ -29,8 +29,8 @@ class SocialNetworkAccount(models.Model):
     social_network = models.PositiveSmallIntegerField(choices=SOCIAL_NETWORKS, verbose_name="Соц. сеть")
     url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)")
     account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")  # 66614881337
-    num_followers = models.BigIntegerField(verbose_name='Количество подписчиков')
-    num_follows = models.BigIntegerField(verbose_name='Количество подписок')
+    num_followers = models.BigIntegerField(default=0, verbose_name='Количество подписчиков')
+    num_follows = models.BigIntegerField(default=0, verbose_name='Количество подписок')
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
