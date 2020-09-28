@@ -9,4 +9,4 @@ llvmlite==0.32.1
 attrs==19.3.0
 lemminflect==0.2.1
 telethon==1.16.4
-aiohttp
+aiohttp==3.6.2

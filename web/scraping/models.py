@@ -29,12 +29,12 @@ class SocialNetworkAccount(models.Model):
     social_network = models.PositiveSmallIntegerField(choices=SOCIAL_NETWORKS, verbose_name="Соц. сеть")
     url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)")
     account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")  # 66614881337
-    is_private = models.BooleanField(default=False, verbose='Конфеденциальность аккаунта')
-    is_valid = models.PositiveSmallIntegerField(default=2, max_length=1000, choices=ACCOUNT_STATUSES,
-                                                verbose='Состояние аккаунта')
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
+    is_private = models.BooleanField(default=False, verbose='Конфеденциальность аккаунта')
+    is_valid = models.PositiveSmallIntegerField(default=2, max_length=1000, choices=ACCOUNT_STATUSES,
+                                                verbose='Состояние аккаунта')
 
     datetime_last_parsed = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего успешного парсинга")
 
