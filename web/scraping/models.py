@@ -50,3 +50,13 @@ class TelegramAuthKey(models.Model):
 
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
+
+
+# Instagram
+class InstagramLoginPass(models.Model):
+    login = models.CharField(max_length=1000, verbose_name='Логин аккаунта')
+    password = models.CharField(max_length=1000, verbose_name='Пароль аккаунта')
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
