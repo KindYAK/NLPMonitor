@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  airflow-worker:
+    build:
+      context: ../airflow-worker
+      dockerfile: Dockerfile
+    volumes:
+      - ../web:/django
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 3072M
+        reservations:
+          cpus: 0.1
+          memory: 128M
+  airflow:
+    volumes:
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
+    ports:
+      - "8001:8001"
+  airflow-scheduler:
+    volumes:
+      - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
