@@ -69,7 +69,7 @@ class InstagramLoginPass(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     csrf_token = models.CharField(max_length=1000, default='VQZCf2glmiox3V2eBY5GYYVe0Ccaahso', blank=True, null=True, verbose_name='CSRF токен')
     ds_user_id = models.BigIntegerField(default='27655705617', null=True, blank=True, verbose_name='UserID')
-    rur = models.CharField(default='ATN', blank=True, null=True, verbose_name='Некая META')
+    rur = models.CharField(max_length=1000, default='ATN', blank=True, null=True, verbose_name='Некая META')
     sessionid = models.CharField(max_length=1000, default='27655705617%3AhtsX9fZJbhBash%3A17', blank=True, null=True, verbose_name='ID Сессии')
     mid = models.CharField(max_length=1000, default="X3MtfQAEAAEMDbQ5Qaq55lCDlKmn", blank=True, null=True, verbose_name='Некое ID')
 
