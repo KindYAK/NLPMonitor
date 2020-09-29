@@ -19,23 +19,26 @@ class SocialNetworkAccount(models.Model):
 
     # account status choices
     ACCOUNT_STATUSES = (
-        (0, 'Неверифицированный'),
+        (0, 'Непроверенный'),
         (1, 'Верифицированный'),
-        (2, 'Непроверенный'),
+        (2, 'Неверифицированный'),
     )
 
     name = models.CharField(max_length=100, verbose_name="Название")  # Мухтар Шлюхтар Залупкин
-    nickname = models.CharField(max_length=1000, verbose_name="Никнэйм аккаунта")  # @muha_reptar
+    nickname = models.CharField(max_length=1000, blank=True, null=True, verbose_name="Никнэйм аккаунта")  # @muha_reptar
     social_network = models.PositiveSmallIntegerField(choices=SOCIAL_NETWORKS, verbose_name="Соц. сеть")
-    url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)")
+    url = models.CharField(max_length=1000, verbose_name="URL аккаунта (ссылка)") # https://telegram.org/muha_reptar
     account_id = models.CharField(max_length=1000, verbose_name="ID аккаунта")  # 66614881337
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
     is_private = models.BooleanField(default=False, verbose_name='Конфеденциальность аккаунта')
-    is_valid = models.PositiveSmallIntegerField(default=2, max_length=1000, choices=ACCOUNT_STATUSES, verbose_name='Состояние аккаунта')
+    is_valid = models.PositiveSmallIntegerField(default=1, max_length=1000, choices=ACCOUNT_STATUSES, verbose_name='Состояние аккаунта')
 
     datetime_last_parsed = models.DateTimeField(null=True, blank=True, verbose_name="Дата последнего успешного парсинга")
+
+    def __str__(self):
+        return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
 
 
 # Telegram
@@ -50,6 +53,9 @@ class TelegramAuthKey(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
 
+    def __str__(self):
+        return f"Ключ телеграм - {self.name} ({self.api_id})"
+
 
 # Instagram
 class InstagramLoginPass(models.Model):
@@ -59,3 +65,6 @@ class InstagramLoginPass(models.Model):
 
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
+
+    def __str__(self):
+        return f"Логин-пароль Инстаграм - {self.login}"
