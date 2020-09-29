@@ -67,7 +67,7 @@ class InstagramLoginPass(models.Model):
     login = models.CharField(max_length=1000, verbose_name='Логин аккаунта')
     password = models.CharField(max_length=1000, verbose_name='Пароль аккаунта')
     is_active = models.BooleanField(default=True, verbose_name="Активен")
-    csrf_token = models.CharField(max_length=1000, default='VQZCf2glmiox3V2eBY5GYYVe0Ccaahso', blank=True, null=True, verbose_name='CSRF токен')
+    csrftoken = models.CharField(max_length=1000, default='VQZCf2glmiox3V2eBY5GYYVe0Ccaahso', blank=True, null=True, verbose_name='CSRF токен')
     ds_user_id = models.BigIntegerField(default='27655705617', null=True, blank=True, verbose_name='UserID')
     rur = models.CharField(max_length=1000, default='ATN', blank=True, null=True, verbose_name='Некая META')
     sessionid = models.CharField(max_length=1000, default='27655705617%3AhtsX9fZJbhBash%3A17', blank=True, null=True, verbose_name='ID Сессии')
