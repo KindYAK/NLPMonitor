@@ -46,6 +46,10 @@ class SocialNetworkAccount(models.Model):
 
 # Telegram
 class TelegramAuthKey(models.Model):
+    class Meta:
+        verbose_name = "Telegram - ключ"
+        verbose_name_plural = "Telegram - ключи"
+
     name = models.CharField(max_length=100, verbose_name="Название")
     api_id = models.PositiveIntegerField(unique=True, verbose_name="API ID (my.telegram.org)")
     api_hash = models.CharField(max_length=64, unique=True, verbose_name="API Key (my.telegram.org)")
@@ -62,6 +66,10 @@ class TelegramAuthKey(models.Model):
 
 # Instagram
 class InstagramLoginPass(models.Model):
+    class Meta:
+        verbose_name = "Instagram - доступ"
+        verbose_name_plural = "Instagram - доступ"
+
     login = models.CharField(max_length=1000, verbose_name='Логин аккаунта')
     password = models.CharField(max_length=1000, verbose_name='Пароль аккаунта')
     is_active = models.BooleanField(default=True, verbose_name="Активен")
