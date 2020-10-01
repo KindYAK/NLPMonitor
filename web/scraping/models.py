@@ -34,7 +34,7 @@ class SocialNetworkAccount(models.Model):
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
     is_private = models.BooleanField(default=False, verbose_name='Конфеденциальность аккаунта')
-    is_valid = models.PositiveSmallIntegerField(default=1, choices=ACCOUNT_STATUSES, verbose_name='Состояние аккаунта')
+    is_valid = models.PositiveSmallIntegerField(default=0, choices=ACCOUNT_STATUSES, verbose_name='Состояние аккаунта')
 
     num_followers = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество подписчиков')
     num_follows = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество подписок')
