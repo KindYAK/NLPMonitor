@@ -11,3 +11,4 @@ lemminflect==0.2.1
 telethon==1.16.4
 aiohttp==3.6.2
 python-slugify==3.0.2
+vk==2.0.2
