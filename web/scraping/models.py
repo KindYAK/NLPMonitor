@@ -2,9 +2,6 @@ from django.db import models
 
 
 # Common
-from django.utils import timezone
-
-
 class SocialNetworkAccount(models.Model):
     class Meta:
         verbose_name = "Аккаунт соц. сети"
@@ -121,6 +118,10 @@ class VKLoginPass(models.Model):
 
     NEWS_FEED_LIMIT = 1000
     WALL_GET = 5000
+
+    NEWS_FEED_MAX_COUNT = 200
+    WALL_GET_MAX_COUNT = 100
+
     API_V = 5.92
 
     app_id = models.CharField(max_length=100, verbose_name='APP ID приложения')
