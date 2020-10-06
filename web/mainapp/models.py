@@ -152,6 +152,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
+        unique_together = (('document', 'comment_id'),)
 
     text = models.TextField(verbose_name="Текст")
     document = models.ForeignKey('Document', on_delete=models.CASCADE, verbose_name="Документ")
@@ -159,6 +160,7 @@ class Comment(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата парсинга")
     reply_to = models.ForeignKey('Comment', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Ответ на...")
     unique_hash = models.CharField(max_length=32, null=True, blank=True, unique=True, verbose_name="Уникальность document, datetime, text")
+    comment_id = models.CharField(max_length=100, default=None, null=True, blank=True, verbose_name='Идентификатор комментария')
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         hash = hashlib.md5()
