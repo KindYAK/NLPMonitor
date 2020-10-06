@@ -10,6 +10,12 @@ class SocialNetworkAccountAdmin(admin.ModelAdmin):
     search_fields = ("name", "url", "account_id", )
 
 
+class MonitoringQueryAdmin(admin.ModelAdmin):
+    list_display = ("name", "query", "social_network", "datetime_last_parsed", "priority_rate", "is_active", )
+    list_filter = ("is_active", "social_network", )
+    search_fields = ("name", "query", )
+
+
 # Telegram
 class TelegramAuthKeyAdmin(admin.ModelAdmin):
     list_display = ("name", "api_id", "is_active", "datetime_created", "datetime_modified", )
@@ -24,11 +30,22 @@ class InstagramLoginPassAdmin(admin.ModelAdmin):
     search_fields = ("login", )
 
 
+#VK
+class VKLoginPassAdmin(admin.ModelAdmin):
+    list_display = ("login", "app_id", "is_active", "news_feed_limit_used", "wall_get_limit_used", "datetime_created", "datetime_modified", )
+    list_filter = ("is_active", )
+    search_fields = ("login", "app_id", )
+
+
 # Common
 admin.site.register(SocialNetworkAccount, SocialNetworkAccountAdmin)
+admin.site.register(MonitoringQuery, MonitoringQueryAdmin)
 
 # Telegram
 admin.site.register(TelegramAuthKey, TelegramAuthKeyAdmin)
 
 # Instagram
 admin.site.register(InstagramLoginPass, InstagramLoginPassAdmin)
+
+#VK
+admin.site.register(VKLoginPass, VKLoginPassAdmin)
