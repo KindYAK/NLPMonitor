@@ -133,8 +133,11 @@ class VKLoginPass(models.Model):
     news_feed_limit_used = models.PositiveSmallIntegerField(default=0, verbose_name="News Feed запросов использовано")
     wall_get_limit_used = models.PositiveSmallIntegerField(default=0, verbose_name="Wall Get запросов использовано")
 
-    datetime_news_feed_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата когда достигнут лимит по News Feed")
-    datetime_wall_get_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата когда достигнут лимит по Wall Get")
+    datetime_news_feed_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда достигнут лимит по News Feed")
+    datetime_wall_get_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда достигнут лимит по Wall Get")
+
+    datetime_news_feed_updated = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда обновлено количество запросов по News Feed")
+    datetime_wall_get_updated = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда обновлено количество запросов по Wall Get")
 
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
