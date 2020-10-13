@@ -63,7 +63,7 @@ class MonitoringQuery(models.Model):
                                                 verbose_name="Дата последнего успешного парсинга")
 
     def __str__(self):
-        return f"Аккаунт {SocialNetworkAccount.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
+        return f"Запрос {SocialNetworkAccount.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
 
 
 # Telegram
