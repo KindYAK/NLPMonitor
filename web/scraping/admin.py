@@ -30,11 +30,19 @@ class InstagramLoginPassAdmin(admin.ModelAdmin):
     search_fields = ("login", )
 
 
-#VK
+# VK
 class VKLoginPassAdmin(admin.ModelAdmin):
     list_display = ("login", "app_id", "is_active", "news_feed_limit_used", "wall_get_limit_used", "datetime_created", "datetime_modified", )
     list_filter = ("is_active", )
     search_fields = ("login", "app_id", )
+
+
+# YouTube
+class YouTubeAuthTokenAdmin(admin.ModelAdmin):
+    list_display = ("token_id", "is_active", "datetime_created", "datetime_modified", )
+    list_filter = ("is_active", )
+    search_fields = ("token_id", "is_active", )
+
 
 
 # Common
@@ -47,5 +55,8 @@ admin.site.register(TelegramAuthKey, TelegramAuthKeyAdmin)
 # Instagram
 admin.site.register(InstagramLoginPass, InstagramLoginPassAdmin)
 
-#VK
+# VK
 admin.site.register(VKLoginPass, VKLoginPassAdmin)
+
+# YouTube
+admin.site.register(YouTubeAuthToken, YouTubeAuthTokenAdmin)
