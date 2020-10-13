@@ -42,6 +42,13 @@ class SocialNetworkAccount(models.Model):
     datetime_last_parsed = models.DateTimeField(null=True, blank=True,
                                                 verbose_name="Дата последнего успешного парсинга")
 
+    # Meta from YouTube channels
+    keywords = models.CharField(max_length=1000, default=None, null=True, blank=True, verbose_name="Ключевые слова канала")
+    description = models.CharField(max_length=1500, default=None, null=True, blank=True, verbose_name="Описание канала")
+    topic_ids = models.CharField(max_length=1500, default=None, null=True, blank=True, verbose_name='Темы, относящиеся к каналу, разделенные знаком "|"')
+    view_count = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество просмотров профиля/канала')
+    posts_count = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество постов/видео')
+
     def __str__(self):
         return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network][1]} - {self.name}"
 
