@@ -43,7 +43,7 @@ class SocialNetworkAccount(models.Model):
                                                 verbose_name="Дата последнего успешного парсинга")
 
     def __str__(self):
-        return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
+        return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network][1]} - {self.name}"
 
 
 class MonitoringQuery(models.Model):
@@ -57,13 +57,14 @@ class MonitoringQuery(models.Model):
     query = models.CharField(max_length=1000, verbose_name="Запрос")
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
+    max_requests_per_session = models.PositiveSmallIntegerField(default=100, verbose_name="Количество запросов за сессию")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
 
     datetime_last_parsed = models.DateTimeField(null=True, blank=True,
                                                 verbose_name="Дата последнего успешного парсинга")
 
     def __str__(self):
-        return f"Аккаунт {SocialNetworkAccount.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
+        return f"Запрос {SocialNetworkAccount.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
 
 
 # Telegram
