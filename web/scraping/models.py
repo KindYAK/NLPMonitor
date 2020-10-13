@@ -144,3 +144,23 @@ class VKLoginPass(models.Model):
 
     def __str__(self):
         return f"Логин-пароль VK - {self.login}"
+
+
+# YouTube
+class YouTubeAuthToken(models.Model):
+    class Meta:
+        verbose_name = "YouTube - доступ"
+        verbose_name_plural = "YouTube - доступ"
+
+    API_V = 3
+    SERVICE_NAME = "youtube"
+
+    app_id = models.CharField(max_length=100, verbose_name='APP ID приложения')
+
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
+
+    def __str__(self):
+        return f"YouTube token id - {self.app_id}"
