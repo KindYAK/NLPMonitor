@@ -162,5 +162,9 @@ class YouTubeAuthToken(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
 
+    videos_limit_used = models.PositiveSmallIntegerField(default=0, verbose_name="Get video запросов использовано")
+    datetime_videos_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда достигнут лимит по get video")
+    datetime_videos_updated = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда обновлено количество запросов по get video")
+
     def __str__(self):
         return f"YouTube token id - {self.token_id}"
