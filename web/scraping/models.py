@@ -155,7 +155,7 @@ class YouTubeAuthToken(models.Model):
     API_V = 3
     SERVICE_NAME = "youtube"
 
-    app_id = models.CharField(max_length=100, verbose_name='APP ID приложения')
+    token_id = models.CharField(null=True, blank=True, max_length=100, verbose_name='TOKEN ID')
 
     is_active = models.BooleanField(default=True, verbose_name="Активен")
 
@@ -163,4 +163,4 @@ class YouTubeAuthToken(models.Model):
     datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
 
     def __str__(self):
-        return f"YouTube token id - {self.app_id}"
+        return f"YouTube token id - {self.token_id}"
