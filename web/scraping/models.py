@@ -43,7 +43,7 @@ class SocialNetworkAccount(models.Model):
                                                 verbose_name="Дата последнего успешного парсинга")
 
     def __str__(self):
-        return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network]} - {self.name}"
+        return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network][1]} - {self.name}"
 
 
 class MonitoringQuery(models.Model):
