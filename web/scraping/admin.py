@@ -11,7 +11,7 @@ class SocialNetworkAccountAdmin(admin.ModelAdmin):
 
 
 class MonitoringQueryAdmin(admin.ModelAdmin):
-    list_display = ("name", "query", "social_network", "datetime_last_parsed", "priority_rate", "is_active", )
+    list_display = ("name", "query", "social_network", "datetime_last_parsed", "max_requests_per_session", "priority_rate", "is_active", )
     list_filter = ("is_active", "social_network", )
     search_fields = ("name", "query", )
 

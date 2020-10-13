@@ -57,6 +57,7 @@ class MonitoringQuery(models.Model):
     query = models.CharField(max_length=1000, verbose_name="Запрос")
 
     priority_rate = models.FloatField(default=50, verbose_name="Приоритет парсинга (от 0 до 100")
+    max_requests_per_session = models.PositiveSmallIntegerField(default=100, verbose_name="Количество запросов за сессию")
     is_active = models.BooleanField(default=True, verbose_name="Парсинг активирован")
 
     datetime_last_parsed = models.DateTimeField(null=True, blank=True,
