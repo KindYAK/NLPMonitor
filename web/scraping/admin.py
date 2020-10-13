@@ -5,7 +5,8 @@ from .models import *
 
 # Common
 class SocialNetworkAccountAdmin(admin.ModelAdmin):
-    list_display = ("name", "account_id", "social_network", "datetime_last_parsed", "priority_rate", "is_active", "is_private", "is_valid", )
+    list_display = ("name", "account_id", "social_network", "datetime_last_parsed", "priority_rate", "is_active",
+                    "is_private", "is_valid", "keywords", "description", "topic_ids", "view_count", "posts_count")
     list_filter = ("is_active", "social_network", "is_private", "is_valid", )
     search_fields = ("name", "url", "account_id", )
 
