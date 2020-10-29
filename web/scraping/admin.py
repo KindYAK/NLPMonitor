@@ -5,7 +5,8 @@ from .models import *
 
 # Common
 class SocialNetworkAccountAdmin(admin.ModelAdmin):
-    list_display = ("name", "account_id", "social_network", "datetime_last_parsed", "priority_rate", "is_active", "is_private", "is_valid", )
+    list_display = ("name", "account_id", "social_network", "datetime_last_parsed", "priority_rate", "is_active",
+                    "is_private", "is_valid", "keywords", "description", "topic_ids", "view_count", "posts_count")
     list_filter = ("is_active", "social_network", "is_private", "is_valid", )
     search_fields = ("name", "url", "account_id", )
 
@@ -30,11 +31,19 @@ class InstagramLoginPassAdmin(admin.ModelAdmin):
     search_fields = ("login", )
 
 
-#VK
+# VK
 class VKLoginPassAdmin(admin.ModelAdmin):
     list_display = ("login", "app_id", "is_active", "news_feed_limit_used", "wall_get_limit_used", "datetime_created", "datetime_modified", )
     list_filter = ("is_active", )
     search_fields = ("login", "app_id", )
+
+
+# YouTube
+class YouTubeAuthTokenAdmin(admin.ModelAdmin):
+    list_display = ("token_id", "is_active", "datetime_created", "datetime_modified", )
+    list_filter = ("is_active", )
+    search_fields = ("token_id", "is_active", )
+
 
 
 # Common
@@ -47,5 +56,8 @@ admin.site.register(TelegramAuthKey, TelegramAuthKeyAdmin)
 # Instagram
 admin.site.register(InstagramLoginPass, InstagramLoginPassAdmin)
 
-#VK
+# VK
 admin.site.register(VKLoginPass, VKLoginPassAdmin)
+
+# YouTube
+admin.site.register(YouTubeAuthToken, YouTubeAuthTokenAdmin)

@@ -42,6 +42,13 @@ class SocialNetworkAccount(models.Model):
     datetime_last_parsed = models.DateTimeField(null=True, blank=True,
                                                 verbose_name="Дата последнего успешного парсинга")
 
+    # Meta from YouTube channels
+    keywords = models.CharField(max_length=1000, default=None, null=True, blank=True, verbose_name="Ключевые слова канала")
+    description = models.CharField(max_length=1500, default=None, null=True, blank=True, verbose_name="Описание канала")
+    topic_ids = models.CharField(max_length=1500, default=None, null=True, blank=True, verbose_name='Темы, относящиеся к каналу, разделенные знаком "|"')
+    view_count = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество просмотров профиля/канала')
+    posts_count = models.BigIntegerField(default=None, null=True, blank=True, verbose_name='Количество постов/видео')
+
     def __str__(self):
         return f"Аккаунт {self.SOCIAL_NETWORKS[self.social_network][1]} - {self.name}"
 
@@ -145,3 +152,27 @@ class VKLoginPass(models.Model):
 
     def __str__(self):
         return f"Логин-пароль VK - {self.login}"
+
+
+# YouTube
+class YouTubeAuthToken(models.Model):
+    class Meta:
+        verbose_name = "YouTube - доступ"
+        verbose_name_plural = "YouTube - доступ"
+
+    API_V = 3
+    SERVICE_NAME = "youtube"
+
+    token_id = models.CharField(null=True, blank=True, max_length=100, verbose_name='TOKEN ID')
+
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    datetime_modified = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменнеия")
+
+    videos_limit_used = models.PositiveSmallIntegerField(default=0, verbose_name="Get video запросов использовано")
+    datetime_videos_limit_reached = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда достигнут лимит по get video")
+    datetime_videos_updated = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Дата, когда обновлено количество запросов по get video")
+
+    def __str__(self):
+        return f"YouTube token id - {self.token_id}"
