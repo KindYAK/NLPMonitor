@@ -38,7 +38,11 @@
                     </td>
                     <td>
                         <a target="_blank" rel="noopener noreferrer" class="nostyle" href="{% url 'mainapp:document_view' document|get_item:'document'|get_item:'id' %}">
-                            {{ document|get_item:'document'|get_item:'title' }}
+                            {% if document|get_item:'document'|get_item:'title' %}
+                               {{ document|get_item:'document'|get_item:'title' }}
+                            {% else %}
+                                {{ document|get_item:'document'|get_item:'text'|slice:':90' }}...
+                            {% endif %}
                         </a>
                     </td>
                 </tr>
