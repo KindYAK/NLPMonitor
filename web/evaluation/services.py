@@ -228,7 +228,7 @@ def get_documents_with_values(top_news_total, criterions, topic_modelling, max_c
     # Get documents and documents eval
     sd = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT) \
              .filter('terms', _id=list(top_news_total)) \
-             .source(('id', 'url', 'title', 'source', 'datetime',))[:1000]
+             .source(('id', 'url', 'text', 'title', 'source', 'datetime',))[:1000]
     if date_from:
         sd = sd.filter("range", datetime={"gte": date_from})
     if date_to:

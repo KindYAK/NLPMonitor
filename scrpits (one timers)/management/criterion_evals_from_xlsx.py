@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from evaluation.models import EvalCriterion, TopicsEval, TopicIDEval
 from mainapp.models_user import TopicID
 
-topic_modelling = "bigartm_two_years"
+topic_modelling = "bigartm_two_years_main_and_gos2"
 
 for filename, criterion_name in (
         ("age_16-25_quant", "Интересы людей возраста 16-25"),
