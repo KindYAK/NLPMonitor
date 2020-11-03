@@ -1,9 +1,11 @@
 import datetime
 
+from elasticsearch_dsl import Q
+
 from dashboard.services import es_widget_search_factory, es_document_location_search_factory
-from evaluation.services import normalize_documents_eval_dynamics, calc_source_input, divide_posneg_source_buckets, \
+from evaluation.services import calc_source_input, divide_posneg_source_buckets, \
     get_documents_with_values, get_criterions_values_for_normalization, normalize_buckets_main_topics, get_topic_dict, \
-    smooth_buckets, normalize_documents_eval_dynamics_with_virt_negative
+    smooth_buckets
 from .util import location_buckets_parser, criterion_map_parser
 
 
@@ -138,7 +140,9 @@ def main_news(widget, mode):
     if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('-value')
     elif mode == "last":
-        s = s.filter("range", value={"gte": range_center + neutrality_threshold})
+        q_gte = Q("range", value={"gte": range_center + neutrality_threshold})
+        q_lte = Q("range", value={"lte": range_center - neutrality_threshold})
+        s = s.filter(q_gte | q_lte)
         s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
