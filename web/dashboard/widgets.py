@@ -137,22 +137,20 @@ def main_news(widget, mode):
 
     # Get top news
     s = es_widget_search_factory(widget)
-    if mode in ["bottom", "top"]:
+    if mode == "top":
         s = s.source(['document_es_id'])[:num_news].sort('-value')
     elif mode == "last":
-        # q_gte = Q("range", value={"gte": range_center + neutrality_threshold})
-        # q_lte = Q("range", value={"lte": range_center - neutrality_threshold})
-        # s = s.filter(q_gte | q_lte) # TODO ? RETURN ?
-        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
+        s = s.filter("range", value={"gte": range_center + neutrality_threshold})
+        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news*5]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     # Get bottom news
     s = es_widget_search_factory(widget)
-    if mode in ["bottom", "top"]:
+    if mode == "bottom":
         s = s.source(['document_es_id'])[:num_news].sort('value')
     elif mode == "last":
         s = s.filter("range", value={"lte": range_center - neutrality_threshold})
-        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
+        s = s.source(['document_es_id']).sort('-document_datetime')[:num_news*5]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
     max_criterion_value_dict, _ = \
@@ -175,9 +173,13 @@ def main_news(widget, mode):
             filter(lambda x: x[1][widget.criterion.id] < range_center, documents_eval_dict.items())
         )
 
-    if mode in ["top", "bottom"]:
+    if mode == "top":
         documents_eval_dict = dict(
-            sorted(documents_eval_dict.items(), key=lambda x: abs(x[1][widget.criterion.id]), reverse=True)
+            sorted(documents_eval_dict.items(), key=lambda x: x[1][widget.criterion.id], reverse=True)
+        )
+    if mode == "bottom":
+        documents_eval_dict = dict(
+            sorted(documents_eval_dict.items(), key=lambda x: x[1][widget.criterion.id], reverse=False)
         )
     elif mode == "last":
         documents_eval_dict = dict(
