@@ -140,9 +140,9 @@ def main_news(widget, mode):
     if mode in ["bottom", "top"]:
         s = s.source(['document_es_id'])[:num_news].sort('-value')
     elif mode == "last":
-        q_gte = Q("range", value={"gte": range_center + neutrality_threshold})
-        q_lte = Q("range", value={"lte": range_center - neutrality_threshold})
-        s = s.filter(q_gte | q_lte)
+        # q_gte = Q("range", value={"gte": range_center + neutrality_threshold})
+        # q_lte = Q("range", value={"lte": range_center - neutrality_threshold})
+        # s = s.filter(q_gte | q_lte) # TODO ? RETURN ?
         s = s.source(['document_es_id']).sort('-document_datetime')[:num_news]
     top_news_ids.update((d.document_es_id for d in s.execute()))
 
