@@ -124,5 +124,9 @@ class SubscriptionReportObject(models.Model):
     url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
 
+    is_sent = models.BooleanField(default=False, verbose_name="Отправлен")
+
+    datetime_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания объекта")
+
     def __str__(self):
         return f"Объект отчёта по {self.subscription} ({self.url})"
