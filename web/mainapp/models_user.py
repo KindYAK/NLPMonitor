@@ -85,3 +85,30 @@ class TopicID(models.Model):
 
     def __str__(self):
         return f"{self.topic_id} из {self.topic_modelling_name}"
+
+
+class Subscription(models.Model):
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        unique_together = (('user', 'criterion', 'topic_modelling_name', 'subscription_type'), )
+
+    TYPES = (
+        (-1, "Негатив"),
+        (0, "Последние новости"),
+        (1, "Позитив"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+
+    criterion = models.ForeignKey('evaluation.EvalCriterion', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Критерий")
+    topic_modelling_name = models.TextField(verbose_name="Название тематической модели")
+
+    subscription_type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип подписки")
+    threshold = models.FloatField(null=True, blank=True, verbose_name="Порог критерия")
+
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    is_fast = models.BooleanField(default=False, verbose_name="Оперативный")
+
+    def __str__(self):
+        return f"Подписка {self.user} на {self.criterion} по {self.topic_modelling_name}"

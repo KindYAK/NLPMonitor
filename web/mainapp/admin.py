@@ -102,7 +102,14 @@ class ViewerAdmin(admin.ModelAdmin):
     search_fields = ('user__username', )
 
 
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'criterion', 'topic_modelling_name', 'subscription_type', 'is_active', 'is_fast', )
+    list_filter = ('topic_modelling_name', 'subscription_type', 'is_active', 'is_fast', )
+    search_fields = ('user__username', 'topic_modelling_name', )
+
+
 admin.site.register(UserGroup, UserGroupAdmin)
 admin.site.register(ContentLoader, ContentLoaderAdmin)
 admin.site.register(Expert, ExpertAdmin)
 admin.site.register(Viewer, ViewerAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)
