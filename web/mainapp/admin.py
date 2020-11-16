@@ -108,8 +108,15 @@ class SubscriptionAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'topic_modelling_name', )
 
 
+class SubscriptionReportObjectAdmin(admin.ModelAdmin):
+    list_display = ('subscription', 'url', 'source', )
+    list_filter = ('subscription', 'source', )
+    search_fields = ('url', )
+
+
 admin.site.register(UserGroup, UserGroupAdmin)
 admin.site.register(ContentLoader, ContentLoaderAdmin)
 admin.site.register(Expert, ExpertAdmin)
 admin.site.register(Viewer, ViewerAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
+admin.site.register(SubscriptionReportObject, SubscriptionReportObjectAdmin)

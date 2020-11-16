@@ -112,3 +112,17 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"Подписка {self.user} на {self.criterion} по {self.topic_modelling_name}"
+
+
+class SubscriptionReportObject(models.Model):
+    class Meta:
+        verbose_name = "Объект отчёта по подписке"
+        verbose_name_plural = "Объекты отчётов по подпискам"
+        unique_together = ('subscription', 'url', 'source', )
+
+    subscription = models.ForeignKey('Subscription', on_delete=models.CASCADE, verbose_name="Подписка")
+    url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
+    source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
+
+    def __str__(self):
+        return f"Объект отчёта по {self.subscription} ({self.url})"
