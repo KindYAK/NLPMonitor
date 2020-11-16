@@ -133,7 +133,7 @@ def main_news(widget, mode):
     top_news_ids = set()
     num_news = 50
     range_center = (widget.criterion.value_range_from + widget.criterion.value_range_to) / 2
-    neutrality_threshold = 0.1
+    neutrality_threshold = 0.01
 
     # Get top news
     s = es_widget_search_factory(widget)
