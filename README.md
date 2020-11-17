@@ -63,7 +63,7 @@ along with either "Deep" or "Convolutional". This language allows to flexibly fi
 </div>
 
 # Practical uses
-[Media Analytics] (https://nlp.iict.kz/) can be applied in industrial tasks as :
+[Media Analytics](https://nlp.iict.kz/) can be applied in industrial tasks as :
 1. Competitive to [ALEM MEDIA MONITORING](https://alem.kz/product-1/) service for:
 
     > Monitoring of media space (news websites, social networks, TV, etc.)
