@@ -123,6 +123,7 @@ class SubscriptionReportObject(models.Model):
     subscription = models.ForeignKey('Subscription', on_delete=models.CASCADE, verbose_name="Подписка")
     url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
     title = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
+    value = models.FloatField(default=0, verbose_name="Значение критерия")
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
 
     is_sent = models.BooleanField(default=False, verbose_name="Отправлен")
