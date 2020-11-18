@@ -293,3 +293,10 @@ SHELL_PLUS_PRE_IMPORTS = (
     ('elasticsearch_dsl', ('Search', 'Index', 'Q')),
     'datetime',
 )
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'nlp.iict@yandex.com'
+EMAIL_HOST_PASSWORD = 'nlpiict1337'
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'NLP.IICT.KZ'
