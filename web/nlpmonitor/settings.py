@@ -294,9 +294,9 @@ SHELL_PLUS_PRE_IMPORTS = (
     'datetime',
 )
 
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'nlp.iict@yandex.com'
-EMAIL_HOST_PASSWORD = 'nlpiict1337'
+EMAIL_HOST = os.getenv('DJANGO_EMAIL_HOST', '')
+EMAIL_PORT = os.getenv('DJANGO_EMAIL_PORT', '')
+EMAIL_HOST_USER = os.getenv('DJANGO_EMAIL_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_PASSWORD', '')
 EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = 'NLP.IICT.KZ'
+DEFAULT_FROM_EMAIL = os.getenv('DJANGO_EMAIL_FROM', '')
