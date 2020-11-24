@@ -105,7 +105,7 @@ class Subscription(models.Model):
     topic_modelling_name = models.TextField(verbose_name="Название тематической модели")
 
     subscription_type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип подписки")
-    threshold = models.FloatField(default=0.1, verbose_name="Порог критерия")
+    threshold = models.IntegerField(default=10, verbose_name="Порог критерия (персентиль)")
     tm_weight_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к ТМ (вес)")
     tm_num_threshold = models.FloatField(default=2, verbose_name="Порог принадлежности к ТМ (количество топиков)")
 
