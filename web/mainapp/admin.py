@@ -109,7 +109,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 
 class SubscriptionReportObjectAdmin(admin.ModelAdmin):
-    list_display = ('subscription', 'url', 'source', 'datetime_created', 'is_sent', )
+    list_display = ('subscription', 'url', 'source', 'datetime_created', 'datetime', 'is_sent', )
     list_filter = ('subscription', 'source', 'is_sent', )
     search_fields = ('url', )
 
