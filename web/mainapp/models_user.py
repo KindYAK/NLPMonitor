@@ -106,7 +106,7 @@ class Subscription(models.Model):
 
     subscription_type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип подписки")
     threshold = models.IntegerField(default=10, verbose_name="Порог критерия (персентиль)")
-    tm_weight_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к ТМ (вес)")
+    tm_weight_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к ТМ (персентиль)")
     tm_num_threshold = models.FloatField(default=2, verbose_name="Порог принадлежности к ТМ (количество топиков)")
 
     is_active = models.BooleanField(default=True, verbose_name="Активен")
@@ -127,6 +127,7 @@ class SubscriptionReportObject(models.Model):
     title = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
     value = models.FloatField(default=0, verbose_name="Значение критерия")
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
+    datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
 
     is_sent = models.BooleanField(default=False, verbose_name="Отправлен")
 
