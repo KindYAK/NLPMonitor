@@ -44,7 +44,7 @@ class Command(BaseCommand):
             qs = qs.filter(id__lte=self.to_id)
         qs = qs.order_by('id')
         # import datetime
-        # qs = qs.filter(datetime__gte=datetime.date(2018, 10, 1), datetime__lte=datetime.date(2018, 10, 10)).order_by('id')
+        # qs = qs.filter(datetime__gte=datetime.date(2019, 1, 1), datetime__lte=datetime.date(2019, 3, 1)).order_by('id')
         # qs = qs.filter(source__corpus__name="gos").order_by('id')
         print("Start build")
         number_of_documents = qs.count()
