@@ -6,15 +6,14 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_
 from elasticsearch_dsl import Search
 
 corpus = "main"
-
 tm_name = "bigartm_two_years_main_and_gos2"
-criterion_ids = [39, 1, 35, 41, 4]
+criterion_ids = ["39_m4a_class", "1", "35", "41_m4a_class", "4"]
 criterion_names = {
-    39: "social_importance",
-    1: "sentiment",
-    35: "popularity",
-    41: "dangerous",
-    4: "kz_relevance",
+    "39_m4a_class": "social_importance",
+    "1": "sentiment",
+    "35": "popularity",
+    "41_m4a_class": "dangerous",
+    "4": "kz_relevance",
 }
 
 group_ids = {
@@ -208,6 +207,7 @@ for group, topic_ids in group_ids.items():
 
 criterion_dicts = defaultdict(dict)
 for criterion_id in criterion_ids:
+    print("criterion", criterion_id)
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{tm_name}_{criterion_id}")
     s = s.source(('value', 'document_es_id'))
     criterion_dicts[criterion_id] = dict(
@@ -215,20 +215,26 @@ for criterion_id in criterion_ids:
     )
 
 # Document_topic_dict
-document_topic_dict = defaultdict(lambda: defaultdict(float))
+document_topic_dict = defaultdict(lambda: defaultdict(list))
 s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}").source(("topic_weight", "topic_id", "document_es_id"))
 total = s.count()
+groups = set()
 for i, td in enumerate(s.scan()):
-    if i % 10000 == 0:
+    if i % 100000 == 0:
         print(f"{i}/{total} processed")
-    document_topic_dict[td.document_es_id][id_group[td.topic_id]] = td.topic_weight
+    if td.topic_id not in id_group:
+        continue
+    document_topic_dict[td.document_es_id][id_group[td.topic_id]].append(td.topic_weight)
+    groups.add(id_group[td.topic_id])
 
-number_of_topics = 100
+for key1 in document_topic_dict.keys():
+    for key2 in document_topic_dict[key1]:
+        document_topic_dict[key1][key2] = sum(document_topic_dict[key1][key2]) / len(document_topic_dict[key1][key2])
 
+groups = list(groups)
 s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
 s = s.filter("terms", corpus=corpus)
 s = s.source(("text", "title", "datetime", "url", "source", "num_views", ))
-
 output = []
 skipped = 0
 for doc in s.scan():
@@ -241,23 +247,32 @@ for doc in s.scan():
         "source": doc.source,
         "num_views": doc.num_views,
     }
-
     for criterion_id in criterion_ids:
         if doc.meta.id not in criterion_dicts[criterion_id]:
             skipped += 1
             new_line[criterion_names[criterion_id]] = None
             continue
         new_line[criterion_names[criterion_id]] = criterion_dicts[criterion_id][doc.meta.id]
-
-    for i in range(number_of_topics):
-        if f"topic_{i}" not in id_group:
-            continue
-        new_line[id_group[f"topic_{i}"]] = document_topic_dict[doc.meta.id][id_group[f"topic_{i}"]]
+    for group in groups:
+        new_line[group] = document_topic_dict[doc.meta.id][group]
     output.append(new_line)
+
+for group in groups:
+    min_v = min([doc[group] for doc in output])
+    max_v = max([doc[group] for doc in output])
+    for doc in output:
+        doc[group] = (doc[group] - min_v) / (max_v - min_v)
+
+for criterion_id in criterion_ids:
+    min_v = min([doc[criterion_names[criterion_id]] for doc in output])
+    max_v = max([doc[criterion_names[criterion_id]] for doc in output])
+    for doc in output:
+        doc[criterion_names[criterion_id]] = (doc[criterion_names[criterion_id]] - min_v) / (max_v - min_v)
 
 print("Skipped", skipped)
 
-# output = list(filter(lambda x: not all([x[f"topic_{i}"] == 0 for i in range(100)]), output))
+output = list(filter(lambda x: not all([(x[group] == 0 or x[group] == None) for group in groups]), output))
+output = list(filter(lambda x: not all([(x[criterion_names[criterion_id]] == 0 or x[criterion_names[criterion_id]] == None) for criterion_id in criterion_ids]), output))
 
 keys = output[0].keys()
 with open(f'/output_data.csv', 'w') as output_file:
