@@ -109,6 +109,9 @@ class Subscription(models.Model):
     tm_weight_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к ТМ (персентиль)")
     tm_num_threshold = models.FloatField(default=2, verbose_name="Порог принадлежности к ТМ (количество топиков)")
 
+    parent_group = models.ForeignKey('TopicGroup', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Группа топиков")
+    parent_group_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к группе")
+
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     is_fast = models.BooleanField(default=False, verbose_name="Оперативный")
 
