@@ -1,20 +1,13 @@
 import csv
+import datetime
 from collections import defaultdict
 
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_TOPIC_DOCUMENT
 
 from elasticsearch_dsl import Search
 
-corpus = "main"
+corpus = ["main", "gos2"]
 tm_name = "bigartm_two_years_main_and_gos2"
-criterion_ids = ["39_m4a_class", "1", "35", "41_m4a_class", "4"]
-criterion_names = {
-    "39_m4a_class": "social_importance",
-    "1": "sentiment",
-    "35": "popularity",
-    "41_m4a_class": "dangerous",
-    "4": "kz_relevance",
-}
 
 group_ids = {
     'health-advice': ['topic_81', 'topic_82'],
@@ -205,17 +198,9 @@ for group, topic_ids in group_ids.items():
     for topic_id in topic_ids:
         id_group[topic_id] = group
 
-criterion_dicts = defaultdict(dict)
-for criterion_id in criterion_ids:
-    print("criterion", criterion_id)
-    s = Search(using=ES_CLIENT, index=f"{ES_INDEX_DOCUMENT_EVAL}_{tm_name}_{criterion_id}")
-    s = s.source(('value', 'document_es_id'))
-    criterion_dicts[criterion_id] = dict(
-        (doc.document_es_id, doc.value) for doc in s.scan()
-    )
-
 # Document_topic_dict
-document_topic_dict = defaultdict(lambda: defaultdict(list))
+document_group_dict = defaultdict(lambda: defaultdict(list))
+document_topic_dict = defaultdict(lambda: defaultdict(int))
 s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}").source(("topic_weight", "topic_id", "document_es_id"))
 total = s.count()
 groups = set()
@@ -224,37 +209,48 @@ for i, td in enumerate(s.scan()):
         print(f"{i}/{total} processed")
     if td.topic_id not in id_group:
         continue
-    document_topic_dict[td.document_es_id][id_group[td.topic_id]].append(td.topic_weight)
+    document_group_dict[td.document_es_id][id_group[td.topic_id]].append(td.topic_weight)
+    document_topic_dict[td.document_es_id][td.topic_id] = td.topic_weight
     groups.add(id_group[td.topic_id])
 
-for key1 in document_topic_dict.keys():
-    for key2 in document_topic_dict[key1]:
-        document_topic_dict[key1][key2] = sum(document_topic_dict[key1][key2]) / len(document_topic_dict[key1][key2])
+for key1 in document_group_dict.keys():
+    for key2 in document_group_dict[key1].keys():
+        try:
+            document_group_dict[key1][key2] = sum(document_group_dict[key1][key2]) / len(document_group_dict[key1][key2])
+        except:
+            pass
 
 groups = list(groups)
 s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
 s = s.filter("terms", corpus=corpus)
-s = s.source(("text", "title", "datetime", "url", "source", "num_views", ))
+s = s.source(("text", "text_lemmatized", "title", "datetime", "url", "source", "num_views", "corpus"))
+s = s.filter("range", datetime={
+    "gte": datetime.date(2018, 1, 1)
+})
 output = []
 skipped = 0
-for doc in s.scan():
+total = s.count()
+for i, doc in enumerate(s.scan()):
+    if i % 100_000 == 0:
+        print(f"{i}/{total}")
     new_line = {
         "document_es_id": doc.meta.id,
         "text": doc.text,
+        "text_lemmatized": doc.text_lemmatized if hasattr(doc, "text_lemmatized") else None,
         "title": doc.title,
-        "datetime": doc.datetime,
-        "url": doc.url,
+        "datetime": doc.datetime if hasattr(doc, "datetime") else None,
+        "url": doc.url if hasattr(doc, "url") else None,
         "source": doc.source,
-        "num_views": doc.num_views,
+        "num_views": doc.num_views if hasattr(doc, "num_views") else None,
+        "type": "News" if doc.corpus == "main" else "Governmental program",
     }
-    for criterion_id in criterion_ids:
-        if doc.meta.id not in criterion_dicts[criterion_id]:
-            skipped += 1
-            new_line[criterion_names[criterion_id]] = None
-            continue
-        new_line[criterion_names[criterion_id]] = criterion_dicts[criterion_id][doc.meta.id]
     for group in groups:
-        new_line[group] = document_topic_dict[doc.meta.id][group]
+        if group not in document_group_dict[doc.meta.id]:
+            new_line[group] = 0
+        new_line[group] = document_group_dict[doc.meta.id][group]
+    for i in range(200):
+        topic_id = f"topic_{i}"
+        new_line[topic_id] = document_topic_dict[doc.meta.id][topic_id]
     output.append(new_line)
 
 for group in groups:
@@ -263,19 +259,12 @@ for group in groups:
     for doc in output:
         doc[group] = (doc[group] - min_v) / (max_v - min_v)
 
-for criterion_id in criterion_ids:
-    min_v = min([doc[criterion_names[criterion_id]] for doc in output])
-    max_v = max([doc[criterion_names[criterion_id]] for doc in output])
-    for doc in output:
-        doc[criterion_names[criterion_id]] = (doc[criterion_names[criterion_id]] - min_v) / (max_v - min_v)
-
 print("Skipped", skipped)
 
 output = list(filter(lambda x: not all([(x[group] == 0 or x[group] == None) for group in groups]), output))
-output = list(filter(lambda x: not all([(x[criterion_names[criterion_id]] == 0 or x[criterion_names[criterion_id]] == None) for criterion_id in criterion_ids]), output))
 
 keys = output[0].keys()
-with open(f'/output_data.csv', 'w') as output_file:
+with open(f'/output_data_social.csv', 'w') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(output)
