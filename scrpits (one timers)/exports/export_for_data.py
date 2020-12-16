@@ -199,7 +199,7 @@ for group, topic_ids in group_ids.items():
         id_group[topic_id] = group
 
 # Document_topic_dict
-document_group_dict = defaultdict(lambda: defaultdict(list))
+document_group_key_temp = defaultdict(lambda: defaultdict(list))
 document_topic_dict = defaultdict(lambda: defaultdict(int))
 s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{tm_name}").source(("topic_weight", "topic_id", "document_es_id"))
 total = s.count()
@@ -209,14 +209,15 @@ for i, td in enumerate(s.scan()):
         print(f"{i}/{total} processed")
     if td.topic_id not in id_group:
         continue
-    document_group_dict[td.document_es_id][id_group[td.topic_id]].append(td.topic_weight)
+    document_group_key_temp[td.document_es_id][id_group[td.topic_id]].append(td.topic_weight)
     document_topic_dict[td.document_es_id][td.topic_id] = td.topic_weight
     groups.add(id_group[td.topic_id])
 
-for key1 in document_group_dict.keys():
-    for key2 in document_group_dict[key1].keys():
+document_group_dict = defaultdict(lambda: defaultdict(int))
+for key1 in document_group_key_temp.keys():
+    for key2 in document_group_key_temp[key1].keys():
         try:
-            document_group_dict[key1][key2] = sum(document_group_dict[key1][key2]) / len(document_group_dict[key1][key2])
+            document_group_dict[key1][key2] = sum(document_group_key_temp[key1][key2]) / len(document_group_key_temp[key1][key2])
         except:
             pass
 
@@ -268,3 +269,21 @@ with open(f'/output_data_social.csv', 'w') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(output)
+
+
+output = sorted(output, key=lambda x: x['datetime'])
+
+for doc in output:
+    for group in groups:
+        doc[f"group_{group}"] = doc[group]
+        del doc[group]
+
+batch_len = 100_000
+keys = output[0].keys()
+for i in range(len(output) // batch_len + (0 if len(output) % batch_len == 0 else 1)):
+    print("!!!", f'/output/output_data_social_{i * batch_len}-{min((i + 1) * batch_len, len(output))}.csv')
+    batch = output[i * batch_len:(i + 1) * batch_len]
+    with open(f'/output/output_data_social_{i * batch_len}-{min((i + 1) * batch_len, len(output))}.csv', 'w') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(batch)
