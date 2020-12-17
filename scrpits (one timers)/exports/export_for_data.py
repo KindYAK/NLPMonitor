@@ -2,6 +2,7 @@ import csv
 import datetime
 from collections import defaultdict
 
+from evaluation.models import TopicsEval
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_DOCUMENT_EVAL, ES_INDEX_TOPIC_DOCUMENT
 
 from elasticsearch_dsl import Search
@@ -287,3 +288,21 @@ for i in range(len(output) // batch_len + (0 if len(output) % batch_len == 0 els
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(batch)
+
+
+evaluations = TopicsEval.objects.filter(criterion__id=1,
+                                        topics__topic_modelling_name="bigartm_two_years_main_and_gos2")\
+    .distinct().prefetch_related('topics')
+
+# Topic -> [List of evaluations by each author]
+criterions_evals_dict = {}
+for evaluation in evaluations:
+    if not evaluation.topics.exists():
+        continue
+    eval_topic_id = evaluation.topics.first().topic_id
+    if eval_topic_id not in criterions_evals_dict:
+        criterions_evals_dict[eval_topic_id] = []
+    criterions_evals_dict[eval_topic_id].append(evaluation.value)
+
+for t in criterions_evals_dict.keys():
+    criterions_evals_dict[t] = sum(criterions_evals_dict[t]) / len(criterions_evals_dict[t])
