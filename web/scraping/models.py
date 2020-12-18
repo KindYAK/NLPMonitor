@@ -15,7 +15,7 @@ class SocialNetworkAccount(models.Model):
         (2, "Twitter"),
         (3, "Instagram"),
         (4, "Telegram"),
-        (5, "Youtube"),
+        (5, "YouTube"),
     )
 
     # account status choices
