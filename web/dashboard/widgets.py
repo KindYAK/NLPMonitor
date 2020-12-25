@@ -224,7 +224,7 @@ def top_topics(widget):
     r = s.execute()
     topics_dict, tm_dict = get_topic_dict(widget.topic_modelling_name)
     last_date = r.aggregations.late_date.value_as_string
-    last_date = datetime.datetime.fromisoformat(last_date[:19])
+    last_date = datetime.datetime.strptime(last_date[:19], "%Y-%m-%dT%H:%M:%S")
     context_update[f'top_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[-1].top_topics.buckets,
                                           topics_dict, tm_dict, 0.05, last_date)
     context_update[f'bottom_topics_{widget.id}'] = normalize_buckets_main_topics(r.aggregations.posneg.buckets[0].bottom_topics.buckets,
