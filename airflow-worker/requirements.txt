@@ -18,3 +18,4 @@ youtube-data-api==0.0.20
 django-redis==4.10.0
 latex==0.7.0
 plotly==4.6.0
+djangorestframework-jwt==1.11.0
