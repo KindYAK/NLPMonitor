@@ -2,14 +2,14 @@ import datetime
 
 from jinja2 import Environment
 from jinja2.loaders import FileSystemLoader
-from latex import build_pdf
-from latex.jinja2 import ENV_ARGS
 
 from mainapp.templatetags.jinja2_styled import remove_http_env, get_item_env, substr_env, LatexMarkup
 from nlpmonitor.settings import TEMPLATE_LATEX_DIR
 
 
 def compile_jinja2_latex(template_name, context):
+    from latex.jinja2 import ENV_ARGS
+
     ENV_ARGS['loader'] = FileSystemLoader(TEMPLATE_LATEX_DIR)
     env = Environment(**ENV_ARGS)
     env.filters.update({
@@ -24,6 +24,8 @@ def compile_jinja2_latex(template_name, context):
 
 
 def build_latex_pdf(template_name, context):
+    from latex import build_pdf
+
     latex_code = compile_jinja2_latex(template_name, context)
     try:
         pdf = build_pdf(latex_code, builder="pdflatex")
