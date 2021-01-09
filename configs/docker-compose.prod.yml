@@ -35,3 +35,13 @@ services:
     networks:
       - network
     restart: always
+  apertium-flask:
+    build:
+      context: ../containers/apertium
+      dockerfile: Dockerfile
+    expose:
+      - 8005
+    networks:
+      - network
+    tty: true
+    stdin_open: true
