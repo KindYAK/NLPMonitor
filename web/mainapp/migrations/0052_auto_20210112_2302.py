@@ -6,12 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mainapp', '0050_subscription_keyword_query_occurrence_threshold'),
+        ('mainapp', '0051_auto_20210112_2302'),
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AddField(
             model_name='subscription',
             name='keyword_query_occurrence_threshold',
+            field=models.IntegerField(default=1, verbose_name='Минимальное количество вхождений ключевых слов'),
         ),
     ]
