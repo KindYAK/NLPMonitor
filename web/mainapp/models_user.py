@@ -104,13 +104,18 @@ class Subscription(models.Model):
     criterion = models.ForeignKey('evaluation.EvalCriterion', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Критерий")
     topic_modelling_name = models.TextField(verbose_name="Название тематической модели")
 
+    corpus = models.ForeignKey('mainapp.Corpus', null=True, on_delete=models.CASCADE, verbose_name="Корпус")
+
     subscription_type = models.SmallIntegerField(choices=TYPES, verbose_name="Тип подписки")
     threshold = models.IntegerField(default=10, verbose_name="Порог критерия (персентиль)")
+
     tm_weight_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к ТМ (персентиль)")
     tm_num_threshold = models.FloatField(default=2, verbose_name="Порог принадлежности к ТМ (количество топиков)")
 
     parent_group = models.ForeignKey('TopicGroup', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Группа топиков")
     parent_group_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к группе")
+
+    keyword_query = models.TextField(blank=True, null=True, verbose_name="Запрос по ключевому слову")
 
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     is_fast = models.BooleanField(default=False, verbose_name="Оперативный")
@@ -127,7 +132,7 @@ class SubscriptionReportObject(models.Model):
 
     subscription = models.ForeignKey('Subscription', on_delete=models.CASCADE, verbose_name="Подписка")
     url = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
-    title = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="URL")
+    title = models.CharField(max_length=1000, null=True, blank=True, unique=True, verbose_name="Заголовок")
     value = models.FloatField(default=0, verbose_name="Значение критерия")
     source = models.ForeignKey('Source', on_delete=models.CASCADE, verbose_name="Источник")
     datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
