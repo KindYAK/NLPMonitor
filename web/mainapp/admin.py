@@ -103,7 +103,7 @@ class ViewerAdmin(admin.ModelAdmin):
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'criterion', 'topic_modelling_name', 'subscription_type', 'is_active', 'is_fast', )
+    list_display = ('user', 'criterion', 'topic_modelling_name', 'subscription_type', 'keyword_query', 'is_active', 'is_fast', )
     list_filter = ('topic_modelling_name', 'subscription_type', 'is_active', 'is_fast', )
     search_fields = ('user__username', 'topic_modelling_name', )
 

@@ -116,6 +116,7 @@ class Subscription(models.Model):
     parent_group_threshold = models.FloatField(default=0.05, verbose_name="Порог принадлежности к группе")
 
     keyword_query = models.TextField(blank=True, null=True, verbose_name="Запрос по ключевому слову")
+    keyword_query_occurrence_threshold = models.TextField(blank=True, null=True, verbose_name="Минимальное количество вхождений ключевых слов")
 
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     is_fast = models.BooleanField(default=False, verbose_name="Оперативный")
