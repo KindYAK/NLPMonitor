@@ -1,4 +1,4 @@
-django==2.2.13
+django==2.2.18
 django-annoying==0.10.4
 django-debug-toolbar==1.11
 django-extensions==2.1.9
