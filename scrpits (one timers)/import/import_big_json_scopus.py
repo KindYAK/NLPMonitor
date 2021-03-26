@@ -23,14 +23,14 @@ corpus = Corpus.objects.create(name="scopus")
 source = Source.objects.create(name="scopus", corpus=corpus)
 
 
-for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=1000)):
-    print("!", i * 1000)
+for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=10000)):
+    print("!", i * 10000)
     docs = []
     for d in chunk:
         docs.append(
             Document(
                 source=source,
-                title=d['dc:title'],
+                title=f"{d['dc:title']} ({d['_id']})",
                 text=d['dc:description'] + " " + d['authkeywords'],
                 datetime=datetime.datetime(int(d['year']), 6, 1)
             )
