@@ -23,8 +23,8 @@ corpus = Corpus.objects.create(name="scopus")
 source = Source.objects.create(name="scopus", corpus=corpus)
 
 
-for chunk in chunks_iter("/scopuspubs.json", chunksize=1000):
-    print("!", chunk * 1000)
+for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=1000)):
+    print("!", i * 1000)
     docs = []
     for d in chunk:
         docs.append(
