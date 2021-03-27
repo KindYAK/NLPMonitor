@@ -26,13 +26,18 @@ source = Source.objects.create(name="scopus", corpus=corpus)
 for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=10000)):
     print("!", i * 10000)
     docs = []
-    for d in chunk:
+    for j, d in enumerate(chunk):
+        try:
+            year = int(d['year'])
+            dt = datetime.datetime(year, 6, 1)
+        except:
+            dt = None
         docs.append(
             Document(
                 source=source,
-                title=f"{d['dc:title'][:490]} ({d['_id'][:10]})",
+                title=f"{d['dc:title'][:480]} ({d['_id'][:10]}{i*10000+j})",
                 text=d['dc:description'] + " " + d['authkeywords'],
-                datetime=datetime.datetime(int(d['year']), 6, 1)
+                datetime=dt
             )
         )
     Document.objects.bulk_create(docs)
