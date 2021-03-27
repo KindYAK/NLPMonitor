@@ -30,7 +30,7 @@ for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=10000)):
         docs.append(
             Document(
                 source=source,
-                title=f"{d['dc:title']} ({d['_id']})",
+                title=f"{d['dc:title'][:490]} ({d['_id'][:10]})",
                 text=d['dc:description'] + " " + d['authkeywords'],
                 datetime=datetime.datetime(int(d['year']), 6, 1)
             )
