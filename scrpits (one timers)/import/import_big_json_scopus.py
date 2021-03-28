@@ -35,9 +35,9 @@ for i, chunk in enumerate(chunks_iter("/scopuspubs.json", chunksize=10000)):
         docs.append(
             Document(
                 source=source,
-                title=f"{d['dc:title'][:480]} ({d['_id'][:10]}{i*10000+j})",
+                title=f"{d['dc:title'][:450]} ({d['_id'][:20]}{i*10000+j})"[:499],
                 text=d['dc:description'] + " " + d['authkeywords'],
                 datetime=dt
             )
         )
-    Document.objects.bulk_create(docs)
+    Document.objects.bulk_create(docs, ignore_conflicts=True)
