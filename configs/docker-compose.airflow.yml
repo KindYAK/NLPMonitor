@@ -31,7 +31,6 @@ services:
       - airflow:/bitnami
       - ../../NLPMonitor-DAGs:/opt/bitnami/airflow/dags
       - ./airflow_plugins:/opt/bitnami/airflow/plugins
-      - ../airflow-worker/airflow_worker_plugins/sentry_plugin:/opt/bitnami/airflow/plugins/sentry_plugin
       - ../logs/:/opt/bitnami/airflow/logs:rw
     env_file:
       - ../.env
