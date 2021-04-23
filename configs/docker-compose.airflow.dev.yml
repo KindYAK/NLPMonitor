@@ -8,6 +8,7 @@ services:
     volumes:
       - ../web:/django
       - ./airflow.cfg.dev:/opt/bitnami/airflow/airflow.cfg
+      - ../big_data/:/big_data/
     deploy:
       resources:
         limits:

@@ -9,7 +9,6 @@ services:
     volumes:
       - ../web:/opt/app
       - media_root:/opt/app/media_root
-      - ../big_data:/big_data/
     tty: true
     stdin_open: true
   nginx:
