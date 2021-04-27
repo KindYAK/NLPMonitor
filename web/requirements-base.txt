@@ -16,7 +16,7 @@ django-stronghold==0.3.0
 django-widget-tweaks==1.4.5
 elasticsearch-dsl==7.0.0
 gunicorn==19.9.0
-jinja2==2.11.1
+jinja2==2.11.3
 latex==0.7.0
 pandas==0.24.2
 plotly==4.6.0
