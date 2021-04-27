@@ -18,4 +18,3 @@ latex==0.7.0
 plotly==4.6.0
 djangorestframework-jwt==1.11.0
 django==2.2.13
-attrs==19.2.0
