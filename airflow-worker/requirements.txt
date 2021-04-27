@@ -7,7 +7,7 @@ bert-serving-client==1.10.0
 llvmlite==0.32.1
 lemminflect==0.2.1
 telethon==1.16.4
-aiohttp==3.6.2
+aiohttp==3.7.4
 python-slugify==3.0.2
 vk==2.0.2
 google-api-python-client==1.12.3
