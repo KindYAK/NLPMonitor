@@ -7,17 +7,17 @@ from scipy.stats import pearsonr
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
 
-topic_modelling = "bigartm_2020_2021_rus_kaz_health_3"
+topic_modelling = "bigartm_2020_2021_rus_kaz"
 topic_weight_threshold = 0.05
 granularity = "1d"
 smooth = True
-# datetime_from = datetime.datetime(2020, 3, 13) # Kaz
-datetime_from = datetime.datetime(2020, 1, 31) # Rus
+datetime_from = datetime.datetime(2020, 3, 13) # Kaz
+# datetime_from = datetime.datetime(2020, 1, 31) # Rus
 datetime_to = datetime.datetime(2021, 2, 25) # Add One
-# corpus = ["main"]
-corpus = ["rus", "rus_propaganda"]
-# country = "Kazakhstan"
-country = "Russia"
+corpus = ["main"]
+# corpus = ["rus", "rus_propaganda"]
+country = "Kazakhstan"
+# country = "Russia"
 fields = [
     "new_cases_smoothed",
     "new_deaths_smoothed",
@@ -144,13 +144,11 @@ def get_topic_details(topic_id):
     # absolute_power = [bucket.doc_count for bucket in topic_documents.aggregations.dynamics.buckets]
     # relative_power = [bucket.doc_count_normal for bucket in topic_documents.aggregations.dynamics.buckets]
     relative_weight = [bucket.dynamics_weight.value for bucket in topic_documents.aggregations.dynamics.buckets]
-    print(len(relative_weight))
     # Smooth
     if smooth:
         # absolute_power = apply_fir_filter(absolute_power, granularity=granularity)
         # relative_power = apply_fir_filter(relative_power, granularity=granularity)
         relative_weight = apply_fir_filter(relative_weight, granularity=granularity)
-    print(len(relative_weight))
     # Create context
     topic_info = {}
     topic_info['date_ticks'] = [bucket.key_as_string for bucket in topic_documents.aggregations.dynamics.buckets]
@@ -177,14 +175,18 @@ for field in fields:
             diff = len(df[field]) - len(topic_dynamics)
             topic_dynamics = [0] * diff + list(topic_dynamics)
             print("!DIFF", diff)
-        correlations.append(
-            {
-                "corr": pearsonr(topic_dynamics, df[field])[0],
-                "topic_id": topic,
-                "words": ", ".join([w['word'] for w in topics_info[topic]['words'][:7]]),
-                "size": topics_info[topic]['size'],
-            }
-        )
+        try:
+            correlations.append(
+                {
+                    "corr": pearsonr(topic_dynamics, df[field])[0],
+                    "topic_id": topic,
+                    "words": ", ".join([w['word'] for w in topics_info[topic]['words'][:7]]),
+                    "size": topics_info[topic]['size'],
+                }
+            )
+        except:
+            print("SAD :(")
+            continue
     with open(f"/covid/{country}-{topic_modelling}-{field}-top.txt", "w") as f:
         for corr in sorted(correlations, key=lambda x: x['corr'], reverse=True)[:25]:
             f.write(f"{corr['corr']} - {corr['topic_id']} - {corr['words']} ({corr['size']} documents)\n")

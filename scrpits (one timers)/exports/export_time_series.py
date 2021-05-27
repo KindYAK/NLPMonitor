@@ -6,16 +6,16 @@ from elasticsearch_dsl import Search
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT
 
-topic_modelling = "bigartm_two_years"
-topic_weight_threshold = 0.05
-granularity = "1w"
+topic_modelling = "bigartm__scopus_100"
+topic_weight_threshold = 0.01
+granularity = "1y"
 smooth = False
 
 
 def get_total_metrics(granularity, topic_weight_threshold):
     std_total = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
         .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-        .filter("range", datetime={"gte": datetime.date(2000, 1, 1)})
+        .filter("range", datetime={"gte": datetime.date(1990, 1, 1)})
     std_total.aggs.bucket(name="dynamics",
                           agg_type="date_histogram",
                           field="datetime",
@@ -38,7 +38,7 @@ def get_current_topics_metrics(topics, granularity, topic_weight_threshold):
     std = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
               .filter("terms", topic_id=topics).sort("-topic_weight") \
               .filter("range", topic_weight={"gte": topic_weight_threshold}) \
-              .filter("range", datetime={"gte": datetime.date(2000, 1, 1)}) \
+              .filter("range", datetime={"gte": datetime.date(1990, 1, 1)}) \
               .source(['document_es_id', 'topic_weight'])[:100]
     std.aggs.bucket(name="dynamics",
                     agg_type="date_histogram",
@@ -156,16 +156,18 @@ def get_topic_details(topic_id):
 
 
 s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}").source([])[:0]
-s.aggs.bucket(name="topic_ids", agg_type="terms", field="topic_id", size=5000000)
+s.aggs.bucket(name="topic_ids", agg_type="terms", field="topic_id", size=5_000_000)
 r = s.execute()
 
 topics_info = get_topics_info()
 
 output = []
 for topic_id in r.aggregations.topic_ids.buckets:
+    print("!", topic_id)
     topic_info = get_topic_details(topic_id.key)
     output.append(topic_info)
 
 
 with open(f"/output-topics-dynamics-{topic_modelling}.json", "w", encoding="utf-8") as f:
     f.write(json.dumps(output))
+
