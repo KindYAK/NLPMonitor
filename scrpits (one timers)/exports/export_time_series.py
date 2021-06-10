@@ -6,11 +6,6 @@ from elasticsearch_dsl import Search
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING, ES_INDEX_DOCUMENT
 
-topic_modelling = "bigartm__scopus_100"
-topic_weight_threshold = 0.01
-granularity = "1y"
-smooth = False
-
 
 def get_total_metrics(granularity, topic_weight_threshold):
     std_total = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}") \
@@ -155,19 +150,19 @@ def get_topic_details(topic_id):
     return topic_info
 
 
-s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}").source([])[:0]
-s.aggs.bucket(name="topic_ids", agg_type="terms", field="topic_id", size=5_000_000)
-r = s.execute()
-
-topics_info = get_topics_info()
-
-output = []
-for topic_id in r.aggregations.topic_ids.buckets:
-    print("!", topic_id)
-    topic_info = get_topic_details(topic_id.key)
-    output.append(topic_info)
-
-
-with open(f"/output-topics-dynamics-{topic_modelling}.json", "w", encoding="utf-8") as f:
-    f.write(json.dumps(output))
-
+for topic_modelling in ES_CLIENT.indices.get_alias('topic_document_sharded_bigartm__scopus_100_*').keys():
+    # topic_modelling = "bigartm__scopus_100"
+    topic_weight_threshold = 0.05
+    granularity = "1y"
+    smooth = False
+    s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}").source([])[:0]
+    s.aggs.bucket(name="topic_ids", agg_type="terms", field="topic_id", size=5_000_000)
+    r = s.execute()
+    topics_info = get_topics_info()
+    output = []
+    for topic_id in r.aggregations.topic_ids.buckets:
+        print("!", topic_id)
+        topic_info = get_topic_details(topic_id.key)
+        output.append(topic_info)
+    with open(f"/scopus_tms/output-topics-dynamics-{topic_modelling}.json", "w", encoding="utf-8") as f:
+        f.write(json.dumps(output))
