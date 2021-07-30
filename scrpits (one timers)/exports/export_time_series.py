@@ -90,7 +90,7 @@ def get_topics_info():
     )
     # Get actual topics
     topics = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING) \
-        .filter("term", **{"name": topic_modelling}) \
+        .filter("term", **{"name.keyword": topic_modelling}) \
         .filter("term", **{"is_ready": True}).execute()[0]['topics']
     # Fill topic objects with meta data
     for topic in topics:
@@ -151,6 +151,11 @@ def get_topic_details(topic_id):
 
 
 for topic_modelling in ES_CLIENT.indices.get_alias('topic_document_sharded_bigartm__scopus_100_*').keys():
+    if "-" not in topic_modelling:
+        continue
+    print(topic_modelling)
+    topic_modelling = topic_modelling.replace(ES_INDEX_TOPIC_DOCUMENT + "_", "")
+    print(topic_modelling)
     # topic_modelling = "bigartm__scopus_100"
     topic_weight_threshold = 0.05
     granularity = "1y"
@@ -158,10 +163,14 @@ for topic_modelling in ES_CLIENT.indices.get_alias('topic_document_sharded_bigar
     s = Search(using=ES_CLIENT, index=f"{ES_INDEX_TOPIC_DOCUMENT}_{topic_modelling}").source([])[:0]
     s.aggs.bucket(name="topic_ids", agg_type="terms", field="topic_id", size=5_000_000)
     r = s.execute()
-    topics_info = get_topics_info()
+    try:
+        topics_info = get_topics_info()
+    except:
+        print("!!!!!!!", topic_modelling)
+        continue
     output = []
     for topic_id in r.aggregations.topic_ids.buckets:
-        print("!", topic_id)
+        # print("!", topic_id)
         topic_info = get_topic_details(topic_id.key)
         output.append(topic_info)
     with open(f"/scopus_tms/output-topics-dynamics-{topic_modelling}.json", "w", encoding="utf-8") as f:

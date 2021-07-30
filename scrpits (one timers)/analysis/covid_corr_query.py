@@ -13,7 +13,7 @@ granularity = "1d"
 smooth = True
 # datetime_from = datetime.datetime(2020, 3, 13)  # Kaz
 datetime_from = datetime.datetime(2020, 1, 31) # Rus
-# datetime_to = datetime.datetime(2021, 2, 25)  # Add One
+datetime_to = datetime.datetime(2021, 2, 25)  # Add One
 # corpus = [1] # Kaz
 corpus = [38, 39] # RUS
 # country = "Kazakhstan"
@@ -44,15 +44,15 @@ total_metrics_dict = dict(
 )
 
 for query in [
-    "фейк ложная информация дезинформация",
-    "безработица бедность",
-    "кризис упадок падение",
-    "нищета голод бездомный",
-    "удалённое образование удалёнка",
-    "фриланс зарубеж удалённая работа утечка мозгов",
-    "преступность воровство кражи разбой",
-    "кризис кредитование долг микрокредитные",
-    "здравоохранение больницы проблемы скандал"
+    # "фейк ложная информация дезинформация",
+    # "безработица бедность",
+    # "кризис упадок падение",
+    # "нищета голод бездомный",
+    # "удалённое образование удалёнка",
+    # "фриланс зарубеж удалённая работа утечка мозгов",
+    # "преступность воровство кражи разбой",
+    # "кризис кредитование долг микрокредитные",
+    # "здравоохранение больницы проблемы скандал",
     "вакцинация вакцины прививка COVID"
 ]:
     print(query)
@@ -87,13 +87,13 @@ for query in [
         absolute_power = apply_fir_filter(absolute_power, granularity=granularity)
         relative_power = apply_fir_filter(relative_power, granularity=granularity)
         relative_weight = apply_fir_filter(relative_weight, granularity=granularity)
-    correlations = []
     for dynamics_name, dynamics in [
         ("absolute_power", absolute_power),
         ("relative_power", relative_power),
         ("relative_weight", relative_weight),
     ]:
         print(dynamics_name)
+        correlations = []
         for field in fields:
             print("!", field)
             if len(dynamics) < len(df[field]):
