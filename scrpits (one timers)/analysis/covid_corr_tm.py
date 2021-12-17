@@ -11,13 +11,13 @@ topic_modelling = "bigartm_2020_2021_rus_kaz"
 topic_weight_threshold = 0.05
 granularity = "1d"
 smooth = True
-datetime_from = datetime.datetime(2020, 3, 13) # Kaz
-# datetime_from = datetime.datetime(2020, 1, 31) # Rus
+# datetime_from = datetime.datetime(2020, 3, 13) # Kaz
+datetime_from = datetime.datetime(2020, 1, 31) # Rus
 datetime_to = datetime.datetime(2021, 2, 25) # Add One
-corpus = ["main"]
-# corpus = ["rus", "rus_propaganda"]
-country = "Kazakhstan"
-# country = "Russia"
+# corpus = ["main"]
+corpus = ["rus", "rus_propaganda"]
+# country = "Kazakhstan"
+country = "Russia"
 fields = [
     "new_cases_smoothed",
     "new_deaths_smoothed",

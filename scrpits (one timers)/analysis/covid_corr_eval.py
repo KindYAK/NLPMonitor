@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 from elasticsearch_dsl import Search
 
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 from evaluation.services import normalize_documents_eval_dynamics, smooth_buckets
 from mainapp.models import Source
@@ -13,13 +13,13 @@ criterion_id = 1
 topic_weight_threshold = 0.05
 granularity = "1d"
 smooth = True
-# datetime_from = datetime.datetime(2020, 3, 13) # Kaz
-datetime_from = datetime.datetime(2020, 1, 31) # Rus
+datetime_from = datetime.datetime(2020, 3, 13) # Kaz
+# datetime_from = datetime.datetime(2020, 1, 31) # Rus
 datetime_to = datetime.datetime(2021, 2, 25) # Add One
-# corpus = ["main"]
-corpus = ["rus", "rus_propaganda"]
-# country = "Kazakhstan"
-country = "Russia"
+corpus = ["main"]
+# corpus = ["rus", "rus_propaganda"]
+country = "Kazakhstan"
+# country = "Russia"
 fields = [
     "new_cases_smoothed",
     "new_deaths_smoothed",
@@ -164,7 +164,7 @@ for name, dynamic in {
         try:
             correlations.append(
                 {
-                    "corr": pearsonr(dynamic, df[field])[0],
+                    "corr": spearmanr(dynamic, df[field])[0],
                     "field": field,
                 }
             )

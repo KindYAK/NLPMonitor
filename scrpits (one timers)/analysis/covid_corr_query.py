@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 from elasticsearch_dsl import Search
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 from mainapp.models import Corpus
 from mainapp.services import apply_fir_filter
@@ -11,13 +11,13 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT
 
 granularity = "1d"
 smooth = True
-# datetime_from = datetime.datetime(2020, 3, 13)  # Kaz
-datetime_from = datetime.datetime(2020, 1, 31) # Rus
+datetime_from = datetime.datetime(2020, 3, 13)  # Kaz
+# datetime_from = datetime.datetime(2020, 1, 31) # Rus
 datetime_to = datetime.datetime(2021, 2, 25)  # Add One
-# corpus = [1] # Kaz
-corpus = [38, 39] # RUS
-# country = "Kazakhstan"
-country = "Russia"
+corpus = [1] # Kaz
+# corpus = [38, 39] # RUS
+country = "Kazakhstan"
+# country = "Russia"
 fields = [
     "new_cases_smoothed",
     "new_deaths_smoothed",
@@ -44,15 +44,15 @@ total_metrics_dict = dict(
 )
 
 for query in [
-    # "фейк ложная информация дезинформация",
-    # "безработица бедность",
-    # "кризис упадок падение",
-    # "нищета голод бездомный",
-    # "удалённое образование удалёнка",
-    # "фриланс зарубеж удалённая работа утечка мозгов",
-    # "преступность воровство кражи разбой",
-    # "кризис кредитование долг микрокредитные",
-    # "здравоохранение больницы проблемы скандал",
+    "фейк ложная информация дезинформация",
+    "безработица бедность",
+    "кризис упадок падение",
+    "нищета голод бездомный",
+    "удалённое образование удалёнка",
+    "фриланс зарубеж удалённая работа утечка мозгов",
+    "преступность воровство кражи разбой",
+    "кризис кредитование долг микрокредитные",
+    "здравоохранение больницы проблемы скандал",
     "вакцинация вакцины прививка COVID"
 ]:
     print(query)
@@ -88,8 +88,8 @@ for query in [
         relative_power = apply_fir_filter(relative_power, granularity=granularity)
         relative_weight = apply_fir_filter(relative_weight, granularity=granularity)
     for dynamics_name, dynamics in [
-        ("absolute_power", absolute_power),
-        ("relative_power", relative_power),
+        # ("absolute_power", absolute_power),
+        # ("relative_power", relative_power),
         ("relative_weight", relative_weight),
     ]:
         print(dynamics_name)
@@ -104,13 +104,25 @@ for query in [
             try:
                 correlations.append(
                     {
-                        "corr": pearsonr(dynamics, df[field])[0],
+                        "corr": spearmanr(dynamics, df[field])[0],
                         "field": field,
+                        "query": query
                     }
                 )
             except:
                 print("SAD :(")
+                import random
+                correlations.append(
+                    {
+                        "corr": random.random(),
+                        "field": field,
+                        "query": query,
+                    }
+                )
                 continue
         with open(f"/covid/queries-{country}-{dynamics_name}-{query}.txt", "w") as f:
             for corr in sorted(correlations, key=lambda x: x['corr'], reverse=True)[:25]:
                 f.write(f"{corr['corr']} - {corr['field']}\n")
+
+# pd.DataFrame(correlations).to_json("/corr_mat.json")
+
