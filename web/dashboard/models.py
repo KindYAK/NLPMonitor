@@ -90,4 +90,4 @@ class Widget(models.Model):
         return json.loads(self.params)
 
     def __str__(self):
-        return f"Виджет - {self.title}"
+        return f"Виджет {self.id} - {self.title}"
