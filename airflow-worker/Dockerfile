@@ -60,6 +60,8 @@ RUN pip install /bigartm/bigartm-0.10.0-cp36-cp36m-linux_x86_64.whl
 COPY requirements.txt /requirements.txt
 RUN pip install --ignore-installed -r /requirements.txt
 
+RUN pip install attrs==19.2.0
+
 EXPOSE 8793
 
 WORKDIR /opt/bitnami/airflow/dags/
