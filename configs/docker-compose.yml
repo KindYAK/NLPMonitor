@@ -18,9 +18,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "9501:9501"
-      - "9502:9502"
-      - "9503:9503"
     volumes:
       - static_root:/static_root
       - media_root:/media_root
