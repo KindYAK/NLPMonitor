@@ -1,5 +1,7 @@
 import datetime
+import random
 import pandas as pd
+import pickle
 
 from elasticsearch_dsl import Search
 from scipy.stats import pearsonr
@@ -7,17 +9,17 @@ from scipy.stats import pearsonr
 from mainapp.services import apply_fir_filter
 from nlpmonitor.settings import ES_CLIENT, ES_INDEX_TOPIC_DOCUMENT, ES_INDEX_TOPIC_MODELLING
 
-topic_modelling = "bigartm_2020_2021_rus_kaz"
+topic_modelling = "bigartm_2020_2022_rus_kaz_health_2"
 topic_weight_threshold = 0.05
 granularity = "1d"
 smooth = True
-# datetime_from = datetime.datetime(2020, 3, 13) # Kaz
-datetime_from = datetime.datetime(2020, 1, 31) # Rus
-datetime_to = datetime.datetime(2021, 2, 25) # Add One
-# corpus = ["main"]
-corpus = ["rus", "rus_propaganda"]
-# country = "Kazakhstan"
-country = "Russia"
+datetime_from = datetime.datetime(2020, 3, 13) # Kaz
+# datetime_from = datetime.datetime(2020, 1, 31) # Rus
+datetime_to = datetime.datetime(2022, 2, 23) # Add One
+corpus = ["main"]
+# corpus = ["rus", "rus_propaganda"]
+country = "Kazakhstan"
+# country = "Russia"
 fields = [
     "new_cases_smoothed",
     "new_deaths_smoothed",
@@ -164,8 +166,9 @@ def get_topic_details(topic_id):
 
 topics_info = get_topics_info()
 
-df = pd.read_csv("/owid-covid-data.csv")
+df = pd.read_excel("/owid-covid-data.xlsx")
 df = df[df.location == country].fillna(0)
+correlations = []
 for field in fields:
     print("!", field)
     correlations = []
@@ -178,6 +181,7 @@ for field in fields:
         try:
             correlations.append(
                 {
+                    "field": field,
                     "corr": pearsonr(topic_dynamics, df[field])[0],
                     "topic_id": topic,
                     "words": ", ".join([w['word'] for w in topics_info[topic]['words'][:7]]),
@@ -186,10 +190,32 @@ for field in fields:
             )
         except:
             print("SAD :(")
+            correlations.append(
+                {
+                    "field": field,
+                    "corr": random.random(),
+                    "topic_id": topic,
+                    "words": ", ".join([w['word'] for w in topics_info[topic]['words'][:7]]),
+                    "size": topics_info[topic]['size'],
+                }
+            )
             continue
-    with open(f"/covid/{country}-{topic_modelling}-{field}-top.txt", "w") as f:
-        for corr in sorted(correlations, key=lambda x: x['corr'], reverse=True)[:25]:
-            f.write(f"{corr['corr']} - {corr['topic_id']} - {corr['words']} ({corr['size']} documents)\n")
-    with open(f"/covid/{country}-{topic_modelling}-{field}-bottom.txt", "w") as f:
-        for corr in sorted(correlations, key=lambda x: x['corr'], reverse=False)[:25]:
-            f.write(f"{corr['corr']} - {corr['topic_id']} - {corr['words']} ({corr['size']} documents)\n")
+    top = sorted(correlations, key=lambda x: x['corr'], reverse=True)[0]
+    topic_dynamics = topics_info[top['topic_id']]['details']['relative_weight']
+    if len(topic_dynamics) < len(df[field]):
+        diff = len(df[field]) - len(topic_dynamics)
+        topic_dynamics = [0] * diff + list(topic_dynamics)
+    pickle.dump({
+        "covid": df[field],
+        "topic": topic_dynamics,
+        "words": top['words'],
+    }, open(f"/export/topic_{field}.pkl", "wb"))
+    # with open(f"/covid/{country}-{topic_modelling}-{field}-top.txt", "w") as f:
+    #     for corr in sorted(correlations, key=lambda x: x['corr'], reverse=True)[:25]:
+    #         f.write(f"{corr['corr']} - {corr['topic_id']} - {corr['words']} ({corr['size']} documents)\n")
+    # with open(f"/covid/{country}-{topic_modelling}-{field}-bottom.txt", "w") as f:
+    #     for corr in sorted(correlations, key=lambda x: x['corr'], reverse=False)[:25]:
+    #         f.write(f"{corr['corr']} - {corr['topic_id']} - {corr['words']} ({corr['size']} documents)\n")
+
+
+pd.DataFrame(correlations).to_json("/corr_mat_tm.json")

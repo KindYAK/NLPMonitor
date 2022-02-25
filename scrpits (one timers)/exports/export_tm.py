@@ -5,7 +5,9 @@ from nlpmonitor.settings import ES_CLIENT, ES_INDEX_DOCUMENT, ES_INDEX_TOPIC_MOD
 
 from elasticsearch_dsl import Search
 
-tm_name = "bigartm_two_years_main_and_gos"
+from topicmodelling.services import calc_topics_resonance
+
+tm_name = "bigartm_2020_2022_rus_kaz_health_2"
 try:
     tm = Search(using=ES_CLIENT, index=ES_INDEX_TOPIC_MODELLING).filter("term", name=tm_name).execute()[0]
 except:
@@ -55,8 +57,11 @@ if corpuses:
             if corpus in topic_info_dict[key]["corpus_weights"]:
                 topic_info_dict[key]["corpus_weights"][corpus]['weight_sum'] /= total_weight
 
+topics = tm.topics
+calc_topics_resonance(topics, tm_name)
+
 output = []
-for topic in tm.topics:
+for topic in topics:
     if topic.id not in topic_info_dict:
         continue
     words = list(sorted(topic.topic_words, key=lambda x: x.weight, reverse=True))[:30]
@@ -84,6 +89,7 @@ for topic in tm.topics:
         "words": ", ".join([word.word for word in words]),
         "volume": topic_info_dict[topic.id]['count'] if topic.id in topic_info_dict else "-",
         "weight": topic_info_dict[topic.id]['weight_sum'] if topic.id in topic_info_dict else "-",
+        "resonance": topic.high_resonance_score,
     })
     # Top news
     for i in range(news_to_export):
