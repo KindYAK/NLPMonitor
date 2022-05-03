@@ -408,9 +408,7 @@
         );
 
         {% if request.user.is_superuser or request.user.expert %}
-            <script>
-                $('.clipboard').show();
-            </script>
+            $('.clipboard').show();
         {% endif %}
     </script>
 {% endblock %}
