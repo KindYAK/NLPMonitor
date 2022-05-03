@@ -32,6 +32,12 @@
             margin-bottom: 0;
         }
     </style>
+
+    {% if request.user.is_superuser or request.user.expert %}
+        <!-- Clipboard.js -->
+        <script src="{% static 'js_vendor/clipboard.min.js' %}"></script>
+        <script src="{% static 'js/plot_to_clipboard.js' %}"></script>
+    {% endif %}
 {% endblock %}
 
 {% block bc %}
@@ -167,6 +173,18 @@
                 <div class="card-body">
                     <div id="dynamic-plots">
                         {# Абсолютная мощность #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="copy1">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#copy1', {
+                                    text: function (trigger) {
+                                        return get_time_series("dynamics");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div id="dynamics" class="dynamics-plot"></div>
                         <script>
                             var selectorOptions = {
@@ -223,6 +241,18 @@
                         </script>
 
                         {# Относительная мощность #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="copy2">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#copy2', {
+                                    text: function (trigger) {
+                                        return get_time_series("dynamics_normal");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div id="dynamics_normal" class="dynamics-plot"></div>
                         <script>
                             var data = [
@@ -253,6 +283,18 @@
                         </script>
 
                         {# Относительный удельный вес #}
+                        <div class="clipboard" style="display: none">
+                            <div style="text-align: center;">
+                                <button class="btn btn-default" id="copy3">Временной ряд в буфер обмена</button>
+                            </div>
+                            <script>
+                                new ClipboardJS('#copy3', {
+                                    text: function (trigger) {
+                                        return get_time_series("dynamics_weight");
+                                    }
+                                });
+                            </script>
+                        </div>
                         <div id="dynamics_weight" class="dynamics-plot"></div>
                         <script>
                             var data = [
@@ -364,5 +406,11 @@
                                         "text": '{{ request.GET.text }}',
                                    }
         );
+
+        {% if request.user.is_superuser or request.user.expert %}
+            <script>
+                $('.clipboard').show();
+            </script>
+        {% endif %}
     </script>
 {% endblock %}
