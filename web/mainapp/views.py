@@ -17,18 +17,19 @@ from .services_es_documents import execute_search, es_filter
 
 
 def login_redirect(request):
-    if request.user.is_superuser:
-        return HttpResponseRedirect(reverse_lazy('dashboard:dashboard', kwargs={"dashboard_id": DashboardPreset.objects.first().id}))
-    if hasattr(request.user, "viewer"):
-        group = get_user_group(request.user)
-        if not group or not group.dashboard_presets.exists():
-            return HttpResponseRedirect(reverse_lazy('evaluation:criterion_eval_analysis'))
-        return HttpResponseRedirect(reverse_lazy('dashboard:dashboard', kwargs={"dashboard_id": group.dashboard_presets.first().id}))
-    if hasattr(request.user, "expert"):
-        return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
+    # if request.user.is_superuser:
+    #     return HttpResponseRedirect(reverse_lazy('dashboard:dashboard', kwargs={"dashboard_id": DashboardPreset.objects.first().id}))
+    # if hasattr(request.user, "viewer"):
+    #     group = get_user_group(request.user)
+    #     if not group or not group.dashboard_presets.exists():
+    #         return HttpResponseRedirect(reverse_lazy('evaluation:criterion_eval_analysis'))
+    #     return HttpResponseRedirect(reverse_lazy('dashboard:dashboard', kwargs={"dashboard_id": group.dashboard_presets.first().id}))
+    # if hasattr(request.user, "expert"):
+    #     return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
     if hasattr(request.user, "contentloader"):
         return HttpResponseRedirect(reverse_lazy('mainapp:document_create'))
-    return HttpResponseRedirect(reverse_lazy('mainapp:index'))
+    return HttpResponseRedirect(reverse_lazy('topicmodelling:topics_list'))
+    # return HttpResponseRedirect(reverse_lazy('mainapp:index'))
 
 
 class SearchView(TemplateView):

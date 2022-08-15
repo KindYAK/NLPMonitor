@@ -126,7 +126,7 @@ for query in [
         #     for corr in sorted(correlations, key=lambda x: x['corr'], reverse=True)[:25]:
         #         f.write(f"{corr['corr']} - {corr['field']}\n")
 
-# pd.DataFrame(correlations).to_json("/corr_mat_queries.json")
+pd.DataFrame(correlations).to_json("/corr_mat_queries.json")
 
 
 for key in correlations.keys():

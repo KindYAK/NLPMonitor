@@ -62,7 +62,7 @@ def get_current_topics_metrics(topics, granularity, topic_weight_threshold):
               .filter("range", topic_weight={"gte": topic_weight_threshold}) \
               .filter("range", datetime={"gte": datetime_from}) \
               .filter("range", datetime={"lte": datetime_to}) \
-              .source(['document_es_id', 'topic_weight'])[:100]
+              .source(['document_es_id', 'topic_weight'])[:1000000]
     std.aggs.bucket(name="dynamics",
                     agg_type="date_histogram",
                     field="datetime",
@@ -171,12 +171,14 @@ df = df[df.location == country].fillna(0)
 correlations = []
 for field in fields:
     print("!", field)
-    correlations = []
+    # correlations = []
     for topic in topics_info.keys():
         topic_dynamics = topics_info[topic]['details']['relative_weight']
         if len(topic_dynamics) < len(df[field]):
             diff = len(df[field]) - len(topic_dynamics)
             topic_dynamics = [0] * diff + list(topic_dynamics)
+            if diff > 10:
+                continue
             print("!DIFF", diff)
         try:
             correlations.append(
@@ -202,6 +204,7 @@ for field in fields:
             continue
     top = sorted(correlations, key=lambda x: x['corr'], reverse=True)[0]
     topic_dynamics = topics_info[top['topic_id']]['details']['relative_weight']
+    print("!!!!!!!!!!!!!!! TOP!!!!!!!!!!!!!", len(topic_dynamics))
     if len(topic_dynamics) < len(df[field]):
         diff = len(df[field]) - len(topic_dynamics)
         topic_dynamics = [0] * diff + list(topic_dynamics)
