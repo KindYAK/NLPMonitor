@@ -9,7 +9,6 @@ services:
     depends_on:
       - db
       - redis
-      - elasticsearch1
     networks:
       - network
     restart: always
@@ -51,12 +50,12 @@ services:
     expose:
       - 6379
     restart: always
-  orca:
-    image: "quay.io/plotly/orca"
-    networks:
-      - network
-    expose:
-      - 9091
+#  orca:
+#    image: "quay.io/plotly/orca"
+#    networks:
+#      - network
+#    expose:
+#      - 9091
 
 volumes:
   django_root:

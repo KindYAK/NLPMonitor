@@ -23,25 +23,25 @@ services:
   db:
     ports:
       - "5456:5432"
-  bert_as_service:
-    build:
-      context: ./bert_as_service
-      dockerfile: Dockerfile
-    volumes:
-      - /home/a.bekbaganbetov/tempdocker/models/rubert_tf_experimental/:/model
-    expose:
-      - 5555
-      - 5556
-    networks:
-      - network
-    restart: always
-  apertium-flask:
-    build:
-      context: ../containers/apertium
-      dockerfile: Dockerfile
-    expose:
-      - 8005
-    networks:
-      - network
-    tty: true
-    stdin_open: true
+  #bert_as_service:
+  #  build:
+  #    context: ./bert_as_service
+  #    dockerfile: Dockerfile
+  #  volumes:
+  #    - /home/a.bekbaganbetov/tempdocker/models/rubert_tf_experimental/:/model
+  #  expose:
+  #    - 5555
+  #    - 5556
+  #  networks:
+  #    - network
+  #  restart: always
+  #apertium-flask:
+  #  build:
+  #    context: ../containers/apertium
+  #    dockerfile: Dockerfile
+  #  expose:
+  #    - 8005
+  #  networks:
+  #    - network
+  #  tty: true
+  #  stdin_open: true
