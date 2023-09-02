@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.views.generic.base import View
 
-from mainapp.services_latex import build_latex_pdf
+#from mainapp.services_latex import build_latex_pdf
 from .services_context import get_analytics_context
 from .services_plots import *
 
