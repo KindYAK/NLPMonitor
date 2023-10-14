@@ -127,7 +127,7 @@ class SearchView(TemplateView):
 
 def search_api(request):
     result = {}
-    smooth = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+    smooth = True if 'smooth' in request.GET else (True if 'granularity' not in request.GET else False)
     granularity = request.GET['granularity'] if 'granularity' in request.GET else "1w"
 
     # Total metrics
