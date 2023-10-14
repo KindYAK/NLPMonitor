@@ -23,7 +23,7 @@ BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 SECRET_KEY = 'afnhvy-!a93^^v(^0&$+b*+5vu+*l1w5ki7z&f0-2pvet=89gg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = ['*']
 
@@ -82,7 +82,7 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = 'nlpmonitor.urls'
 
-#TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
+TEMPLATE_LATEX_DIR = os.path.join(BASE_DIR, 'templates_latex')
 REPORT_IMAGE_DIR = os.path.join("/", 'report_images')
 
 CUSTOM_CONTEXT_PROCESSORS = [
@@ -92,7 +92,7 @@ if DEBUG:
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [os.path.join(BASE_DIR, 'templates')],
+            'DIRS': [os.path.join(BASE_DIR, 'templates'), TEMPLATE_LATEX_DIR],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -108,7 +108,7 @@ else:
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [os.path.join(BASE_DIR, 'templates')],
+            'DIRS': [os.path.join(BASE_DIR, 'templates'), TEMPLATE_LATEX_DIR],
             'OPTIONS': {
                 'context_processors': [
                     'django.template.context_processors.debug',

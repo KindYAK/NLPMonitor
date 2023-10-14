@@ -9,13 +9,14 @@ services:
     depends_on:
       - db
       - redis
+      - elasticsearch1
     networks:
       - network
     restart: always
   nginx:
     image: "nginx:1.17.0"
     ports:
-      - "8088:8088"
+      - "80:80"
       - "443:443"
     volumes:
       - static_root:/static_root
@@ -50,12 +51,12 @@ services:
     expose:
       - 6379
     restart: always
-#  orca:
-#    image: "quay.io/plotly/orca"
-#    networks:
-#      - network
-#    expose:
-#      - 9091
+  orca:
+    image: "quay.io/plotly/orca"
+    networks:
+      - network
+    expose:
+      - 9091
 
 volumes:
   django_root:
