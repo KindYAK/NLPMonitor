@@ -20,7 +20,8 @@ SOURCE_FIELDS = ('id', 'datetime', 'title', 'source', )
 
 def es_filter(search, key, value):
     query = 'terms'
-    value = list([v.name for v in value])
+    value = list([v.name if hasattr(v, 'name') else v
+                 for v in value])
     key = TERMS_FIELDS_DICT[key]
     return search.filter(query, **{key: value})
 
