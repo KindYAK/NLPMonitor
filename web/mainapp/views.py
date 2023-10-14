@@ -132,7 +132,7 @@ def search_api(request):
 
     # Total metrics
     sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
-    sd_total = es_filter(sd_total, "corpuses", "main")
+    sd_total = es_filter(sd_total, "corpuses", ["main"])
     sd_total.aggs.bucket(name="dynamics",
                          agg_type="date_histogram",
                          field="datetime",
@@ -152,7 +152,7 @@ def search_api(request):
     search_request['datetime_from'] = datetime.date(2000, 1, 1)
     search_request['datetime_to'] = datetime.datetime.now().date()
     search_request['text'] = request.GET.get('text', '')
-    search_request['corpuses'] = "main"
+    search_request['corpuses'] = ["main"]
     s = execute_search(search_request, return_search_obj=True)[:200]
     s.aggs.bucket(name="dynamics",
                   agg_type="date_histogram",
