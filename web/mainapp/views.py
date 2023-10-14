@@ -156,7 +156,7 @@ def search_api(request):
     s.aggs.bucket(name="dynamics",
                   agg_type="date_histogram",
                   field="datetime",
-                  calendar_interval=request.GET.get('granularity', '1w')) \
+                  calendar_interval=granularity) \
         .metric("dynamics_weight", agg_type="sum", script="_score")
     results = s.execute()
     if 'text' in search_request and search_request['text']:
