@@ -172,7 +172,7 @@ def search_api(request):
         "source": document.source,
         "score": str(document.meta.score).replace(",", "."),
     } for document in results[:relevant_count * 2]]
-    result['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
+    result['documents'] = unique_ize(result['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
 
     # Normalize dynamics
     for bucket in results.aggregations.dynamics.buckets:
