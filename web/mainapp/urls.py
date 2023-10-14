@@ -15,6 +15,8 @@ urlpatterns = [
 
     path('search/', SearchView.as_view(), name='search'),
 
+    path('search_api/', search_api, name='search_api'),
+
     path('document_view/<document_id>/', DocumentDetailView.as_view(), name='document_view'),
     path('document_create/', DocumentCreateView.as_view(), name='document_create'),
     path('document_create_success/', TemplateView.as_view(template_name="mainapp/document_create_success.html"), name='document_create_success'),

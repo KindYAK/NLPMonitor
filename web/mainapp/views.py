@@ -125,6 +125,82 @@ class SearchView(TemplateView):
         return context
 
 
+def search_api(request):
+    result = {}
+    smooth = True if 'smooth' in self.request.GET else (True if 'granularity' not in self.request.GET else False)
+    granularity = request.GET['granularity'] if 'granularity' in request.GET else "1w"
+
+    # Total metrics
+    sd_total = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
+    sd_total = es_filter(sd_total, "corpuses", "main")
+    sd_total.aggs.bucket(name="dynamics",
+                         agg_type="date_histogram",
+                         field="datetime",
+                         calendar_interval=granularity)
+    documents_total = sd_total.execute()
+    total_metrics_dict = dict(
+        (
+            t.key_as_string,
+            {
+                "size": t.doc_count
+            }
+        ) for t in documents_total.aggregations.dynamics.buckets
+    )
+
+    # Search
+    search_request = {}
+    search_request['datetime_from'] = datetime.date(2000, 1, 1)
+    search_request['datetime_to'] = datetime.datetime.now().date()
+    search_request['text'] = request.GET.get('text', '')
+    s = execute_search(search_request, return_search_obj=True)[:200]
+    s.aggs.bucket(name="dynamics",
+                  agg_type="date_histogram",
+                  field="datetime",
+                  calendar_interval=request.GET.get('granularity', '1w')) \
+        .metric("dynamics_weight", agg_type="sum", script="_score")
+    results = s.execute()
+    if 'text' in search_request and search_request['text']:
+        relevant_count = get_elscore_cutoff([d.meta.score for d in results], "SEARCH_LVL_LIGHT")
+    else:
+        relevant_count = s.count().value
+    result['total_found'] = relevant_count
+    result['documents'] = [{
+        "id": document.id,
+        "document_es_id": document.meta.id,
+        "datetime": document.datetime if hasattr(document, "datetime") else "",
+        "title": document.title,
+        "source": document.source,
+        "score": str(document.meta.score).replace(",", "."),
+    } for document in results[:relevant_count * 2]]
+    result['documents'] = unique_ize(context['documents'], key=lambda x: x['id'])[:min(relevant_count, 100)]
+
+    # Normalize dynamics
+    for bucket in results.aggregations.dynamics.buckets:
+        total_size = total_metrics_dict[bucket.key_as_string]['size']
+        if total_size != 0:
+            bucket.doc_count_normal = bucket.doc_count / total_size
+            bucket.dynamics_weight.value /= total_size
+        else:
+            bucket.doc_count_normal = 0
+
+    # Separate signals
+    absolute_power = [bucket.doc_count for bucket in results.aggregations.dynamics.buckets]
+    relative_power = [bucket.doc_count_normal for bucket in results.aggregations.dynamics.buckets]
+    relative_weight = [bucket.dynamics_weight.value for bucket in results.aggregations.dynamics.buckets]
+
+    if smooth:
+        absolute_power = apply_fir_filter(absolute_power, granularity=granularity)
+        relative_power = apply_fir_filter(relative_power, granularity=granularity)
+        relative_weight = apply_fir_filter(relative_weight, granularity=granularity)
+
+    # Create context
+    result['date_ticks'] = [bucket.key_as_string for bucket in results.aggregations.dynamics.buckets]
+    result['absolute_power'] = absolute_power
+    result['relative_power'] = relative_power
+    result['relative_weight'] = relative_weight
+    return context
+
+
 class DocumentDetailView(TemplateView):
     template_name = "mainapp/document_detail.html"
 
