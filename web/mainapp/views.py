@@ -201,7 +201,7 @@ def search_api(request):
     result['absolute_power'] = absolute_power
     result['relative_power'] = relative_power
     result['relative_weight'] = relative_weight
-    return result
+    return JsonResponse(result)
 
 
 class DocumentDetailView(TemplateView):
