@@ -176,6 +176,8 @@ def search_api(request):
 
     # Normalize dynamics
     for bucket in results.aggregations.dynamics.buckets:
+        if bucket.key_as_string not in total_metrics_dict:
+            continue
         total_size = total_metrics_dict[bucket.key_as_string]['size']
         if total_size != 0:
             bucket.doc_count_normal = bucket.doc_count / total_size
