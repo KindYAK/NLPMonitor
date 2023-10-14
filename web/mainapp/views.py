@@ -198,9 +198,9 @@ def search_api(request):
 
     # Create context
     result['date_ticks'] = [bucket.key_as_string for bucket in results.aggregations.dynamics.buckets]
-    result['absolute_power'] = absolute_power
-    result['relative_power'] = relative_power
-    result['relative_weight'] = relative_weight
+    result['absolute_power'] = list(absolute_power)
+    result['relative_power'] = list(relative_power)
+    result['relative_weight'] = list(relative_weight)
     return JsonResponse(result)
 
 
