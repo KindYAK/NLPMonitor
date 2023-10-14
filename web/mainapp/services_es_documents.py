@@ -65,7 +65,7 @@ def execute_search(
         medical_keywords = ["медиц", "врач", "больница", "клиника", "псих", "стоматол", "окулис", "офтальмо", "гинекол",
                             "педиатр", "терапевт", "хирург", "педиатр", "психиатр"]
         medical_queries = [Q("match", title=kw) for kw in medical_keywords]
-        q_med = Q('bool', must=medical_queries)
+        q_med = Q('bool', should=medical_queries, minimum_should_match=1)
         s = s.query(q_med)
 
     if return_search_obj:
