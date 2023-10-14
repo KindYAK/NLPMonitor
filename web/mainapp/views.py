@@ -2,7 +2,7 @@ import datetime
 
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, ListView, DeleteView
 from elasticsearch_dsl import Search
