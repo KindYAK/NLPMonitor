@@ -67,6 +67,7 @@ STRONGHOLD_PUBLIC_URLS = (
     r'/$',
     r'^/accounts/.+$',
     r'^/static/.+$',
+    r'^/search_api/.*$',
 )
 
 REST_FRAMEWORK = {
