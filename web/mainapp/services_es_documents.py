@@ -26,7 +26,11 @@ def es_filter(search, key, value):
     return search.filter(query, **{key: value})
 
 
-def execute_search(search_request, return_search_obj=False):
+def execute_search(
+    search_request,
+    return_search_obj=False,
+    only_med=False,
+):
     s = Search(using=ES_CLIENT, index=ES_INDEX_DOCUMENT)
     s = s.source(include=SOURCE_FIELDS)
 
@@ -56,6 +60,13 @@ def execute_search(search_request, return_search_obj=False):
         q_from = Q("range", **{RANGE_FROM_DATE_FIELD.replace("_from", ""): {"gte": search_request[RANGE_FROM_DATE_FIELD]}})
         q_empty = ~Q('exists', field="datetime")
         s = s.query((q_to & q_from) | q_empty)
+
+    if only_med:
+        q = Q()
+        for kw in ["медиц", "врач", "больница", "клиника"]:
+            q = q | Q("match", text=kw)
+            q = q | Q("match", title=kw)
+        s = s.query(q)
 
     if return_search_obj:
         return s

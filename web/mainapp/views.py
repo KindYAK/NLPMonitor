@@ -153,7 +153,7 @@ def search_api(request):
     search_request['datetime_to'] = datetime.datetime.now().date()
     search_request['text'] = request.GET.get('text', '')
     search_request['corpuses'] = ["main"]
-    s = execute_search(search_request, return_search_obj=True)[:200]
+    s = execute_search(search_request, return_search_obj=True, only_med=True)[:200]
     s.aggs.bucket(name="dynamics",
                   agg_type="date_histogram",
                   field="datetime",
